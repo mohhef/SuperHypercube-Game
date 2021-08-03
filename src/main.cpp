@@ -276,6 +276,7 @@ void updateDisplacement(float currentFrame) {
 		displacementSpeed = 1;
 		
 		resetModel();
+		randomRotation();
 	}
 }
 // Reset translation matrix for each model's cube.
@@ -359,7 +360,7 @@ void processInput(GLFWwindow* window, int key, int scancode, int action, int mod
 			for (int i = 0; i < modelRotMat.size(); i++)
 			{
 				glm::mat4 model = glm::mat4(1.0f);
-				model = glm::rotate(model, glm::radians(5.0f), glm::vec3(1.0f, 0.0f, 0.0f));
+				model = glm::rotate(model, glm::radians(90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
 				modelRotMat.at(i) = model * modelRotMat.at(i);
 			}
 	}
@@ -368,7 +369,7 @@ void processInput(GLFWwindow* window, int key, int scancode, int action, int mod
 			for (int i = 0; i < modelRotMat.size(); i++)
 			{
 				glm::mat4 model = glm::mat4(1.0f);
-				model = glm::rotate(model, glm::radians(-5.0f), glm::vec3(1.0f, 0.0f, 0.0f));
+				model = glm::rotate(model, glm::radians(-90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
 				modelRotMat.at(i) = model * modelRotMat.at(i);
 			}
 	}
@@ -381,7 +382,7 @@ void processInput(GLFWwindow* window, int key, int scancode, int action, int mod
 			for (int i = 0; i < modelRotMat.size(); i++)
 			{
 				glm::mat4 model = glm::mat4(1.0f);
-				model = glm::rotate(model, glm::radians(5.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+				model = glm::rotate(model, glm::radians(90.0f), glm::vec3(0.0f, 1.0f, 0.0f));
 				modelRotMat.at(i) = model * modelRotMat.at(i);
 			}
 		}
@@ -395,7 +396,7 @@ void processInput(GLFWwindow* window, int key, int scancode, int action, int mod
 			for (int i = 0; i < modelRotMat.size(); i++)
 			{
 				glm::mat4 model = glm::mat4(1.0f);
-				model = glm::rotate(model, glm::radians(-5.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+				model = glm::rotate(model, glm::radians(-90.0f), glm::vec3(0.0f, 1.0f, 0.0f));
 				modelRotMat.at(i) = model * modelRotMat.at(i);
 			}
 		}
@@ -405,7 +406,7 @@ void processInput(GLFWwindow* window, int key, int scancode, int action, int mod
 		for (int i = 0; i < modelRotMat.size(); i++)
 		{
 			glm::mat4 model = glm::mat4(1.0f);
-			model = glm::rotate(model, glm::radians(5.0f), glm::vec3(0.0f, 0.0f, 1.0f));
+			model = glm::rotate(model, glm::radians(90.0f), glm::vec3(0.0f, 0.0f, 1.0f));
 			modelRotMat.at(i) = model * modelRotMat.at(i);
 		}
 	}
@@ -414,7 +415,7 @@ void processInput(GLFWwindow* window, int key, int scancode, int action, int mod
 		for (int i = 0; i < modelRotMat.size(); i++)
 		{
 			glm::mat4 model = glm::mat4(1.0f);
-			model = glm::rotate(model, glm::radians(-5.0f), glm::vec3(0.0f, 0.0f, 1.0f));
+			model = glm::rotate(model, glm::radians(-90.0f), glm::vec3(0.0f, 0.0f, 1.0f));
 			modelRotMat.at(i) = model * modelRotMat.at(i);
 		}
 	}
@@ -578,14 +579,14 @@ void shuffleModel(vector<vector<int>> model) {
 void randomRotation() {
 	glm::mat4 randRotMat = glm::mat4(1.0f);
 	//random rotation angle from -100 -> 100, multiple of 10
-	float rotAng = (rand() % 21 + (-10)) * 10;
+	float rotAng = (rand() % (4 - 0 + 1) + 0)*90.0f;
 	//random x rotation
 	randRotMat = glm::rotate(randRotMat, glm::radians(rotAng), glm::vec3(1.0f, 0.0f, 0.0f));
 	//random y rotation
-	rotAng = rand() % 181 + (-90);
+	rotAng = (rand() % (4 - 0 + 1) + 0) * 90.0f;
 	randRotMat = glm::rotate(randRotMat, glm::radians(rotAng), glm::vec3(0.0f, 1.0f, 0.0f));
 	//random z rotation
-	rotAng = rand() % 181 + (-90);
+	rotAng = (rand() % (4 - 0 + 1) + 0) * 90.0f;
 	randRotMat = glm::rotate(randRotMat, glm::radians(rotAng), glm::vec3(0.0f, 0.0f, 1.0f));
 
 	for (auto& rotMat : modelRotMat) {
