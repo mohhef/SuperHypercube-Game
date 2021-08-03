@@ -136,25 +136,56 @@ static vector<vector<vector<int>>> models = {
 	{0, 3, 0, 0, 0},
 	{0, 0, 0, 0, 0},
 }
+, {
+	{0, 0, 0, 0, 0},
+	{0, 0, 1, 2, 0},
+	{0, 1, 1, 0, 0},
+	{0, 1, 2, 0, 0},
+	{0, 0, 0, 1, 0},
+	{0, 0, 0, 0, 0},
+},
+{
+	{0, 0, 0, 0, 0},
+	{0, 1, 1, 1, 0},
+	{0, 1, 0, 2, 0},
+	{0, 2, 0, 1, 0},
+	{0, 0, 0, 0, 0},
+},
+{
+	{0, 0, 0, 0, 0},
+	{0, 0, 1, 1, 0},
+	{0, 2, 0, -2, 0},
+	{0, 0, 2, 1, 0},
+	{0, 0, 0, 0, 0},
+},
+{
+	{0, 0, 0, 0, 0},
+	{0, 2, 1, 0, 0},
+	{0, 0, -1, -2, 0},
+	{0, 2, -1, 0, 0},
+	{0, 0, 0, 0, 0},
+	}
 };
 
 extern vector<vector<glm::vec3>> modelCubePositions;
 extern vector<vector<glm::vec3>> wallCubePositions;
 
-// initial configuration position of wall (to align with XZ plane)
-static vector<glm::vec3> wallPosition =
-{
-	glm::vec3(0.0f, 1.0f, 10.0f),
-};
-
 // initial configuration scale of model cubes
 static vector<glm::mat4> modelScale
 {
 	glm::scale(glm::mat4(1.0f), glm::vec3(2.0f, 2.0f, 2.0f)),
+	glm::scale(glm::mat4(1.0f), glm::vec3(2.0f, 2.0f, 2.0f)),
+	glm::scale(glm::mat4(1.0f), glm::vec3(2.0f, 2.0f, 2.0f)),
+	glm::scale(glm::mat4(1.0f), glm::vec3(2.0f, 2.0f, 2.0f)),
+	glm::scale(glm::mat4(1.0f), glm::vec3(2.0f, 2.0f, 2.0f))
 };
 
 // initial configuration position of model (to align with hole)
 static vector<glm::vec3> modelPosition =
 {
 	glm::vec3(0.0f, 1.0f, 10.0f),
+	glm::vec3(0.0f, 1.0f, 10.0f),
+	glm::vec3(0.0f, 1.0f, 10.0f),
+	glm::vec3(0.0f, 1.0f, 10.0f),
+	glm::vec3(0.0f, 1.0f, 10.0f)
 };

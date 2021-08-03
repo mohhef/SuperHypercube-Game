@@ -264,13 +264,18 @@ GLFWwindow* initializeWindow()
 }
 
 void updateDisplacement(float currentFrame) {
-	//update z displacement, 2 is a speed
+	//update z displacement
 	displacement.z = currentFrame * -1 * displacementSpeed;
-	//if passes the wall reset, -5 is an offset so that it passes the wall
-	if (abs(displacement.z) > abs(wallPosition.at(modelIndex).z + 20)) {
+	//if passes the wall reset
+	if (displacement.z < -30) {
+		modelIndex = (modelIndex+1) % models.size();
+		Renderer::getInstance().setRenderIndex(modelIndex);
+		
 		glfwSetTime(0);
 		displacement.z = 0;
 		displacementSpeed = 1;
+		
+		resetModel();
 	}
 }
 // Reset translation matrix for each model's cube.
