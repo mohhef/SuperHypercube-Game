@@ -49,9 +49,6 @@
     <ClCompile Include="Camera.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Constants.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="DepthMapper.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
