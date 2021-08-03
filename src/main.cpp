@@ -351,32 +351,21 @@ void processInput(GLFWwindow* window, int key, int scancode, int action, int mod
 
 	if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
 	{
-		if (mode == GLFW_MOD_SHIFT && displacement.z != -100.f)
-			displacement.z -= 0.50f;
-		else
-		{
-
 			for (int i = 0; i < modelRotMat.size(); i++)
 			{
 				glm::mat4 model = glm::mat4(1.0f);
 				model = glm::rotate(model, glm::radians(5.0f), glm::vec3(1.0f, 0.0f, 0.0f));
 				modelRotMat.at(i) = model * modelRotMat.at(i);
 			}
-		}
 	}
 	if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
 	{
-		if (mode == GLFW_MOD_SHIFT && displacement.z != 20.f)
-			displacement.z += 0.50f;
-		else
-		{
 			for (int i = 0; i < modelRotMat.size(); i++)
 			{
 				glm::mat4 model = glm::mat4(1.0f);
 				model = glm::rotate(model, glm::radians(-5.0f), glm::vec3(1.0f, 0.0f, 0.0f));
 				modelRotMat.at(i) = model * modelRotMat.at(i);
 			}
-		}
 	}
 	if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
 	{
