@@ -494,7 +494,6 @@ void processMouse(GLFWwindow* window, double xpos, double  ypos)
 	}
 }
 
-
 void createModel(vector<vector<int>> model) {
 	int rows = model.size();
 	vector<glm::vec3> wallPos;

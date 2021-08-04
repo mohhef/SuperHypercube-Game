@@ -42,7 +42,8 @@ void Renderer::setRenderIndex(unsigned int index)
 	renderIndex = index;
 }
 
-void Renderer::setIsFindingDepth(bool findDepth) {
+void Renderer::setIsFindingDepth(bool findDepth) 
+{
 	this->isFindingDepth = findDepth;
 }
 

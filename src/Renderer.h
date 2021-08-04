@@ -14,6 +14,13 @@
 void glClearError();
 bool glLogCall(const char* function, const char* file, int line);
 
+struct Character
+{
+	unsigned int id;
+	glm::ivec2 size;
+	glm::ivec2 bearing; // offset from baseline
+	unsigned int advance; // offset to next character
+};
 
 class Renderer
 {
@@ -24,6 +31,9 @@ private:
 	bool isFindingDepth = false;
 	glm::vec3 centerOfMass;
 	Renderer();
+
+	void initializeCharacters();
+	unsigned int score;
 
 public:
 	static Renderer& getInstance();
@@ -40,4 +50,6 @@ public:
 	void drawObject(VertexArray& va, Shader& shader, glm::mat4 view, glm::mat4 projection, glm::vec3 lightPos, glm::vec3 cameraPos, Texture& texture, glm::mat4 modelRotMat, vector<glm::mat4> modelTransMat, float scaleFactor, glm::vec3 displacement);
 	void drawWall(VertexArray & va, Shader & shader, glm::mat4 view, glm::mat4 projection, glm::vec3 lightPos, glm::vec3 cameraPos, Texture& texture, glm::mat4 modelRotMat, float scaleFactor, glm::vec3 displacement);
 	void drawFloor(VertexArray& va, Shader& shader, glm::mat4 view, glm::mat4 projection, glm::vec3 lightPos, glm::vec3 cameraPos, Texture& texture);
+	void renderTimer(VertexArray& va, Shader& shader);
+	void renderScore(VertexArray& va, Shader& shader, unsigned int score);
 };
