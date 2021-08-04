@@ -191,6 +191,7 @@ int main(int argc, char* argv[])
 			shader->bind();
 			shader->setUniform3Vec("lightPosition", lightPos);
 			shader->setUniform3Vec("viewPos", camera->position);
+			shader->setUniform1i("drawShadows", shadows);
 			shader->setUniform1f("map_range", far);
 			depthMapper.bind();
 
@@ -439,6 +440,10 @@ void processInput(GLFWwindow* window, int key, int scancode, int action, int mod
 	{
 		shuffleModel(models.at(modelIndex));
 		resetModel(true);
+	}
+	if (glfwGetKey(window, GLFW_KEY_B) == GLFW_PRESS)
+	{
+		shadows = !shadows;
 	}
 }
 
