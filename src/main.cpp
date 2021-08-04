@@ -153,7 +153,7 @@ int main(int argc, char* argv[])
 		glm::vec3 lightPos(0.0, 40.0f, 20.0f);
 
 		// Initialize model matricies for each cube within each model 
-		resetModel();
+		resetModel(true);
 		glfwSetKeyCallback(window, processInput);
 		glfwSetCursorPosCallback(window, processMouse);
 
