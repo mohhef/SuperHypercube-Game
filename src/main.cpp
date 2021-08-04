@@ -86,7 +86,9 @@ int main(int argc, char* argv[])
 	for (auto &model : models) {
 		createModel(model);
 	}
-	SoundEngine->play2D("audio/salt.mp3", true);
+	SoundEngine->setSoundVolume(0.1f);
+	SoundEngine->play2D("audio/Kirby.mp3", true);
+
 	GLFWwindow* window = initializeWindow();
 	{
 		// Setup for models
