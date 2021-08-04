@@ -33,6 +33,9 @@
     <None Include="vertex_fragment.shader">
       <Filter>Resource Files</Filter>
     </None>
+    <None Include="text.shader">
+      <Filter>Resource Files</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <Image Include="brick.jpg">

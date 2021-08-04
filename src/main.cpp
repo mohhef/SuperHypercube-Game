@@ -34,8 +34,6 @@
 using namespace irrklang;
 using namespace std;
 
-
-
 // Modified throughout run and to reset between runs.
 // Possibly bound to a single model (modelIndex)
 vector<glm::mat4> modelTransMat;
@@ -86,8 +84,8 @@ int main(int argc, char* argv[])
 	for (auto &model : models) {
 		createModel(model);
 	}
-	SoundEngine->setSoundVolume(0.1f);
-	SoundEngine->play2D("audio/Kirby.mp3", true);
+	// SoundEngine->setSoundVolume(0.1f);
+	// SoundEngine->play2D("audio/Kirby.mp3", true);
 
 	GLFWwindow* window = initializeWindow();
 	{
@@ -125,11 +123,19 @@ int main(int argc, char* argv[])
 		layoutFloor.push<float>(2);
 		vaFloor.addBuffer(vbFloor, layoutFloor);
 
+		// Setup for text
+		VertexArray vaText;
+		VertexBuffer vbText(sizeof(float) * 6 * 4);
+		VertexBufferLayout layoutText;
+		layoutText.push<float>(4);
+		vaText.addBuffer(vbFloor, layoutText);
+
 		// Create shader instances
 		Shader* shader = new Shader("vertex_fragment.shader");
 		Shader* axesShader = new Shader("axes.shader");
 		Shader* lightingSourceShader = new Shader("lightingSource.shader");
 		Shader* depthShader = new Shader("depthMap.shader");
+		Shader* textShader = new Shader("text.shader");
 
 		// telling the shader which textures go where
 		shader->bind();
@@ -142,6 +148,8 @@ int main(int argc, char* argv[])
 		// Renddering setup
 		Renderer& renderer = Renderer::getInstance();
 		glEnable(GL_DEPTH_TEST);
+		glEnable(GL_BLEND);
+		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 		glDepthFunc(GL_LESS);
 
 		// Create camera instance
@@ -202,11 +210,13 @@ int main(int argc, char* argv[])
 			renderer.drawLightingSource(vaLightingSource, *lightingSourceShader, view, projection, lightPos);
 			renderer.drawAxes(vaAxes, *axesShader, view, projection);
 
+			renderer.drawScore(vaText, vbText, *textShader, score);
+			
 			// draw the floor with tiles or draw the mesh depending on if we are drawing with or without textures
 			renderer.drawFloor(vaFloor, *shader, view, projection, lightPos, camera->position, tileTexture);
 			
 			renderer.drawLightingSource(vaLightingSource, *lightingSourceShader, view, projection, lightPos);
-
+			
 			// End frame
 			glfwSwapBuffers(window);
 
@@ -501,7 +511,6 @@ void processMouse(GLFWwindow* window, double xpos, double  ypos)
 		camera->tiltCamera(yOffset);
 	}
 }
-
 
 void createModel(vector<vector<int>> model) {
 	int rows = model.size();
