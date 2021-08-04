@@ -43,7 +43,6 @@ glm::mat4 modelRotMat;
 glm::vec3 displacement;
 float displacementSpeed = 1.0;
 float scaleFactor = 1.0f;
-bool combinedRot = false;
 bool textureStatus = true;
 bool shadows = true;
 int score = 0;
@@ -191,7 +190,6 @@ int main(int argc, char* argv[])
 			shader->bind();
 			shader->setUniform3Vec("lightPosition", lightPos);
 			shader->setUniform3Vec("viewPos", camera->position);
-			shader->setUniform1i("drawShadows", shadows);
 			shader->setUniform1f("map_range", far);
 			depthMapper.bind();
 
@@ -266,16 +264,34 @@ GLFWwindow* initializeWindow()
 
 bool isFit() {
 
+	bool result = true;
 		glm::vec4 fullXRot = glm::rotate(glm::mat4(1.0f), glm::radians(360.0f), glm::vec3(1.0f, 0.0f, 0.0f))*glm::vec4(1.0f);
 		glm::vec4 fullYRot = glm::rotate(glm::mat4(1.0f), glm::radians(360.0f), glm::vec3(0.0f, 1.0f, 0.0f))*glm::vec4(1.0f);
 		glm::vec4 fullZRot = glm::rotate(glm::mat4(1.0f), glm::radians(360.0f), glm::vec3(0.0f, 0.0f, 1.0f))*glm::vec4(1.0f);
 
 		glm::vec4 currRot = modelRotMat* glm::vec4(1.0f);
-
-		if (fmod(abs(currRot.x),fullXRot.x) == 0.0f && fmod(abs(currRot.y), fullYRot.y) == 0.0f && fmod(abs(currRot.z), fullZRot.z) == 0.0f) {
-			return true;
+		if (fmod(abs(currRot.x), 0.999999881f) == 0 || fmod(abs(currRot.x), 0.999999821f) == 0 || fmod(abs(currRot.x), 1.00000012f) == 0 || fmod(abs(currRot.x), 1) == 0 ) {
+			result = true;
 		}
-		return false;
+		else {
+			result = false;
+			return result;
+		}
+		if (fmod(abs(currRot.y), 0.999999881f) == 0 || fmod(abs(currRot.y), 0.999999821f) == 0 || fmod(abs(currRot.y), 1.00000012f) == 0 || fmod(abs(currRot.y), 1) == 0 ) {
+			result = true;
+		}
+		else {
+			result = false;
+			return result;
+		}
+		if (fmod(abs(currRot.z), 0.999999881f) == 0 || fmod(abs(currRot.z), 0.999999821f) == 0 || fmod(abs(currRot.z), 1.00000012f) == 0 || fmod(abs(currRot.z), 1) == 0 ) {
+			result = true;
+		}
+		else {
+			result = false;
+			return result;
+		}
+		return result;
 }
 void updateDisplacement(float currentFrame) {
 	//update z displacement
@@ -385,36 +401,26 @@ void processInput(GLFWwindow* window, int key, int scancode, int action, int mod
 	}
 	if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
 	{
-		if (mode == GLFW_MOD_SHIFT && displacement.x != -20.f)
-			displacement.x -= 0.50f;
-		else
-		{
 				glm::mat4 model = glm::mat4(1.0f);
 				model = glm::rotate(model, glm::radians(90.0f), glm::vec3(0.0f, 1.0f, 0.0f));
 				modelRotMat = model * modelRotMat;
-		}
 	}
 	if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
 	{
-		if (mode == GLFW_MOD_SHIFT && displacement.x != 20.f)
-			displacement.x += 0.50f;
-		else
-		{
 				glm::mat4 model = glm::mat4(1.0f);
 				model = glm::rotate(model, glm::radians(-90.0f), glm::vec3(0.0f, 1.0f, 0.0f));
 				modelRotMat = model * modelRotMat;
-		}
 	}
 	if (key == GLFW_KEY_Q)
 	{
 			glm::mat4 model = glm::mat4(1.0f);
-			model = glm::rotate(model, glm::radians(90.0f), glm::vec3(0.0f, 0.0f, 1.0f));
+			model = glm::rotate(model, glm::radians(45.0f), glm::vec3(0.0f, 0.0f, 1.0f));
 			modelRotMat= model * modelRotMat;
 	}
 	if (key == GLFW_KEY_E)
 	{
 			glm::mat4 model = glm::mat4(1.0f);
-			model = glm::rotate(model, glm::radians(-90.0f), glm::vec3(0.0f, 0.0f, 1.0f));
+			model = glm::rotate(model, glm::radians(-45.0f), glm::vec3(0.0f, 0.0f, 1.0f));
 			modelRotMat = model * modelRotMat;
 	}
 	// Toggle rendering mode between point, line and fill mode (P/L/T)
@@ -432,17 +438,6 @@ void processInput(GLFWwindow* window, int key, int scancode, int action, int mod
 	{
 		shuffleModel(models.at(modelIndex));
 		resetModel(true);
-	}
-
-	if (glfwGetKey(window, GLFW_KEY_B) == GLFW_PRESS) 
-	{
-		shadows = !shadows;
-	}
-
-	if (glfwGetKey(window, GLFW_KEY_X) == GLFW_PRESS) 
-	{
-		textureStatus = !textureStatus;
-		Renderer::getInstance().isTextureEnabled = textureStatus;
 	}
 }
 

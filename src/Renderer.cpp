@@ -247,13 +247,11 @@ void Renderer::drawWall(VertexArray& va, Shader& shader, glm::mat4 view, glm::ma
 	for (int i = 0; i < numWallPieces; i++)
 	{
 		// calculate model matrix for each object and pass it to shader before drawing
-		glm::mat4 trans = glm::translate(glm::mat4(1.0f), glm::vec3(displacement.x, 0.0f, 0.0f));
 		glm::mat4 initialPos = glm::translate(glm::mat4(1.0f), modelPosition.at(renderIndex));
 
 		// unit matrix * wall_scale * x_translation * wall_translation (align with XZ plane) * wall_cube_scale * wall_cube_translate
 		glm::mat4 model = glm::mat4(1.0f)
 			* glm::scale(glm::mat4(1.0f), glm::vec3(scaleFactor))
-			* trans
 			* initialPos
 			* rotationMatrix
 			* modelScale.at(renderIndex)
