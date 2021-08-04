@@ -39,13 +39,14 @@ using namespace std;
 // Modified throughout run and to reset between runs.
 // Possibly bound to a single model (modelIndex)
 vector<glm::mat4> modelTransMat;
-vector<glm::mat4> modelRotMat;
+glm::mat4 modelRotMat;
 glm::vec3 displacement;
 float displacementSpeed = 1.0;
 float scaleFactor = 1.0f;
 bool combinedRot = false;
 bool textureStatus = true;
 bool shadows = true;
+int score = 0;
 ISoundEngine* SoundEngine = createIrrKlangDevice();
 
 // Cursor positions for mouse inputs
@@ -263,11 +264,28 @@ GLFWwindow* initializeWindow()
 	return window;
 }
 
+bool isFit() {
+
+		glm::vec4 fullXRot = glm::rotate(glm::mat4(1.0f), glm::radians(360.0f), glm::vec3(1.0f, 0.0f, 0.0f))*glm::vec4(1.0f);
+		glm::vec4 fullYRot = glm::rotate(glm::mat4(1.0f), glm::radians(360.0f), glm::vec3(0.0f, 1.0f, 0.0f))*glm::vec4(1.0f);
+		glm::vec4 fullZRot = glm::rotate(glm::mat4(1.0f), glm::radians(360.0f), glm::vec3(0.0f, 0.0f, 1.0f))*glm::vec4(1.0f);
+
+		glm::vec4 currRot = modelRotMat* glm::vec4(1.0f);
+
+		if (fmod(abs(currRot.x),fullXRot.x) == 0.0f && fmod(abs(currRot.y), fullYRot.y) == 0.0f && fmod(abs(currRot.z), fullZRot.z) == 0.0f) {
+			return true;
+		}
+		return false;
+}
 void updateDisplacement(float currentFrame) {
 	//update z displacement
 	displacement.z = currentFrame * -1 * displacementSpeed;
 	//if passes the wall reset
 	if (displacement.z < -30) {
+
+		if (isFit()) {
+			score += 1;
+		}
 		modelIndex = (modelIndex+1) % models.size();
 		Renderer::getInstance().setRenderIndex(modelIndex);
 		
@@ -294,9 +312,7 @@ void resetTransMat()
 // Reset model's rotation matrix.
 void resetRotMat(bool randomRot)
 {
-	modelRotMat.resize(modelCubePositions.at(modelIndex).size());
-	for (int i = 0; i < modelCubePositions.at(modelIndex).size(); i++)
-		modelRotMat.at(i) = glm::mat4(1.0f);
+	modelRotMat = glm::mat4(1.0f);
 
 	if (randomRot) {
 		randomRotation();
@@ -357,21 +373,15 @@ void processInput(GLFWwindow* window, int key, int scancode, int action, int mod
 
 	if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
 	{
-			for (int i = 0; i < modelRotMat.size(); i++)
-			{
 				glm::mat4 model = glm::mat4(1.0f);
 				model = glm::rotate(model, glm::radians(-90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
-				modelRotMat.at(i) = model * modelRotMat.at(i);
-			}
+				modelRotMat= model * modelRotMat;
 	}
 	if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
 	{
-			for (int i = 0; i < modelRotMat.size(); i++)
-			{
 				glm::mat4 model = glm::mat4(1.0f);
 				model = glm::rotate(model, glm::radians(90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
-				modelRotMat.at(i) = model * modelRotMat.at(i);
-			}
+				modelRotMat = model * modelRotMat;
 	}
 	if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
 	{
@@ -379,12 +389,9 @@ void processInput(GLFWwindow* window, int key, int scancode, int action, int mod
 			displacement.x -= 0.50f;
 		else
 		{
-			for (int i = 0; i < modelRotMat.size(); i++)
-			{
 				glm::mat4 model = glm::mat4(1.0f);
 				model = glm::rotate(model, glm::radians(90.0f), glm::vec3(0.0f, 1.0f, 0.0f));
-				modelRotMat.at(i) = model * modelRotMat.at(i);
-			}
+				modelRotMat = model * modelRotMat;
 		}
 	}
 	if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
@@ -393,31 +400,22 @@ void processInput(GLFWwindow* window, int key, int scancode, int action, int mod
 			displacement.x += 0.50f;
 		else
 		{
-			for (int i = 0; i < modelRotMat.size(); i++)
-			{
 				glm::mat4 model = glm::mat4(1.0f);
 				model = glm::rotate(model, glm::radians(-90.0f), glm::vec3(0.0f, 1.0f, 0.0f));
-				modelRotMat.at(i) = model * modelRotMat.at(i);
-			}
+				modelRotMat = model * modelRotMat;
 		}
 	}
 	if (key == GLFW_KEY_Q)
 	{
-		for (int i = 0; i < modelRotMat.size(); i++)
-		{
 			glm::mat4 model = glm::mat4(1.0f);
 			model = glm::rotate(model, glm::radians(90.0f), glm::vec3(0.0f, 0.0f, 1.0f));
-			modelRotMat.at(i) = model * modelRotMat.at(i);
-		}
+			modelRotMat= model * modelRotMat;
 	}
 	if (key == GLFW_KEY_E)
 	{
-		for (int i = 0; i < modelRotMat.size(); i++)
-		{
 			glm::mat4 model = glm::mat4(1.0f);
 			model = glm::rotate(model, glm::radians(-90.0f), glm::vec3(0.0f, 0.0f, 1.0f));
-			modelRotMat.at(i) = model * modelRotMat.at(i);
-		}
+			modelRotMat = model * modelRotMat;
 	}
 	// Toggle rendering mode between point, line and fill mode (P/L/T)
 	if (glfwGetKey(window, GLFW_KEY_P) == GLFW_PRESS)
@@ -589,10 +587,7 @@ void randomRotation() {
 	rotAng = (rand() % (4 - 0 + 1) + 0) * 90.0f;
 	randRotMat = glm::rotate(randRotMat, glm::radians(rotAng), glm::vec3(0.0f, 0.0f, 1.0f));
 
-	for (auto& rotMat : modelRotMat) {
-		rotMat *= randRotMat;
-	}
-	modelRotMat.at(modelIndex) = randRotMat;
+	modelRotMat = randRotMat;
 }
 
 //count the total number of cubes in a model
