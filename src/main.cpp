@@ -348,10 +348,6 @@ void resetModel(bool randomRot)
 // Handle all keyboard inputs
 void processInput(GLFWwindow* window, int key, int scancode, int action, int mode)
 {
-	//Toggle rotate object only or wall & object
-	mode == GLFW_MOD_CONTROL?
-		Renderer::getInstance().setRenderCombinedRot(true):Renderer::getInstance().setRenderCombinedRot(false);
-
 	// Closes window
 	if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
 		glfwSetWindowShouldClose(window, true);

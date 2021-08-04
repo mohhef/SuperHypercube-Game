@@ -20,7 +20,6 @@ class Renderer
 private:
 	unsigned int renderIndex = 0;
 	glm::mat4 rotationMatrix = glm::mat4(1.0f);
-	bool combinedRot = false;
 	static Renderer s_Instance;
 	bool isFindingDepth = false;
 	glm::vec3 centerOfMass;
@@ -30,7 +29,6 @@ public:
 	static Renderer& getInstance();
 	Renderer(const Renderer&) = delete;
 	bool isTextureEnabled = true;
-	void setRenderCombinedRot(bool rot);
 	void setRenderIndex(unsigned int index);
 	void setIsFindingDepth(bool findDepth);
 	void updateCenterOfMass();

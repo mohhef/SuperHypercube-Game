@@ -42,10 +42,6 @@ void Renderer::setRenderIndex(unsigned int index)
 	renderIndex = index;
 }
 
-void Renderer::setRenderCombinedRot(bool rot) {
-	combinedRot = rot;
-}
-
 void Renderer::setIsFindingDepth(bool findDepth) {
 	this->isFindingDepth = findDepth;
 }
@@ -80,7 +76,6 @@ void Renderer::drawAxes(VertexArray& va, Shader& shader, glm::mat4 view, glm::ma
 	shader.unbind();
 	glLineWidth(1);
 }
-
 
 // Renderer for drawing floor (with texture)
 void Renderer::drawFloor(VertexArray& va, Shader& shader, glm::mat4 view, glm::mat4 projection, glm::vec3 lightPos, glm::vec3 cameraPos, Texture& texture)
@@ -235,12 +230,6 @@ void Renderer::drawWall(VertexArray& va, Shader& shader, glm::mat4 view, glm::ma
 			shader.setUniform1i("textureStatus", 0);
 			shader.setUniform3Vec("ourColor", glm::vec3(0.63f, 0.63f, 0.63f));
 		}
-	}
-	
-	
-	//using the same roation as the object will work 
-	if (combinedRot == true) {
-		rotationMatrix = modelRotMat;
 	}
 
 	int numWallPieces = wallCubePositions.at(renderIndex).size();
