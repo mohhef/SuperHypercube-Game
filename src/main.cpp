@@ -173,8 +173,7 @@ int main(int argc, char* argv[])
 			lastFrame = currentFrame;
 
 			updateDisplacement(currentFrame);
-			//move the object forward with a speed
-			//updateDisplacement(currentFrame);
+
 			// Clear color and depth buffers
 			renderer.clear();
 
@@ -264,6 +263,7 @@ GLFWwindow* initializeWindow()
 	return window;
 }
 
+//TODO: Fix this function, it does nothing now, its supposed to check if an object is fitting in the wall, it doesnt work tho
 bool isFit() {
 
 	bool result = true;
@@ -295,18 +295,21 @@ bool isFit() {
 		}
 		return result;
 }
+
+//update the displacement of the object
 void updateDisplacement(float currentFrame) {
 	//update z displacement
 	displacement.z = currentFrame * -1 * displacementSpeed;
 	//if passes the wall reset
 	if (displacement.z < -30) {
-
+		//if the object fits in wall, increment score
 		if (isFit()) {
 			score += 1;
 		}
 		modelIndex = (modelIndex+1) % models.size();
 		Renderer::getInstance().setRenderIndex(modelIndex);
 		
+		//resset time, z dispalcement and speed
 		glfwSetTime(0);
 		displacement.z = 0;
 		displacementSpeed = 1;
@@ -387,39 +390,39 @@ void processInput(GLFWwindow* window, int key, int scancode, int action, int mod
 
 	if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
 	{
-				glm::mat4 model = glm::mat4(1.0f);
-				model = glm::rotate(model, glm::radians(-90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
-				modelRotMat= model * modelRotMat;
+		glm::mat4 model = glm::mat4(1.0f);
+		model = glm::rotate(model, glm::radians(-90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
+		modelRotMat= model * modelRotMat;
 	}
 	if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
 	{
-				glm::mat4 model = glm::mat4(1.0f);
-				model = glm::rotate(model, glm::radians(90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
-				modelRotMat = model * modelRotMat;
+		glm::mat4 model = glm::mat4(1.0f);
+		model = glm::rotate(model, glm::radians(90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
+		modelRotMat = model * modelRotMat;
 	}
 	if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
 	{
-				glm::mat4 model = glm::mat4(1.0f);
-				model = glm::rotate(model, glm::radians(90.0f), glm::vec3(0.0f, 1.0f, 0.0f));
-				modelRotMat = model * modelRotMat;
+		glm::mat4 model = glm::mat4(1.0f);
+		model = glm::rotate(model, glm::radians(90.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+		modelRotMat = model * modelRotMat;
 	}
 	if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
 	{
-				glm::mat4 model = glm::mat4(1.0f);
-				model = glm::rotate(model, glm::radians(-90.0f), glm::vec3(0.0f, 1.0f, 0.0f));
-				modelRotMat = model * modelRotMat;
+		glm::mat4 model = glm::mat4(1.0f);
+		model = glm::rotate(model, glm::radians(-90.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+		modelRotMat = model * modelRotMat;
 	}
 	if (key == GLFW_KEY_Q)
 	{
-			glm::mat4 model = glm::mat4(1.0f);
-			model = glm::rotate(model, glm::radians(45.0f), glm::vec3(0.0f, 0.0f, 1.0f));
-			modelRotMat= model * modelRotMat;
+		glm::mat4 model = glm::mat4(1.0f);
+		model = glm::rotate(model, glm::radians(45.0f), glm::vec3(0.0f, 0.0f, 1.0f));
+		modelRotMat= model * modelRotMat;
 	}
 	if (key == GLFW_KEY_E)
 	{
-			glm::mat4 model = glm::mat4(1.0f);
-			model = glm::rotate(model, glm::radians(-45.0f), glm::vec3(0.0f, 0.0f, 1.0f));
-			modelRotMat = model * modelRotMat;
+		glm::mat4 model = glm::mat4(1.0f);
+		model = glm::rotate(model, glm::radians(-45.0f), glm::vec3(0.0f, 0.0f, 1.0f));
+		modelRotMat = model * modelRotMat;
 	}
 	// Toggle rendering mode between point, line and fill mode (P/L/T)
 	if (glfwGetKey(window, GLFW_KEY_P) == GLFW_PRESS)
