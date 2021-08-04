@@ -29,7 +29,9 @@
 
 #include "Renderer.h"
 #include "stb_image.h" // Reference: Lab 4 (COMP 353) and LearnOpenGL; Source: https://github.com/nothings/stb/blob/master/stb_image.h
+#include <irrklang/irrKlang.h>
 
+using namespace irrklang;
 using namespace std;
 
 
@@ -37,12 +39,14 @@ using namespace std;
 // Modified throughout run and to reset between runs.
 // Possibly bound to a single model (modelIndex)
 vector<glm::mat4> modelTransMat;
-vector<glm::mat4> modelRotMat;
+glm::mat4 modelRotMat;
 glm::vec3 displacement;
+float displacementSpeed = 1.0;
 float scaleFactor = 1.0f;
-bool combinedRot = false;
 bool textureStatus = true;
 bool shadows = true;
+int score = 0;
+ISoundEngine* SoundEngine = createIrrKlangDevice();
 
 // Cursor positions for mouse inputs
 float lastMouseX;
@@ -61,6 +65,7 @@ void processMouse(GLFWwindow* window, double xpos, double  ypos);
 void createModel(vector<vector<int>> model);
 void shuffleModel(vector<vector<int>> model);
 void randomRotation();
+void updateDisplacement(float currentFrame);
 int getTotalCubes(vector <vector<int>> model);
 
 vector<vector<glm::vec3>> modelCubePositions;
@@ -81,6 +86,9 @@ int main(int argc, char* argv[])
 	for (auto &model : models) {
 		createModel(model);
 	}
+	SoundEngine->setSoundVolume(0.1f);
+	SoundEngine->play2D("audio/Kirby.mp3", true);
+
 	GLFWwindow* window = initializeWindow();
 	{
 		// Setup for models
@@ -92,13 +100,6 @@ int main(int argc, char* argv[])
 		layout.push<float>(2);
 		vA.addBuffer(vB, layout);
 		
-		// Setup for boundary
-		VertexArray vaBound;
-		VertexBuffer vbBound(cubeVertices, sizeof(cubeVertices));
-		VertexBufferLayout layoutBound;
-		layoutBound.push<float>(3);
-		vaBound.addBuffer(vbBound, layoutBound);
-
 		// Setup for lighting
 		VertexArray vaLightingSource;
 		VertexBuffer vblightingSource(vertices, sizeof(vertices));
@@ -114,14 +115,6 @@ int main(int argc, char* argv[])
 		VertexBufferLayout layoutAxes;
 		layoutAxes.push<float>(3);
 		vaAxes.addBuffer(vbAxes, layoutAxes);
-
-		// Setup for mesh
-		VertexArray vaMesh;
-		VertexBuffer vbMesh(meshVertices, sizeof(vertices));
-		VertexBufferLayout layoutMesh;
-		layoutMesh.push<float>(3);
-		layoutMesh.push<float>(3);
-		vaMesh.addBuffer(vbMesh, layoutMesh);
 
 		// Setup for floor
 		VertexArray vaFloor;
@@ -154,7 +147,7 @@ int main(int argc, char* argv[])
 		// Create camera instance
 		// Position: behind model, along Z-axis.
 		// Target: world origin (initially)
-		camera = new Camera(glm::vec3(modelPosition.at(modelIndex).x, modelPosition.at(modelIndex).y, 100.0f),
+		camera = new Camera(glm::vec3(modelPosition.at(modelIndex).x +30, modelPosition.at(modelIndex).y +40, 100.0f),
 			glm::vec3(0.0f, 1.0f, 0.0f),
 			glm::vec3(0.0f, 0.0f, 0.0f));
 
@@ -162,7 +155,7 @@ int main(int argc, char* argv[])
 		glm::vec3 lightPos(0.0, 40.0f, 20.0f);
 
 		// Initialize model matricies for each cube within each model 
-		resetModel();
+		resetModel(true);
 		glfwSetKeyCallback(window, processInput);
 		glfwSetCursorPosCallback(window, processMouse);
 
@@ -179,6 +172,8 @@ int main(int argc, char* argv[])
 			deltaTime = currentFrame - lastFrame;
 			lastFrame = currentFrame;
 
+			updateDisplacement(currentFrame);
+
 			// Clear color and depth buffers
 			renderer.clear();
 
@@ -190,8 +185,6 @@ int main(int argc, char* argv[])
 				// Render objects to be drawn by the depth mapper object
 				renderer.drawObject(vA, *depthShader, view, projection, lightPos, camera->position, metalTexture, modelRotMat, modelTransMat, scaleFactor, displacement);
 				renderer.drawWall(vA, *depthShader, view, projection, lightPos, camera->position, brickTexture, modelRotMat, scaleFactor, displacement);
-				renderer.drawStaticObjects(vA, *depthShader, view, projection, lightPos, camera->position, brickTexture, metalTexture);
-
 				});
 
 			// bind universal attributes necessary for drawing all the objects on the map
@@ -206,18 +199,13 @@ int main(int argc, char* argv[])
 			renderer.updateCenterOfMass();
 			renderer.drawObject(vA, *shader, view, projection, lightPos, camera->position, metalTexture, modelRotMat, modelTransMat, scaleFactor, displacement);
 			renderer.drawWall(vA, *shader, view, projection, lightPos, camera->position, brickTexture, modelRotMat, scaleFactor, displacement);
-			renderer.drawBoundary(vaBound, *axesShader, view, projection, modelRotMat, modelTransMat, scaleFactor, displacement);
-			renderer.drawStaticObjects(vA, *shader, view, projection, lightPos, camera->position, brickTexture, metalTexture);
 			renderer.drawLightingSource(vaLightingSource, *lightingSourceShader, view, projection, lightPos);
 			renderer.drawAxes(vaAxes, *axesShader, view, projection);
 
 			// draw the floor with tiles or draw the mesh depending on if we are drawing with or without textures
-			if (textureStatus)
-				renderer.drawFloor(vaFloor, *shader, view, projection, lightPos, camera->position, tileTexture);
-			else
-				renderer.drawMesh(vaMesh, *shader, view, projection, lightPos, camera->position, scaleFactor);
+			renderer.drawFloor(vaFloor, *shader, view, projection, lightPos, camera->position, tileTexture);
+			
 			renderer.drawLightingSource(vaLightingSource, *lightingSourceShader, view, projection, lightPos);
-			renderer.drawAxes(vaAxes, *axesShader, view, projection);
 
 			// End frame
 			glfwSwapBuffers(window);
@@ -276,6 +264,61 @@ GLFWwindow* initializeWindow()
 	return window;
 }
 
+//TODO: Fix this function, it does nothing now, its supposed to check if an object is fitting in the wall, it doesnt work tho
+bool isFit() {
+
+	bool result = true;
+		glm::vec4 fullXRot = glm::rotate(glm::mat4(1.0f), glm::radians(360.0f), glm::vec3(1.0f, 0.0f, 0.0f))*glm::vec4(1.0f);
+		glm::vec4 fullYRot = glm::rotate(glm::mat4(1.0f), glm::radians(360.0f), glm::vec3(0.0f, 1.0f, 0.0f))*glm::vec4(1.0f);
+		glm::vec4 fullZRot = glm::rotate(glm::mat4(1.0f), glm::radians(360.0f), glm::vec3(0.0f, 0.0f, 1.0f))*glm::vec4(1.0f);
+
+		glm::vec4 currRot = modelRotMat* glm::vec4(1.0f);
+		if (fmod(abs(currRot.x), 0.999999881f) == 0 || fmod(abs(currRot.x), 0.999999821f) == 0 || fmod(abs(currRot.x), 1.00000012f) == 0 || fmod(abs(currRot.x), 1) == 0 ) {
+			result = true;
+		}
+		else {
+			result = false;
+			return result;
+		}
+		if (fmod(abs(currRot.y), 0.999999881f) == 0 || fmod(abs(currRot.y), 0.999999821f) == 0 || fmod(abs(currRot.y), 1.00000012f) == 0 || fmod(abs(currRot.y), 1) == 0 ) {
+			result = true;
+		}
+		else {
+			result = false;
+			return result;
+		}
+		if (fmod(abs(currRot.z), 0.999999881f) == 0 || fmod(abs(currRot.z), 0.999999821f) == 0 || fmod(abs(currRot.z), 1.00000012f) == 0 || fmod(abs(currRot.z), 1) == 0 ) {
+			result = true;
+		}
+		else {
+			result = false;
+			return result;
+		}
+		return result;
+}
+
+//update the displacement of the object
+void updateDisplacement(float currentFrame) {
+	//update z displacement
+	displacement.z = currentFrame * -1 * displacementSpeed;
+	//if passes the wall reset
+	if (displacement.z < -30) {
+		//if the object fits in wall, increment score
+		if (isFit()) {
+			score += 1;
+		}
+		modelIndex = (modelIndex+1) % models.size();
+		Renderer::getInstance().setRenderIndex(modelIndex);
+		
+		//resset time, z dispalcement and speed
+		glfwSetTime(0);
+		displacement.z = 0;
+		displacementSpeed = 1;
+		
+		resetModel();
+		randomRotation();
+	}
+}
 // Reset translation matrix for each model's cube.
 void resetTransMat()
 {
@@ -291,9 +334,7 @@ void resetTransMat()
 // Reset model's rotation matrix.
 void resetRotMat(bool randomRot)
 {
-	modelRotMat.resize(modelCubePositions.at(modelIndex).size());
-	for (int i = 0; i < modelCubePositions.at(modelIndex).size(); i++)
-		modelRotMat.at(i) = glm::mat4(1.0f);
+	modelRotMat = glm::mat4(1.0f);
 
 	if (randomRot) {
 		randomRotation();
@@ -313,41 +354,9 @@ void resetModel(bool randomRot)
 // Handle all keyboard inputs
 void processInput(GLFWwindow* window, int key, int scancode, int action, int mode)
 {
-	//Toggle rotate object only or wall & object
-	mode == GLFW_MOD_CONTROL?
-		Renderer::getInstance().setRenderCombinedRot(true):Renderer::getInstance().setRenderCombinedRot(false);
-
 	// Closes window
 	if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
 		glfwSetWindowShouldClose(window, true);
-
-	// Toggle between models (1-2-3)
-	if (key == GLFW_KEY_1 || key == GLFW_KEY_2 || key == GLFW_KEY_3 || key == GLFW_KEY_4 || key == GLFW_KEY_5) {
-		if (key == GLFW_KEY_1) {
-			modelIndex = 0;
-			Renderer::getInstance().setRenderIndex(modelIndex);
-		}
-		if (key == GLFW_KEY_2) {
-			modelIndex = 1;
-			Renderer::getInstance().setRenderIndex(modelIndex);
-		}
-		if (key == GLFW_KEY_3) {
-			modelIndex = 2;
-			Renderer::getInstance().setRenderIndex(modelIndex);
-		}
-		if (key == GLFW_KEY_4) {
-			modelIndex = 3;
-			Renderer::getInstance().setRenderIndex(modelIndex);
-		}
-		if (key == GLFW_KEY_5) {
-			modelIndex = 4;
-			Renderer::getInstance().setRenderIndex(modelIndex);
-		}
-		resetModel();
-		camera = new Camera(glm::vec3(modelPosition.at(modelIndex).x, modelPosition.at(modelIndex).y, 100.0f),
-			glm::vec3(0.0f, 1.0f, 0.0f),
-			glm::vec3(0.0f, 0.0f, 0.0f));
-	}
 	
 	// Camera rotation around world axis (UP/DOWN/LEFT/RIGHT)
 	if (glfwGetKey(window, GLFW_KEY_UP) == GLFW_PRESS)
@@ -376,80 +385,45 @@ void processInput(GLFWwindow* window, int key, int scancode, int action, int mod
 		scaleFactor -= 0.01f;
 
 	// Model displacement (W/S/A/D) and rotation (w/s/a/d), the latter of which around it's own axis.
+	if (mode == GLFW_MOD_SHIFT) {
+		displacementSpeed *= 1.5f;
+	}
+
 	if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
 	{
-		if (mode == GLFW_MOD_SHIFT && displacement.z != -100.f)
-			displacement.z -= 0.50f;
-		else
-		{
-
-			for (int i = 0; i < modelRotMat.size(); i++)
-			{
-				glm::mat4 model = glm::mat4(1.0f);
-				model = glm::rotate(model, glm::radians(5.0f), glm::vec3(1.0f, 0.0f, 0.0f));
-				modelRotMat.at(i) = model * modelRotMat.at(i);
-			}
-		}
+		glm::mat4 model = glm::mat4(1.0f);
+		model = glm::rotate(model, glm::radians(-90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
+		modelRotMat= model * modelRotMat;
 	}
 	if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
 	{
-		if (mode == GLFW_MOD_SHIFT && displacement.z != 20.f)
-			displacement.z += 0.50f;
-		else
-		{
-			for (int i = 0; i < modelRotMat.size(); i++)
-			{
-				glm::mat4 model = glm::mat4(1.0f);
-				model = glm::rotate(model, glm::radians(-5.0f), glm::vec3(1.0f, 0.0f, 0.0f));
-				modelRotMat.at(i) = model * modelRotMat.at(i);
-			}
-		}
+		glm::mat4 model = glm::mat4(1.0f);
+		model = glm::rotate(model, glm::radians(90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
+		modelRotMat = model * modelRotMat;
 	}
 	if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
 	{
-		if (mode == GLFW_MOD_SHIFT && displacement.x != -20.f)
-			displacement.x -= 0.50f;
-		else
-		{
-			for (int i = 0; i < modelRotMat.size(); i++)
-			{
-				glm::mat4 model = glm::mat4(1.0f);
-				model = glm::rotate(model, glm::radians(5.0f), glm::vec3(0.0f, 1.0f, 0.0f));
-				modelRotMat.at(i) = model * modelRotMat.at(i);
-			}
-		}
+		glm::mat4 model = glm::mat4(1.0f);
+		model = glm::rotate(model, glm::radians(90.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+		modelRotMat = model * modelRotMat;
 	}
 	if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
 	{
-		if (mode == GLFW_MOD_SHIFT && displacement.x != 20.f)
-			displacement.x += 0.50f;
-		else
-		{
-			for (int i = 0; i < modelRotMat.size(); i++)
-			{
-				glm::mat4 model = glm::mat4(1.0f);
-				model = glm::rotate(model, glm::radians(-5.0f), glm::vec3(0.0f, 1.0f, 0.0f));
-				modelRotMat.at(i) = model * modelRotMat.at(i);
-			}
-		}
+		glm::mat4 model = glm::mat4(1.0f);
+		model = glm::rotate(model, glm::radians(-90.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+		modelRotMat = model * modelRotMat;
 	}
 	if (key == GLFW_KEY_Q)
 	{
-		for (int i = 0; i < modelRotMat.size(); i++)
-		{
-			glm::mat4 model = glm::mat4(1.0f);
-			model = glm::rotate(model, glm::radians(5.0f), glm::vec3(0.0f, 0.0f, 1.0f));
-			modelRotMat.at(i) = model * modelRotMat.at(i);
-		}
+		glm::mat4 model = glm::mat4(1.0f);
+		model = glm::rotate(model, glm::radians(45.0f), glm::vec3(0.0f, 0.0f, 1.0f));
+		modelRotMat= model * modelRotMat;
 	}
 	if (key == GLFW_KEY_E)
 	{
-		for (int i = 0; i < modelRotMat.size(); i++)
-		{
-			glm::mat4 model = glm::mat4(1.0f);
-			model = glm::rotate(model, glm::radians(-5.0f), glm::vec3(0.0f, 0.0f, 1.0f));
-			modelRotMat.at(i) = model * modelRotMat.at(i);
-		}
+		glm::mat4 model = glm::mat4(1.0f);
+		model = glm::rotate(model, glm::radians(-45.0f), glm::vec3(0.0f, 0.0f, 1.0f));
+		modelRotMat = model * modelRotMat;
 	}
 	// Toggle rendering mode between point, line and fill mode (P/L/T)
 	if (glfwGetKey(window, GLFW_KEY_P) == GLFW_PRESS)
@@ -467,16 +441,9 @@ void processInput(GLFWwindow* window, int key, int scancode, int action, int mod
 		shuffleModel(models.at(modelIndex));
 		resetModel(true);
 	}
-
-	if (glfwGetKey(window, GLFW_KEY_B) == GLFW_PRESS) 
+	if (glfwGetKey(window, GLFW_KEY_B) == GLFW_PRESS)
 	{
 		shadows = !shadows;
-	}
-
-	if (glfwGetKey(window, GLFW_KEY_X) == GLFW_PRESS) 
-	{
-		textureStatus = !textureStatus;
-		Renderer::getInstance().isTextureEnabled = textureStatus;
 	}
 }
 
@@ -611,20 +578,17 @@ void shuffleModel(vector<vector<int>> model) {
 void randomRotation() {
 	glm::mat4 randRotMat = glm::mat4(1.0f);
 	//random rotation angle from -100 -> 100, multiple of 10
-	float rotAng = (rand() % 21 + (-10)) * 10;
+	float rotAng = (rand() % (4 - 0 + 1) + 0)*90.0f;
 	//random x rotation
 	randRotMat = glm::rotate(randRotMat, glm::radians(rotAng), glm::vec3(1.0f, 0.0f, 0.0f));
 	//random y rotation
-	rotAng = rand() % 181 + (-90);
+	rotAng = (rand() % (4 - 0 + 1) + 0) * 90.0f;
 	randRotMat = glm::rotate(randRotMat, glm::radians(rotAng), glm::vec3(0.0f, 1.0f, 0.0f));
 	//random z rotation
-	rotAng = rand() % 181 + (-90);
+	rotAng = (rand() % (4 - 0 + 1) + 0) * 90.0f;
 	randRotMat = glm::rotate(randRotMat, glm::radians(rotAng), glm::vec3(0.0f, 0.0f, 1.0f));
 
-	for (auto& rotMat : modelRotMat) {
-		rotMat *= randRotMat;
-	}
-	modelRotMat.at(modelIndex) = randRotMat;
+	modelRotMat = randRotMat;
 }
 
 //count the total number of cubes in a model
