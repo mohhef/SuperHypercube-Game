@@ -276,6 +276,7 @@ GLFWwindow* initializeWindow()
 }
 
 // Wall check for score
+// TODO: MAKE IT SO THAT IT CAN ACCEPT OTHER WAYS
 bool isFit() 
 {
 	int numCubePieces = modelCubePositions.at(modelIndex).size();
