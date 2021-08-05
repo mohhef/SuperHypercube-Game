@@ -41,10 +41,9 @@ private:
 	float x_timer;
 	float y_timer;
 	float scale;
+	void initializeCharacters();
 
 	Renderer();
-
-	void initializeCharacters();
 
 public:
 	static Renderer& getInstance();

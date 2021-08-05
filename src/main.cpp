@@ -65,6 +65,7 @@ void shuffleModel(vector<vector<int>> model);
 void randomRotation();
 void updateDisplacement(float currentFrame);
 int getTotalCubes(vector <vector<int>> model);
+bool isFit();
 
 vector<vector<glm::vec3>> modelCubePositions;
 vector<vector<glm::vec3>> wallCubePositions;
@@ -171,7 +172,7 @@ int main(int argc, char* argv[])
 		Texture brickTexture("brick.jpg");
 		Texture tileTexture("tiles.jpg");
 		Texture metalTexture("metal.jpg");
-
+		
 		// Entering main loop
 		while (!glfwWindowShouldClose(window))
 		{
@@ -216,7 +217,7 @@ int main(int argc, char* argv[])
 			renderer.drawFloor(vaFloor, *shader, view, projection, lightPos, camera->position, tileTexture);
 			
 			renderer.drawLightingSource(vaLightingSource, *lightingSourceShader, view, projection, lightPos);
-			
+
 			// End frame
 			glfwSwapBuffers(window);
 
@@ -274,37 +275,30 @@ GLFWwindow* initializeWindow()
 	return window;
 }
 
-//TODO: Fix this function, it does nothing now, its supposed to check if an object is fitting in the wall, it doesnt work tho
-bool isFit() {
+// Wall check for score
+bool isFit() 
+{
+	int numCubePieces = modelCubePositions.at(modelIndex).size();
+	for (int i = 0; i < numCubePieces; i++)
+	{
+		int rows = models.at(modelIndex).size();
+		int columns = models.at(modelIndex).at(0).size();
 
-	bool result = true;
-		glm::vec4 fullXRot = glm::rotate(glm::mat4(1.0f), glm::radians(360.0f), glm::vec3(1.0f, 0.0f, 0.0f))*glm::vec4(1.0f);
-		glm::vec4 fullYRot = glm::rotate(glm::mat4(1.0f), glm::radians(360.0f), glm::vec3(0.0f, 1.0f, 0.0f))*glm::vec4(1.0f);
-		glm::vec4 fullZRot = glm::rotate(glm::mat4(1.0f), glm::radians(360.0f), glm::vec3(0.0f, 0.0f, 1.0f))*glm::vec4(1.0f);
+		glm::vec4 axes = glm::vec4(columns, rows, 1.0f, 1.0f);
+		glm::mat4 model = glm::mat4(1.0f) * modelRotMat;
+		glm::vec4 cubePos = model * glm::vec4(modelCubePositions.at(modelIndex).at(i), 1.0f);
 
-		glm::vec4 currRot = modelRotMat* glm::vec4(1.0f);
-		if (fmod(abs(currRot.x), 0.999999881f) == 0 || fmod(abs(currRot.x), 0.999999821f) == 0 || fmod(abs(currRot.x), 1.00000012f) == 0 || fmod(abs(currRot.x), 1) == 0 ) {
-			result = true;
+		cubePos.x = round(cubePos.x);
+		cubePos.y = round(cubePos.y);
+
+		if (cubePos.x != modelCubePositions.at(modelIndex).at(i).x
+			|| cubePos.y != modelCubePositions.at(modelIndex).at(i).y)
+		{
+			return false;
 		}
-		else {
-			result = false;
-			return result;
-		}
-		if (fmod(abs(currRot.y), 0.999999881f) == 0 || fmod(abs(currRot.y), 0.999999821f) == 0 || fmod(abs(currRot.y), 1.00000012f) == 0 || fmod(abs(currRot.y), 1) == 0 ) {
-			result = true;
-		}
-		else {
-			result = false;
-			return result;
-		}
-		if (fmod(abs(currRot.z), 0.999999881f) == 0 || fmod(abs(currRot.z), 0.999999821f) == 0 || fmod(abs(currRot.z), 1.00000012f) == 0 || fmod(abs(currRot.z), 1) == 0 ) {
-			result = true;
-		}
-		else {
-			result = false;
-			return result;
-		}
-		return result;
+	}
+	
+	return true;
 }
 
 //update the displacement of the object
@@ -314,8 +308,12 @@ void updateDisplacement(float currentFrame) {
 	//if passes the wall reset
 	if (displacement.z < -30) {
 		//if the object fits in wall, increment score
-		if (isFit()) {
+		if (isFit()) 
+		{
 			score += 1;
+			
+			// NOTE: CURRENTLY PRINTING HERE TO SHOW YOU THAT IT WORKS
+			cout << score << endl;
 		}
 		modelIndex = (modelIndex+1) % models.size();
 		Renderer::getInstance().setRenderIndex(modelIndex);
@@ -329,6 +327,7 @@ void updateDisplacement(float currentFrame) {
 		randomRotation();
 	}
 }
+
 // Reset translation matrix for each model's cube.
 void resetTransMat()
 {
