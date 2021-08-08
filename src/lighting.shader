@@ -17,8 +17,8 @@ void main()
 
 out vec4 FragColor;
 
-uniform vec4 ourColor;
-uniform vec4 lightColor;
+uniform vec3 ourColor;
+uniform vec3 lightColor;
 
 void main()
 {

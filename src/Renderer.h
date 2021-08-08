@@ -15,12 +15,7 @@
 void glClearError();
 bool glLogCall(const char* function, const char* file, int line);
 
-struct Character {
-	unsigned int id; // texture id
-	glm::ivec2   size;      
-	glm::ivec2   bearing;   // offset from baseline
-	unsigned int advance;   // offset to next character
-};
+
 
 class Renderer
 {
@@ -34,15 +29,6 @@ private:
 	glm::vec3 centerOfMass;
 	bool isFindingDepth = false;
 
-	// characters
-	map<GLchar, Character> Characters;
-	float x_score;
-	float y_score;
-	float x_timer;
-	float y_timer;
-	float scale;
-	void initializeCharacters();
-
 	Renderer();
 
 public:
@@ -55,6 +41,7 @@ public:
 
 	// draw functions
 	void clear() const;
+	void drawCube(VertexArray& va, Shader& shader, glm::mat4 view, glm::mat4 projection, glm::vec3 lightPos, glm::vec3 cameraPos, Texture& texture);
 	void drawAxes(VertexArray& va, Shader& shader, glm::mat4 view, glm::mat4 projection);
 	void drawLightingSource(VertexArray& va, Shader& shader, glm::mat4 view, glm::mat4 projection, glm::vec3 lightPos);
 	void drawObject(VertexArray& va, Shader& shader, glm::mat4 view, glm::mat4 projection, glm::vec3 lightPos, glm::vec3 cameraPos, Texture& texture, glm::mat4 modelRotMat, vector<glm::mat4> modelTransMat, float scaleFactor, glm::vec3 displacement);
