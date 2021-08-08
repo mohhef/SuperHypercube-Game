@@ -56,6 +56,7 @@ Camera* camera = NULL;
 // function calls
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
 GLFWwindow* initializeWindow();
+
 void resetTransMat();
 void resetRotMat(bool randomRot= false);
 void resetModel(bool randomRot=false);
@@ -86,13 +87,14 @@ int main(int argc, char* argv[])
 	for (auto &model : models) {
 		createModel(model);
 	}
-	//TextRendering textRendering(WIDTH, HEIGHT);
 
 	// SoundEngine->setSoundVolume(0.1f);
 	// SoundEngine->play2D("audio/Kirby.mp3", true);
 
 	GLFWwindow* window = initializeWindow();
 	{
+		TextRendering textRendering(WIDTH, HEIGHT);
+
 		// Setup for models
 		VertexArray vA;
 		VertexBuffer vB(vertices, sizeof(vertices));
@@ -219,7 +221,6 @@ int main(int argc, char* argv[])
 			renderer.drawWall(vA, *shader, view, projection, lightPos, camera->position, brickTexture, modelRotMat, scaleFactor, displacement);
 			renderer.drawLightingSource(vaLightingSource, *lightingSourceShader, view, projection, lightPos);
 			renderer.drawAxes(vaAxes, *axesShader, view, projection);
-			renderer.drawCube(vA, *lightingShader, view, projection, lightPos, camera->position, metalTexture);
 
 			// Render floor with tiles or draw the mesh depending on if we are drawing with or without textures
 			renderer.drawFloor(vaFloor, *shader, view, projection, lightPos, camera->position, tileTexture);
@@ -232,7 +233,7 @@ int main(int argc, char* argv[])
 			glDisable(GL_DEPTH_TEST);
 			glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 			// Render text
-			//textRendering.RenderText(*textShader, "This is sample text", 25.0f, 25.0f, 1.0f, glm::vec3(0.5, 0.8f, 0.2f));
+			textRendering.RenderText(*textShader, std::to_string(score), 25.0f, 25.0f, 1.0f, glm::vec3(0.5, 0.8f, 0.2f));
 			glDisable(GL_BLEND);
 			glDisable(GL_CULL_FACE);
 			glEnable(GL_DEPTH_TEST);
@@ -272,6 +273,7 @@ GLFWwindow* initializeWindow()
 
 	// Create Window and rendering context using GLFW, resolution is WIDTH x HEIGHT
 	window = glfwCreateWindow(WIDTH, HEIGHT, "playground", NULL, NULL);
+
 	if (!window)
 	{
 		cerr << "Failed to create GLFW window" << endl;

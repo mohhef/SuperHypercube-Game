@@ -13,7 +13,9 @@
 #include FT_FREETYPE_H
 
 #include "Shader.h"
-
+#include "Renderer.h"
+#include "Camera.h"
+#include "Constants.h"
 
 
 class TextRendering
@@ -26,7 +28,7 @@ class TextRendering
     };
   
     std::map<char, Character> Characters;
-    GLuint VAO, VBO;
+    unsigned int VAO, VBO;
     int SCR_W, SCR_H;
 
 public:
@@ -42,7 +44,7 @@ public:
 
         // Load font as face
         FT_Face face;
-        if (FT_New_Face(ft, "..\\fonts\\ARIAL.TTF", 0, &face))
+        if (FT_New_Face(ft,"./fonts/Antonio-Regular.ttf", 0, &face))
             std::cout << "ERROR::FREETYPE: Failed to load font" << std::endl;
 
         // Set size to load glyphs as
