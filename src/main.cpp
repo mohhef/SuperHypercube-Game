@@ -133,7 +133,6 @@ int main(int argc, char* argv[])
 		Shader* shader = new Shader("vertex_fragment.shader");
 		Shader* axesShader = new Shader("axes.shader");
 		Shader* lightingSourceShader = new Shader("lightingSource.shader");
-		Shader* lightingShader = new Shader("lighting.shader");
 		Shader* depthShader = new Shader("depthMap.shader");
 		Shader* textShader = new Shader("text.shader");
 
