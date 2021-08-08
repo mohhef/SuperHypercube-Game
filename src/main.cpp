@@ -129,7 +129,7 @@ int main(int argc, char* argv[])
 		VertexBuffer vbText(sizeof(float) * 6 * 4);
 		VertexBufferLayout layoutText;
 		layoutText.push<float>(4);
-		vaText.addBuffer(vbFloor, layoutText);
+		vaText.addBuffer(vbText, layoutText);
 
 		// Create shader instances
 		Shader* shader = new Shader("vertex_fragment.shader");
@@ -149,9 +149,8 @@ int main(int argc, char* argv[])
 		// Renddering setup
 		Renderer& renderer = Renderer::getInstance();
 		glEnable(GL_DEPTH_TEST);
-		glEnable(GL_BLEND);
-		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 		glDepthFunc(GL_LESS);
+		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
 		// Create camera instance
 		// Position: behind model, along Z-axis.
@@ -210,13 +209,15 @@ int main(int argc, char* argv[])
 			renderer.drawWall(vA, *shader, view, projection, lightPos, camera->position, brickTexture, modelRotMat, scaleFactor, displacement);
 			renderer.drawLightingSource(vaLightingSource, *lightingSourceShader, view, projection, lightPos);
 			renderer.drawAxes(vaAxes, *axesShader, view, projection);
-
-			renderer.drawScore(vaText, vbText, *textShader, score);
 			
-			// draw the floor with tiles or draw the mesh depending on if we are drawing with or without textures
+			// Render floor with tiles or draw the mesh depending on if we are drawing with or without textures
 			renderer.drawFloor(vaFloor, *shader, view, projection, lightPos, camera->position, tileTexture);
 			
+			// Render light source
 			renderer.drawLightingSource(vaLightingSource, *lightingSourceShader, view, projection, lightPos);
+			
+			// Render text
+			renderer.drawScore(vaText, vbText, *textShader, score);
 
 			// End frame
 			glfwSwapBuffers(window);

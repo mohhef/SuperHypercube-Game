@@ -2,6 +2,7 @@
 #include <ft2build.h>
 #include FT_FREETYPE_H
 #include <cmath>
+#include <string>
 #include "Renderer.h"
 #include "Constants.h"
 
@@ -312,7 +313,7 @@ void Renderer::initializeCharacters()
 	}
 
 	// Get path to font
-	string font_path = "./fonts/OpenSans-Regular.ttf";
+	string font_path = "./fonts/Antonio-Regular.ttf";
 
 	// Load font as face
 	FT_Face face;
@@ -370,19 +371,15 @@ void Renderer::initializeCharacters()
 void Renderer::drawScore(VertexArray& va, VertexBuffer& vb, Shader& shader, int score)
 {
 	// bind vertex array and shader
-	va.bind();
 	shader.bind();
-	glActiveTexture(GL_TEXTURE0);
-
-	// create and set projection matrix
-	glm::mat4 projection = glm::ortho(0.0f, (float) WIDTH, 0.0f, (float) HEIGHT);
+	glm::mat4 projection = glm::ortho(0.0f, (float)WIDTH, 0.0f, (float)HEIGHT);
 	shader.setUniform4Mat("projection", projection);
-
-	// set text color and activate texture
 	shader.setUniform3Vec("color", glm::vec3(1.0f, 1.0f, 1.0f));
+	glActiveTexture(GL_TEXTURE0);
+	va.bind();
 	
 	// set score text
-	string text = "Score: 5";
+	string text = "Score: " + to_string(score);
 
 	// initialize x and y coordinates
 	float x = x_score;
