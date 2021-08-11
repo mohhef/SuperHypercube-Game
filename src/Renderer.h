@@ -15,12 +15,7 @@
 void glClearError();
 bool glLogCall(const char* function, const char* file, int line);
 
-struct Character {
-	unsigned int id; // texture id
-	glm::ivec2   size;      
-	glm::ivec2   bearing;   // offset from baseline
-	unsigned int advance;   // offset to next character
-};
+
 
 class Renderer
 {
@@ -33,15 +28,6 @@ private:
 	glm::mat4 rotationMatrix = glm::mat4(1.0f);
 	glm::vec3 centerOfMass;
 	bool isFindingDepth = false;
-
-	// characters
-	map<GLchar, Character> Characters;
-	float x_score;
-	float y_score;
-	float x_timer;
-	float y_timer;
-	float scale;
-	void initializeCharacters();
 
 	Renderer();
 

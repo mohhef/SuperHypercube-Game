@@ -146,7 +146,6 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <None Include="axes.shader" />
-    <None Include="custom_material.shader" />
     <None Include="depthMap.shader" />
     <None Include="lighting.shader" />
     <None Include="lightingSource.shader" />
@@ -164,6 +163,7 @@
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Renderer.cpp" />
     <ClCompile Include="Shader.cpp" />
+    <ClCompile Include="TextRendering.cpp" />
     <ClCompile Include="Texture.cpp" />
     <ClCompile Include="VertexArray.cpp" />
     <ClCompile Include="VertexBuffer.cpp" />
@@ -173,6 +173,7 @@
     <ClInclude Include="Camera.h" />
     <ClInclude Include="Constants.h" />
     <ClInclude Include="DepthMapper.h" />
+    <ClInclude Include="TextRendering.h" />
     <ClInclude Include="Renderer.h" />
     <ClInclude Include="Shader.h" />
     <ClInclude Include="stb_image.h" />
