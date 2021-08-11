@@ -33,7 +33,8 @@
 
 using namespace irrklang;
 using namespace std;
-
+// Rotation control
+bool rotatable = true;
 // Modified throughout run and to reset between runs.
 // Possibly bound to a single model (modelIndex)
 vector<glm::mat4> modelTransMat;
@@ -303,20 +304,42 @@ bool isFit()
 	return true;
 }
 
+int scoreMultiplier = 1;
+int multiplierCounter = 0;
 //update the displacement of the object
 void updateDisplacement(float currentFrame) {
 	//update z displacement
 	displacement.z = currentFrame * -1 * displacementSpeed;
+	// rotation disabled when contact with wall
+	if (displacement.z <= -18) {
+		rotatable = false;
+	}
 	//if passes the wall reset
 	if (displacement.z < -30) {
 		//if the object fits in wall, increment score
-		if (isFit()) 
+		if (isFit())
 		{
-			score += 1;
-			
-			// NOTE: CURRENTLY PRINTING HERE TO SHOW YOU THAT IT WORKS
-			cout << score << endl;
+			score += 1 * scoreMultiplier;
+			multiplierCounter++;
 		}
+		else {
+			multiplierCounter = 0;
+			// reduce multipler to half
+			if(scoreMultiplier > 1)scoreMultiplier = scoreMultiplier / 2;
+		}
+		// update multiplier if 2 fit in a line
+		if (multiplierCounter == 2) {
+			scoreMultiplier += 1;
+			multiplierCounter = 0;
+		}
+		// NOTE: CURRENTLY PRINTING HERE TO SHOW YOU THAT IT WORKS
+		cout << "score: " << endl;
+		cout << score << endl;
+		cout << "multiplier: " << endl;
+		cout << scoreMultiplier << endl;
+		cout << "multiplierCounter: " << endl;
+		cout << multiplierCounter << endl;
+
 		modelIndex = (modelIndex+1) % models.size();
 		Renderer::getInstance().setRenderIndex(modelIndex);
 		
@@ -324,6 +347,8 @@ void updateDisplacement(float currentFrame) {
 		glfwSetTime(0);
 		displacement.z = 0;
 		displacementSpeed = 1;
+		
+		rotatable = true;
 		
 		resetModel();
 		randomRotation();
@@ -368,7 +393,7 @@ void processInput(GLFWwindow* window, int key, int scancode, int action, int mod
 	// Closes window
 	if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
 		glfwSetWindowShouldClose(window, true);
-	
+
 	// Camera rotation around world axis (UP/DOWN/LEFT/RIGHT)
 	if (glfwGetKey(window, GLFW_KEY_UP) == GLFW_PRESS)
 		camera->processMovement(KEY::UP, deltaTime);
@@ -399,30 +424,31 @@ void processInput(GLFWwindow* window, int key, int scancode, int action, int mod
 	if (mode == GLFW_MOD_SHIFT) {
 		displacementSpeed *= 1.5f;
 	}
-
-	if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
-	{
-		glm::mat4 model = glm::mat4(1.0f);
-		model = glm::rotate(model, glm::radians(-90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
-		modelRotMat= model * modelRotMat;
-	}
-	if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
-	{
-		glm::mat4 model = glm::mat4(1.0f);
-		model = glm::rotate(model, glm::radians(90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
-		modelRotMat = model * modelRotMat;
-	}
-	if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
-	{
-		glm::mat4 model = glm::mat4(1.0f);
-		model = glm::rotate(model, glm::radians(90.0f), glm::vec3(0.0f, 1.0f, 0.0f));
-		modelRotMat = model * modelRotMat;
-	}
-	if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
-	{
-		glm::mat4 model = glm::mat4(1.0f);
-		model = glm::rotate(model, glm::radians(-90.0f), glm::vec3(0.0f, 1.0f, 0.0f));
-		modelRotMat = model * modelRotMat;
+	if (rotatable) {
+		if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
+		{
+			glm::mat4 model = glm::mat4(1.0f);
+			model = glm::rotate(model, glm::radians(-90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
+			modelRotMat = model * modelRotMat;
+		}
+		if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
+		{
+			glm::mat4 model = glm::mat4(1.0f);
+			model = glm::rotate(model, glm::radians(90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
+			modelRotMat = model * modelRotMat;
+		}
+		if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
+		{
+			glm::mat4 model = glm::mat4(1.0f);
+			model = glm::rotate(model, glm::radians(90.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+			modelRotMat = model * modelRotMat;
+		}
+		if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
+		{
+			glm::mat4 model = glm::mat4(1.0f);
+			model = glm::rotate(model, glm::radians(-90.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+			modelRotMat = model * modelRotMat;
+		}
 	}
 	if (key == GLFW_KEY_Q)
 	{
