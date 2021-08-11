@@ -51,6 +51,7 @@ bool shadows = true;
 
 // Text
 int score = 0;
+int numCubes = 0;
 clock_t timer;
 
 // Sound
@@ -75,6 +76,7 @@ void createModel(vector<vector<int>> model);
 void shuffleModel(vector<vector<int>> model);
 void randomRotation();
 void updateDisplacement(float currentFrame);
+void updateNumberOfCubes();
 int getTotalCubes(vector <vector<int>> model);
 bool isFit();
 void resetScoreAndTimer();
@@ -173,6 +175,8 @@ int main(int argc, char* argv[])
 		glfwSetKeyCallback(window, processInput);
 		glfwSetCursorPosCallback(window, processMouse);
 
+		updateNumberOfCubes();
+
 		// Load texture ids
 		Texture brickTexture("brick.jpg");
 		Texture tileTexture("tiles.jpg");
@@ -240,7 +244,14 @@ int main(int argc, char* argv[])
 				textRendering.RenderText(*textShader, "Time: " + to_string(minutes) + ":0" + to_string(seconds), 800.0f, 700.0f, 0.75f, glm::vec3(0.5, 0.8f, 0.2f));
 			else
 				textRendering.RenderText(*textShader, "Time: " + to_string(minutes) + ":" + to_string(seconds), 800.0f, 700.0f, 0.75f, glm::vec3(0.5, 0.8f, 0.2f));
+<<<<<<< HEAD
 			textRendering.disable();
+=======
+			textRendering.RenderText(*textShader, "Number of cubes in cluster : " + to_string(numCubes), 50.0f, 650.0f, 0.75f, glm::vec3(0.5, 0.8f, 0.2f));
+			glDisable(GL_BLEND);
+			glDisable(GL_CULL_FACE);
+			glEnable(GL_DEPTH_TEST);
+>>>>>>> 4d247e06c49e404925304255c04c51b54074b3d4
 
 			// End frame
 			glfwSwapBuffers(window);
@@ -351,7 +362,14 @@ void updateDisplacement(float currentFrame)
 		
 		resetModel();
 		randomRotation();
+		updateNumberOfCubes();
 	}
+}
+
+// Update the number of cubes in cluster based on current model
+void updateNumberOfCubes()
+{
+	numCubes = getTotalCubes(models.at(modelIndex));
 }
 
 // Reset translation matrix for each model's cube.
