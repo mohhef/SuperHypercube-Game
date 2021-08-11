@@ -32,9 +32,7 @@ void Renderer::clear() const
 // Renderer singleton instance
 Renderer Renderer::s_Instance;
 
-Renderer::Renderer() 
-{
-};
+Renderer::Renderer() {};
 
 // Getting singleton instance
 Renderer& Renderer::getInstance()
