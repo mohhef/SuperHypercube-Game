@@ -153,3 +153,18 @@ void TextRendering::RenderText(Shader& shader, std::string text, GLfloat x, GLfl
     glBindVertexArray(0);
     glBindTexture(GL_TEXTURE_2D, 0);
 }
+
+void TextRendering::enable()
+{
+    glEnable(GL_BLEND);
+    glEnable(GL_CULL_FACE);
+    glDisable(GL_DEPTH_TEST);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+}
+
+void TextRendering::disable()
+{
+    glDisable(GL_BLEND);
+    glDisable(GL_CULL_FACE);
+    glEnable(GL_DEPTH_TEST);
+}

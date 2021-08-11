@@ -29,4 +29,6 @@ private:
 public:
     TextRendering(int SCR_W, int SCR_H);
     void RenderText(Shader& shader, std::string text, GLfloat x, GLfloat y, GLfloat scale, glm::vec3 color);
+    void enable();
+    void disable();
 };

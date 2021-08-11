@@ -154,15 +154,7 @@ int main(int argc, char* argv[])
 		DepthMapper depthMapper;
 
 		// Renddering setup
-		glEnable(GL_BLEND);
-		glEnable(GL_CULL_FACE);
-		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-		glDisable(GL_DEPTH_TEST);
-
 		Renderer& renderer = Renderer::getInstance();
-
-		glDisable(GL_BLEND);
-		glDisable(GL_CULL_FACE);
 		glEnable(GL_DEPTH_TEST);
 		glDepthFunc(GL_LESS);
 
@@ -242,18 +234,13 @@ int main(int argc, char* argv[])
 			int seconds = totalSeconds % 60;
 
 			// Render text
-			glEnable(GL_BLEND);
-			glEnable(GL_CULL_FACE);
-			glDisable(GL_DEPTH_TEST);
-			glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+			textRendering.enable();
 			textRendering.RenderText(*textShader, "Score: " + to_string(score), 50.0f, 700.0f, 0.75f, glm::vec3(0.5, 0.8f, 0.2f));
 			if (seconds < 10)
 				textRendering.RenderText(*textShader, "Time: " + to_string(minutes) + ":0" + to_string(seconds), 800.0f, 700.0f, 0.75f, glm::vec3(0.5, 0.8f, 0.2f));
 			else
 				textRendering.RenderText(*textShader, "Time: " + to_string(minutes) + ":" + to_string(seconds), 800.0f, 700.0f, 0.75f, glm::vec3(0.5, 0.8f, 0.2f));
-			glDisable(GL_BLEND);
-			glDisable(GL_CULL_FACE);
-			glEnable(GL_DEPTH_TEST);
+			textRendering.disable();
 
 			// End frame
 			glfwSwapBuffers(window);
