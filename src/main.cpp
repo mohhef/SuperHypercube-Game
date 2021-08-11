@@ -343,24 +343,22 @@ bool isFit()
 }
 
 //update the displacement of the object
-void updateDisplacement(float currentFrame) {
-	//update z displacement
+void updateDisplacement(float currentFrame) 
+{
+	// Update z displacement
 	displacement.z = currentFrame * -1 * displacementSpeed;
-	//if passes the wall reset
+
+	// Reset upon wall pass
 	if (displacement.z < -30) {
-		//if the object fits in wall, increment score
+
+		// Increment if model fits through hole
 		if (isFit()) 
-		{
 			score += 1;
-			
-			// NOTE: CURRENTLY PRINTING HERE TO SHOW YOU THAT IT WORKS
-			cout << score << endl;
-		}
+
 		modelIndex = (modelIndex+1) % models.size();
 		Renderer::getInstance().setRenderIndex(modelIndex);
 		
-		//resset time, z dispalcement and speed
-		glfwSetTime(0);
+		// Z displacement and speed
 		displacement.z = 0;
 		displacementSpeed = 1;
 		
