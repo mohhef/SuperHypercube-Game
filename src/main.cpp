@@ -14,6 +14,7 @@
 #include <iostream>
 #include <stdlib.h>
 #include <time.h>
+#include <ctime>
 
 #include <iostream>
 #include <string>
@@ -48,8 +49,9 @@ vector<vector<glm::vec3>> wallCubePositions;
 // Shadows
 bool shadows = true;
 
-// Score
+// Text
 int score = 0;
+clock_t timer;
 
 // Sound
 ISoundEngine* SoundEngine = createIrrKlangDevice();
@@ -75,6 +77,7 @@ void randomRotation();
 void updateDisplacement(float currentFrame);
 int getTotalCubes(vector <vector<int>> model);
 bool isFit();
+void resetScoreAndTimer();
 
 // Window size
 int HEIGHT = 768;
@@ -84,7 +87,7 @@ int WIDTH = 1024;
 float lastX = WIDTH / 2;
 float lastY = HEIGHT / 2;
 
-// main function
+// Main function
 int main(int argc, char* argv[])
 {
 	// Create models
@@ -166,7 +169,7 @@ int main(int argc, char* argv[])
 		// Create camera instance
 		// Position: behind model, along Z-axis.
 		// Target: world origin (initially)
-		camera = new Camera(glm::vec3(modelPosition.at(modelIndex).x +30, modelPosition.at(modelIndex).y +40, 100.0f),
+		camera = new Camera(glm::vec3(modelPosition.at(modelIndex).x + 30, modelPosition.at(modelIndex).y + 40, 100.0f),
 			glm::vec3(0.0f, 1.0f, 0.0f),
 			glm::vec3(0.0f, 0.0f, 0.0f));
 
@@ -178,10 +181,13 @@ int main(int argc, char* argv[])
 		glfwSetKeyCallback(window, processInput);
 		glfwSetCursorPosCallback(window, processMouse);
 
-		// load texture ids
+		// Load texture ids
 		Texture brickTexture("brick.jpg");
 		Texture tileTexture("tiles.jpg");
 		Texture metalTexture("metal.jpg");
+
+		// Set timer
+		timer = clock();
 
 		// Entering main loop
 		while (!glfwWindowShouldClose(window))
@@ -199,14 +205,14 @@ int main(int argc, char* argv[])
 			glm::mat4 projection = glm::perspective(glm::radians(camera->zoom), (float)WIDTH / (float)HEIGHT, 0.1f, 200.0f);
 			glm::mat4 view = camera->getViewMatrix();
 
-			// used to afterwards draw the shadows
+			// Shadow mapping
 			depthMapper.Draw(depthShader, lightPos, [&]() {
 				// Render objects to be drawn by the depth mapper object
 				renderer.drawObject(vA, *depthShader, view, projection, lightPos, camera->position, metalTexture, modelRotMat, modelTransMat, scaleFactor, displacement);
 				renderer.drawWall(vA, *depthShader, view, projection, lightPos, camera->position, brickTexture, modelRotMat, scaleFactor, displacement);
 				});
 
-			// bind universal attributes necessary for drawing all the objects on the map
+			// Bind universal attributes necessary for drawing all the objects on the map
 			shader->bind();
 			shader->setUniform3Vec("lightPosition", lightPos);
 			shader->setUniform3Vec("viewPos", camera->position);
@@ -227,12 +233,24 @@ int main(int argc, char* argv[])
 			// Render light source
 			renderer.drawLightingSource(vaLightingSource, *lightingSourceShader, view, projection, lightPos);
 			
+			// Update timer
+			int totalSeconds = 120 - (int) ((clock() - timer) / (double) CLOCKS_PER_SEC);
+			if (totalSeconds < 0)
+				resetScoreAndTimer();
+
+			int minutes = totalSeconds / 60;
+			int seconds = totalSeconds % 60;
+
 			// Render text
 			glEnable(GL_BLEND);
 			glEnable(GL_CULL_FACE);
 			glDisable(GL_DEPTH_TEST);
 			glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-			textRendering.RenderText(*textShader, "Score: " + std::to_string(score), 25.0f, 25.0f, 1.0f, glm::vec3(0.5, 0.8f, 0.2f));
+			textRendering.RenderText(*textShader, "Score: " + to_string(score), 50.0f, 700.0f, 0.75f, glm::vec3(0.5, 0.8f, 0.2f));
+			if (seconds < 10)
+				textRendering.RenderText(*textShader, "Time: " + to_string(minutes) + ":0" + to_string(seconds), 800.0f, 700.0f, 0.75f, glm::vec3(0.5, 0.8f, 0.2f));
+			else
+				textRendering.RenderText(*textShader, "Time: " + to_string(minutes) + ":" + to_string(seconds), 800.0f, 700.0f, 0.75f, glm::vec3(0.5, 0.8f, 0.2f));
 			glDisable(GL_BLEND);
 			glDisable(GL_CULL_FACE);
 			glEnable(GL_DEPTH_TEST);
@@ -634,4 +652,11 @@ int getTotalCubes(vector<vector<int>> model) {
 		}
 	}
 	return total;
+}
+
+// Reset score and timer when time ends
+void resetScoreAndTimer()
+{
+	score = 0;
+	timer = clock();
 }
