@@ -35,28 +35,35 @@
 using namespace irrklang;
 using namespace std;
 
-// Modified throughout run and to reset between runs.
-// Possibly bound to a single model (modelIndex)
+// Models
 vector<glm::mat4> modelTransMat;
 glm::mat4 modelRotMat;
 glm::vec3 displacement;
 float displacementSpeed = 1.0;
 float scaleFactor = 1.0f;
 bool textureStatus = true;
+vector<vector<glm::vec3>> modelCubePositions;
+vector<vector<glm::vec3>> wallCubePositions;
+
+// Shadows
 bool shadows = true;
+
+// Score
 int score = 0;
+
+// Sound
 ISoundEngine* SoundEngine = createIrrKlangDevice();
 
 // Cursor positions for mouse inputs
 float lastMouseX;
 float lastMouseY;
 
+// Camera
 Camera* camera = NULL;
 
-// function calls
+// Function calls
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
 GLFWwindow* initializeWindow();
-
 void resetTransMat();
 void resetRotMat(bool randomRot= false);
 void resetModel(bool randomRot=false);
@@ -69,9 +76,6 @@ void updateDisplacement(float currentFrame);
 int getTotalCubes(vector <vector<int>> model);
 bool isFit();
 
-vector<vector<glm::vec3>> modelCubePositions;
-vector<vector<glm::vec3>> wallCubePositions;
-
 // Window size
 int HEIGHT = 768;
 int WIDTH = 1024;
@@ -83,7 +87,7 @@ float lastY = HEIGHT / 2;
 // main function
 int main(int argc, char* argv[])
 {
-	//create models
+	// Create models
 	for (auto &model : models) {
 		createModel(model);
 	}
@@ -143,7 +147,6 @@ int main(int argc, char* argv[])
 		textShader->bind();
 		textShader->setUniform1i("text", 2);
 
-
 		// Setup for shadows
 		DepthMapper depthMapper;
 
@@ -153,14 +156,12 @@ int main(int argc, char* argv[])
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 		glDisable(GL_DEPTH_TEST);
 
-
 		Renderer& renderer = Renderer::getInstance();
 
 		glDisable(GL_BLEND);
 		glDisable(GL_CULL_FACE);
 		glEnable(GL_DEPTH_TEST);
 		glDepthFunc(GL_LESS);
-
 
 		// Create camera instance
 		// Position: behind model, along Z-axis.
@@ -181,7 +182,6 @@ int main(int argc, char* argv[])
 		Texture brickTexture("brick.jpg");
 		Texture tileTexture("tiles.jpg");
 		Texture metalTexture("metal.jpg");
-
 
 		// Entering main loop
 		while (!glfwWindowShouldClose(window))
@@ -227,12 +227,12 @@ int main(int argc, char* argv[])
 			// Render light source
 			renderer.drawLightingSource(vaLightingSource, *lightingSourceShader, view, projection, lightPos);
 			
+			// Render text
 			glEnable(GL_BLEND);
 			glEnable(GL_CULL_FACE);
 			glDisable(GL_DEPTH_TEST);
 			glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-			// Render text
-			textRendering.RenderText(*textShader, std::to_string(score), 25.0f, 25.0f, 1.0f, glm::vec3(0.5, 0.8f, 0.2f));
+			textRendering.RenderText(*textShader, "Score: " + std::to_string(score), 25.0f, 25.0f, 1.0f, glm::vec3(0.5, 0.8f, 0.2f));
 			glDisable(GL_BLEND);
 			glDisable(GL_CULL_FACE);
 			glEnable(GL_DEPTH_TEST);
@@ -250,6 +250,7 @@ int main(int argc, char* argv[])
 	return 0;
 }
 
+// Callback for window size
 void framebuffer_size_callback(GLFWwindow* window, int width, int height)
 {
 	glViewport(0, 0, width, height);
@@ -257,6 +258,7 @@ void framebuffer_size_callback(GLFWwindow* window, int width, int height)
 	WIDTH = width;
 }
 
+// Initialize window function
 GLFWwindow* initializeWindow()
 {
 	GLFWwindow* window;
@@ -532,11 +534,13 @@ void processMouse(GLFWwindow* window, double xpos, double  ypos)
 	}
 }
 
+// Create models for each object
 void createModel(vector<vector<int>> model) {
 	int rows = model.size();
 	vector<glm::vec3> wallPos;
 	vector<glm::vec3> modelPos;
 	float z = -10.0f;
+
 	//start from bottom left
 	for (int i = rows-1; i > -1; i--) {
 		int cols = model.at(i).size();
@@ -562,6 +566,7 @@ void createModel(vector<vector<int>> model) {
 	wallCubePositions.push_back(wallPos);
 };
 
+// Shuffe cubes for models
 void shuffleModel(vector<vector<int>> model) {
 	srand(time(0));
 	//Max number of cubes
@@ -603,7 +608,7 @@ void shuffleModel(vector<vector<int>> model) {
 	modelCubePositions.at(modelIndex) = modelPos;
 }
 
-//rotate a model randomly when shuffling
+// Rotate a model randomly when shuffling
 void randomRotation() {
 	glm::mat4 randRotMat = glm::mat4(1.0f);
 	//random rotation angle from -100 -> 100, multiple of 10
@@ -620,7 +625,7 @@ void randomRotation() {
 	modelRotMat = randRotMat;
 }
 
-//count the total number of cubes in a model
+// Count the total number of cubes in a model
 int getTotalCubes(vector<vector<int>> model) {
 	int total = 0;
 	for (auto& row : model) {
