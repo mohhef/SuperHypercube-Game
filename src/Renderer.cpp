@@ -1,4 +1,8 @@
 #include <iostream>
+#include <ft2build.h>
+#include FT_FREETYPE_H
+#include <cmath>
+#include <string>
 #include "Renderer.h"
 #include "Constants.h"
 
@@ -177,7 +181,7 @@ void Renderer::drawObject(VertexArray& va, Shader& shader, glm::mat4 view, glm::
 	
 }
 
-//Draw the lighting object
+// Draw the lighting object
 void Renderer::drawLightingSource(VertexArray& va, Shader& shader, glm::mat4 view, glm::mat4 projection, glm::vec3 lightPos) {
 	
 	// Binding vertex array and shader
@@ -288,3 +292,4 @@ void Renderer::updateCenterOfMass()
 	centerOfMass.y /= numOfCubes.y;
 	centerOfMass.z /= numOfCubes.z;
 }
+

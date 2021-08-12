@@ -4,15 +4,13 @@
 
 using namespace std;
 
-static const double pi = 3.14159265358979323846;
-
 static float deltaTime = 0.0f; // Time increment between frame buffering
 static float lastFrame = 0.0f; // Time at which last frame was buffered
 
-static float wallZPos = -10.0f; // wall offset from origin
-static int modelIndex = 0; // initial index to display the model
+static float wallZPos = -10.0f; // Wall offset from origin
+static int modelIndex = 0; // Initial index to display the model
 
-// External window size and cursor position paramters
+// External window size and cursor position parameters
 // Defined in main.cpp
 extern int HEIGHT;
 extern int WIDTH;
@@ -21,7 +19,11 @@ extern float lastY;
 
 static bool initialMousePos = true;
 
-//cube verticies used for line rendering
+// External vectors for cube positions for both wall and model
+extern vector<vector<glm::vec3>> modelCubePositions;
+extern vector<vector<glm::vec3>> wallCubePositions;
+
+// Cube verticies used for line rendering
 static float cubeVertices[] =
 {
 	-0.5f, 0.5f, 0.5f,
@@ -55,8 +57,8 @@ static float cubeVertices[] =
 	-0.5f, -0.5f, -0.5,
 };
 
-//cube verticies used for triangle rendering
-//Position(f,f,f) Normal(f,f,f) Texture(f,f)
+// Cube verticies used for triangle rendering
+// Position(f,f,f) Normal(f,f,f) Texture(f,f)
 static float vertices[] =
 {
 	-0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  0.0f,  0.0f,
@@ -123,54 +125,54 @@ static float axesVertices[] =
 
 // Vertices for a line which is used by the mesh
 // Position(f,f,f) Normal(f,f,f) 
-static float meshVertices[] = {
+static float meshVertices[] = 
+{
 	0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f,
 	1.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f,
 };
 
-static vector<vector<vector<int>>> models = {
+// Wall/Model design
+static vector<vector<vector<int>>> models = 
 {
-	{0, 0, 0, 0, 0},
-	{0, 0, 1, 2, 0},
-	{0, 1, 0, 2, 0},
-	{0, 3, 0, 0, 0},
-	{0, 0, 0, 0, 0},
-}
-, {
-	{0, 0, 0, 0, 0},
-	{0, 0, 1, 2, 0},
-	{0, 1, 1, 0, 0},
-	{0, 1, 2, 0, 0},
-	{0, 0, 0, 1, 0},
-	{0, 0, 0, 0, 0},
-},
-{
-	{0, 0, 0, 0, 0},
-	{0, 1, 1, 1, 0},
-	{0, 1, 0, 2, 0},
-	{0, 2, 0, 1, 0},
-	{0, 0, 0, 0, 0},
-},
-{
-	{0, 0, 0, 0, 0},
-	{0, 0, 1, 1, 0},
-	{0, 2, 0, -2, 0},
-	{0, 0, 2, 1, 0},
-	{0, 0, 0, 0, 0},
-},
-{
-	{0, 0, 0, 0, 0},
-	{0, 2, 1, 0, 0},
-	{0, 0, -1, -2, 0},
-	{0, 2, -1, 0, 0},
-	{0, 0, 0, 0, 0},
+	{
+		{0, 0, 0, 0, 0},
+		{0, 0, 1, 2, 0},
+		{0, 1, 0, 2, 0},
+		{0, 3, 0, 0, 0},
+		{0, 0, 0, 0, 0},
+	}, 
+	{
+		{0, 0, 0, 0, 0},
+		{0, 0, 1, 2, 0},
+		{0, 1, 1, 0, 0},
+		{0, 1, 2, 0, 0},
+		{0, 0, 0, 1, 0},
+		{0, 0, 0, 0, 0},
+	},
+	{
+		{0, 0, 0, 0, 0},
+		{0, 1, 1, 1, 0},
+		{0, 1, 0, 2, 0},
+		{0, 2, 0, 1, 0},
+		{0, 0, 0, 0, 0},
+	},
+	{
+		{0, 0, 0, 0, 0},
+		{0, 0, 1, 1, 0},
+		{0, 2, 0, -2, 0},
+		{0, 0, 2, 1, 0},
+		{0, 0, 0, 0, 0},
+	},
+	{
+		{0, 0, 0, 0, 0},
+		{0, 2, 1, 0, 0},
+		{0, 0, -1, -2, 0},
+		{0, 2, -1, 0, 0},
+		{0, 0, 0, 0, 0},
 	}
 };
 
-extern vector<vector<glm::vec3>> modelCubePositions;
-extern vector<vector<glm::vec3>> wallCubePositions;
-
-// initial configuration scale of model cubes
+// Initial configuration scale of model cubes
 static vector<glm::mat4> modelScale
 {
 	glm::scale(glm::mat4(1.0f), glm::vec3(2.0f, 2.0f, 2.0f)),
@@ -180,7 +182,7 @@ static vector<glm::mat4> modelScale
 	glm::scale(glm::mat4(1.0f), glm::vec3(2.0f, 2.0f, 2.0f))
 };
 
-// initial configuration position of model (to align with hole)
+// Initial configuration position of model (to align with hole)
 static vector<glm::vec3> modelPosition =
 {
 	glm::vec3(0.0f, 1.0f, 10.0f),

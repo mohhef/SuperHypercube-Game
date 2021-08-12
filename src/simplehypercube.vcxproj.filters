@@ -18,9 +18,6 @@
     <None Include="axes.shader">
       <Filter>Resource Files</Filter>
     </None>
-    <None Include="custom_material.shader">
-      <Filter>Resource Files</Filter>
-    </None>
     <None Include="depthMap.shader">
       <Filter>Resource Files</Filter>
     </None>
@@ -31,6 +28,9 @@
       <Filter>Resource Files</Filter>
     </None>
     <None Include="vertex_fragment.shader">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="text.shader">
       <Filter>Resource Files</Filter>
     </None>
   </ItemGroup>
@@ -73,6 +73,9 @@
     <ClCompile Include="VertexBufferLayout.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="TextRendering.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Camera.h">
@@ -103,6 +106,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="VertexBufferLayout.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="TextRendering.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
