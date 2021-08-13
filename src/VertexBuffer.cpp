@@ -9,14 +9,6 @@ VertexBuffer::VertexBuffer(const void* data, unsigned int size)
 	glBufferData(GL_ARRAY_BUFFER, size, data, GL_STATIC_DRAW);
 }
 
-// Vertex buffer constructor (dynamic)
-VertexBuffer::VertexBuffer(unsigned int size)
-{
-	glGenBuffers(1, &id);
-	glBindBuffer(GL_ARRAY_BUFFER, id);
-	glBufferData(GL_ARRAY_BUFFER, size, NULL, GL_DYNAMIC_DRAW);
-}
-
 // Vertex buffer destructor
 VertexBuffer::~VertexBuffer()
 {

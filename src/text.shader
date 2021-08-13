@@ -20,10 +20,10 @@ in vec2 textPos;
 out vec4 textColor;
 
 uniform sampler2D text;
-uniform vec3 color;
+uniform vec3 ourColor;
 
 void main()
 {
     vec4 result = vec4(1.0, 1.0, 1.0, texture(text, textPos).r);
-    textColor = vec4(color, 1.0) * result;
+    textColor = vec4(ourColor, 1.0) * result;
 }

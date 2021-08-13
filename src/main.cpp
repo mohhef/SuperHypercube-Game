@@ -14,6 +14,7 @@
 #include <iostream>
 #include <stdlib.h>
 #include <time.h>
+#include <ctime>
 
 #include <iostream>
 #include <string>
@@ -22,6 +23,7 @@
 #include "Camera.h"
 #include "Texture.h"
 #include "DepthMapper.h"
+#include "TextRendering.h"
 
 #include "VertexArray.h"
 #include "VertexBufferLayout.h"
@@ -33,6 +35,7 @@
 
 using namespace irrklang;
 using namespace std;
+
 // Rotation disabled when contact with wall
 bool rotatable = true;
 // Score multiplier variables
@@ -40,23 +43,35 @@ int scoreMultiplier = 1;
 int multiplierCounter = 0;
 // Modified throughout run and to reset between runs.
 // Possibly bound to a single model (modelIndex)
+// Models
 vector<glm::mat4> modelTransMat;
 glm::mat4 modelRotMat;
 glm::vec3 displacement;
 float displacementSpeed = 1.0;
 float scaleFactor = 1.0f;
 bool textureStatus = true;
+vector<vector<glm::vec3>> modelCubePositions;
+vector<vector<glm::vec3>> wallCubePositions;
+
+// Shadows
 bool shadows = true;
+
+// Text
 int score = 0;
+int numCubes = 0;
+clock_t timer;
+
+// Sound
 ISoundEngine* SoundEngine = createIrrKlangDevice();
 
 // Cursor positions for mouse inputs
 float lastMouseX;
 float lastMouseY;
 
+// Camera
 Camera* camera = NULL;
 
-// function calls
+// Function calls
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
 GLFWwindow* initializeWindow();
 void resetTransMat();
@@ -68,11 +83,10 @@ void createModel(vector<vector<int>> model);
 void shuffleModel(vector<vector<int>> model);
 void randomRotation();
 void updateDisplacement(float currentFrame);
+void updateNumberOfCubes();
 int getTotalCubes(vector <vector<int>> model);
 bool isFit();
-
-vector<vector<glm::vec3>> modelCubePositions;
-vector<vector<glm::vec3>> wallCubePositions;
+void resetScoreAndTimer();
 
 // Window size
 int HEIGHT = 768;
@@ -82,18 +96,21 @@ int WIDTH = 1024;
 float lastX = WIDTH / 2;
 float lastY = HEIGHT / 2;
 
-// main function
+// Main function
 int main(int argc, char* argv[])
 {
-	//create models
+	// Create models
 	for (auto &model : models) {
 		createModel(model);
 	}
+
 	// SoundEngine->setSoundVolume(0.1f);
 	// SoundEngine->play2D("audio/Kirby.mp3", true);
 
 	GLFWwindow* window = initializeWindow();
 	{
+		TextRendering textRendering(WIDTH, HEIGHT);
+
 		// Setup for models
 		VertexArray vA;
 		VertexBuffer vB(vertices, sizeof(vertices));
@@ -128,13 +145,6 @@ int main(int argc, char* argv[])
 		layoutFloor.push<float>(2);
 		vaFloor.addBuffer(vbFloor, layoutFloor);
 
-		// Setup for text
-		VertexArray vaText;
-		VertexBuffer vbText(sizeof(float) * 6 * 4);
-		VertexBufferLayout layoutText;
-		layoutText.push<float>(4);
-		vaText.addBuffer(vbText, layoutText);
-
 		// Create shader instances
 		Shader* shader = new Shader("vertex_fragment.shader");
 		Shader* axesShader = new Shader("axes.shader");
@@ -146,6 +156,8 @@ int main(int argc, char* argv[])
 		shader->bind();
 		shader->setUniform1i("textureObject", 0);
 		shader->setUniform1i("depthMap", 1);
+		textShader->bind();
+		textShader->setUniform1i("text", 2);
 
 		// Setup for shadows
 		DepthMapper depthMapper;
@@ -154,12 +166,11 @@ int main(int argc, char* argv[])
 		Renderer& renderer = Renderer::getInstance();
 		glEnable(GL_DEPTH_TEST);
 		glDepthFunc(GL_LESS);
-		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
 		// Create camera instance
 		// Position: behind model, along Z-axis.
 		// Target: world origin (initially)
-		camera = new Camera(glm::vec3(modelPosition.at(modelIndex).x +30, modelPosition.at(modelIndex).y +40, 100.0f),
+		camera = new Camera(glm::vec3(modelPosition.at(modelIndex).x + 30, modelPosition.at(modelIndex).y + 40, 100.0f),
 			glm::vec3(0.0f, 1.0f, 0.0f),
 			glm::vec3(0.0f, 0.0f, 0.0f));
 
@@ -171,11 +182,16 @@ int main(int argc, char* argv[])
 		glfwSetKeyCallback(window, processInput);
 		glfwSetCursorPosCallback(window, processMouse);
 
-		// load texture ids
+		updateNumberOfCubes();
+
+		// Load texture ids
 		Texture brickTexture("brick.jpg");
 		Texture tileTexture("tiles.jpg");
 		Texture metalTexture("metal.jpg");
-		
+
+		// Set timer
+		timer = clock();
+
 		// Entering main loop
 		while (!glfwWindowShouldClose(window))
 		{
@@ -192,14 +208,14 @@ int main(int argc, char* argv[])
 			glm::mat4 projection = glm::perspective(glm::radians(camera->zoom), (float)WIDTH / (float)HEIGHT, 0.1f, 200.0f);
 			glm::mat4 view = camera->getViewMatrix();
 
-			// used to afterwards draw the shadows
+			// Shadow mapping
 			depthMapper.Draw(depthShader, lightPos, [&]() {
 				// Render objects to be drawn by the depth mapper object
 				renderer.drawObject(vA, *depthShader, view, projection, lightPos, camera->position, metalTexture, modelRotMat, modelTransMat, scaleFactor, displacement);
 				renderer.drawWall(vA, *depthShader, view, projection, lightPos, camera->position, brickTexture, modelRotMat, scaleFactor, displacement);
 				});
 
-			// bind universal attributes necessary for drawing all the objects on the map
+			// Bind universal attributes necessary for drawing all the objects on the map
 			shader->bind();
 			shader->setUniform3Vec("lightPosition", lightPos);
 			shader->setUniform3Vec("viewPos", camera->position);
@@ -213,15 +229,30 @@ int main(int argc, char* argv[])
 			renderer.drawWall(vA, *shader, view, projection, lightPos, camera->position, brickTexture, modelRotMat, scaleFactor, displacement);
 			renderer.drawLightingSource(vaLightingSource, *lightingSourceShader, view, projection, lightPos);
 			renderer.drawAxes(vaAxes, *axesShader, view, projection);
-			
+
 			// Render floor with tiles or draw the mesh depending on if we are drawing with or without textures
 			renderer.drawFloor(vaFloor, *shader, view, projection, lightPos, camera->position, tileTexture);
 			
 			// Render light source
 			renderer.drawLightingSource(vaLightingSource, *lightingSourceShader, view, projection, lightPos);
 			
+			// Update timer
+			int totalSeconds = 120 - (int) ((clock() - timer) / (double) CLOCKS_PER_SEC);
+			if (totalSeconds < 0)
+				resetScoreAndTimer();
+
+			int minutes = totalSeconds / 60;
+			int seconds = totalSeconds % 60;
+
 			// Render text
-			renderer.drawScore(vaText, vbText, *textShader, score);
+			textRendering.enable();
+			textRendering.RenderText(*textShader, "Score: " + to_string(score), 50.0f, 700.0f, 0.75f, glm::vec3(0.5, 0.8f, 0.2f));
+			if (seconds < 10)
+				textRendering.RenderText(*textShader, "Time: " + to_string(minutes) + ":0" + to_string(seconds), 800.0f, 700.0f, 0.75f, glm::vec3(0.5, 0.8f, 0.2f));
+			else
+				textRendering.RenderText(*textShader, "Time: " + to_string(minutes) + ":" + to_string(seconds), 800.0f, 700.0f, 0.75f, glm::vec3(0.5, 0.8f, 0.2f));
+			textRendering.RenderText(*textShader, "Number of cubes in cluster : " + to_string(numCubes), 50.0f, 650.0f, 0.75f, glm::vec3(0.5, 0.8f, 0.2f));
+			textRendering.disable();
 
 			// End frame
 			glfwSwapBuffers(window);
@@ -236,6 +267,7 @@ int main(int argc, char* argv[])
 	return 0;
 }
 
+// Callback for window size
 void framebuffer_size_callback(GLFWwindow* window, int width, int height)
 {
 	glViewport(0, 0, width, height);
@@ -243,6 +275,7 @@ void framebuffer_size_callback(GLFWwindow* window, int width, int height)
 	WIDTH = width;
 }
 
+// Initialize window function
 GLFWwindow* initializeWindow()
 {
 	GLFWwindow* window;
@@ -258,6 +291,7 @@ GLFWwindow* initializeWindow()
 
 	// Create Window and rendering context using GLFW, resolution is WIDTH x HEIGHT
 	window = glfwCreateWindow(WIDTH, HEIGHT, "playground", NULL, NULL);
+
 	if (!window)
 	{
 		cerr << "Failed to create GLFW window" << endl;
@@ -308,9 +342,11 @@ bool isFit()
 }
 
 //update the displacement of the object
-void updateDisplacement(float currentFrame) {
-	//update z displacement
+void updateDisplacement(float currentFrame) 
+{
+	// Update z displacement
 	displacement.z = currentFrame * -1 * displacementSpeed;
+
 	// rotation disabled when contact with wall
 	if (displacement.z <= -18) {
 		rotatable = false;
@@ -344,8 +380,7 @@ void updateDisplacement(float currentFrame) {
 		modelIndex = (modelIndex+1) % models.size();
 		Renderer::getInstance().setRenderIndex(modelIndex);
 		
-		//resset time, z dispalcement and speed
-		glfwSetTime(0);
+		// Z displacement and speed
 		displacement.z = 0;
 		displacementSpeed = 1;
 		
@@ -353,7 +388,14 @@ void updateDisplacement(float currentFrame) {
 		
 		resetModel();
 		randomRotation();
+		updateNumberOfCubes();
 	}
+}
+
+// Update the number of cubes in cluster based on current model
+void updateNumberOfCubes()
+{
+	numCubes = getTotalCubes(models.at(modelIndex));
 }
 
 // Reset translation matrix for each model's cube.
@@ -540,11 +582,13 @@ void processMouse(GLFWwindow* window, double xpos, double  ypos)
 	}
 }
 
+// Create models for each object
 void createModel(vector<vector<int>> model) {
 	int rows = model.size();
 	vector<glm::vec3> wallPos;
 	vector<glm::vec3> modelPos;
 	float z = -10.0f;
+
 	//start from bottom left
 	for (int i = rows-1; i > -1; i--) {
 		int cols = model.at(i).size();
@@ -570,6 +614,7 @@ void createModel(vector<vector<int>> model) {
 	wallCubePositions.push_back(wallPos);
 };
 
+// Shuffe cubes for models
 void shuffleModel(vector<vector<int>> model) {
 	srand(time(0));
 	//Max number of cubes
@@ -611,7 +656,7 @@ void shuffleModel(vector<vector<int>> model) {
 	modelCubePositions.at(modelIndex) = modelPos;
 }
 
-//rotate a model randomly when shuffling
+// Rotate a model randomly when shuffling
 void randomRotation() {
 	glm::mat4 randRotMat = glm::mat4(1.0f);
 	//random rotation angle from -100 -> 100, multiple of 10
@@ -628,7 +673,7 @@ void randomRotation() {
 	modelRotMat = randRotMat;
 }
 
-//count the total number of cubes in a model
+// Count the total number of cubes in a model
 int getTotalCubes(vector<vector<int>> model) {
 	int total = 0;
 	for (auto& row : model) {
@@ -637,4 +682,11 @@ int getTotalCubes(vector<vector<int>> model) {
 		}
 	}
 	return total;
+}
+
+// Reset score and timer when time ends
+void resetScoreAndTimer()
+{
+	score = 0;
+	timer = clock();
 }
