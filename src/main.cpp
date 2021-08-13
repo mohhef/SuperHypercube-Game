@@ -14,6 +14,8 @@
 #include <iostream>
 #include <stdlib.h>
 #include <time.h>
+#include "Model.h"
+#include <filesystem>
 
 #include <iostream>
 #include <string>
@@ -51,6 +53,8 @@ float lastMouseX;
 float lastMouseY;
 
 Camera* camera = NULL;
+
+Model ourModel("ExternalModels/backpack/backpack.obj");
 
 // function calls
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
