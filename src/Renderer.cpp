@@ -310,7 +310,6 @@ float Renderer::calculateFurthestZ(glm::mat4 modelRotMat, vector<glm::mat4> mode
 			* glm::translate(glm::mat4(1.0f), centerOfMass)
 			* modelRotMat
 			* glm::translate(glm::mat4(1.0f), -centerOfMass);
-			// * modelTransMat.at(i);
 
 		currentModelCubes.at(i) = model * glm::vec4(modelCubePositions.at(renderIndex).at(i), 1.0);
 	}

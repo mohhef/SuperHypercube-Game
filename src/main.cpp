@@ -161,7 +161,6 @@ int main(int argc, char* argv[])
 		DepthMapper depthMapper;
 
 		// Renddering setup
-		// Renderer& renderer = Renderer::getInstance();
 		glEnable(GL_DEPTH_TEST);
 		glDepthFunc(GL_LESS);
 
@@ -251,8 +250,6 @@ int main(int argc, char* argv[])
 				textRendering.RenderText(*textShader, "Time: " + to_string(minutes) + ":" + to_string(seconds), 800.0f, 700.0f, 0.75f, glm::vec3(0.5, 0.8f, 0.2f));
 			textRendering.RenderText(*textShader, "Number of cubes in cluster : " + to_string(numCubes), 50.0f, 650.0f, 0.75f, glm::vec3(0.5, 0.8f, 0.2f));
 			textRendering.disable();
-
-			// renderer.calculateFurthestZ(modelRotMat, modelTransMat, displacement);
 
 			// End frame
 			glfwSwapBuffers(window);
