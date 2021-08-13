@@ -41,6 +41,7 @@ bool rotatable = true;
 // Score multiplier variables
 int scoreMultiplier = 1;
 int multiplierCounter = 0;
+int incMultiplierThreshold = 2;
 // Modified throughout run and to reset between runs.
 // Possibly bound to a single model (modelIndex)
 // Models
@@ -364,8 +365,8 @@ void updateDisplacement(float currentFrame)
 			// reduce multipler to half
 			if(scoreMultiplier > 1)scoreMultiplier = scoreMultiplier / 2;
 		}
-		// update multiplier if 2 fit in a line
-		if (multiplierCounter == 2) {
+		// update multiplier upon threshold
+		if (multiplierCounter >= incMultiplierThreshold) {
 			scoreMultiplier += 1;
 			multiplierCounter = 0;
 		}
