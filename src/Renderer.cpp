@@ -293,3 +293,36 @@ void Renderer::updateCenterOfMass()
 	centerOfMass.z /= numOfCubes.z;
 }
 
+glm::vec3 Renderer::getCenterOfMass()
+{
+	return centerOfMass;
+}
+
+float Renderer::calculateFurthestZ(glm::mat4 modelRotMat, vector<glm::mat4> modelTransMat, glm::vec3 displacement)
+{
+	int numCubePieces = modelCubePositions.at(renderIndex).size();
+	glm::mat4 trans = glm::translate(glm::mat4(1.0f), glm::vec3(displacement.x, 0.0f, displacement.z));
+	glm::mat4 initialPos = glm::translate(glm::mat4(1.0f), modelPosition.at(renderIndex));
+
+	vector<glm::vec3> currentModelCubes;
+	currentModelCubes.resize(numCubePieces);
+
+	for (int i = 0; i < numCubePieces; i++)
+	{
+		glm::mat4 model = glm::mat4(1.0f)
+			* trans
+			* initialPos
+			* glm::translate(glm::mat4(1.0f), centerOfMass)
+			* modelRotMat
+			* glm::translate(glm::mat4(1.0f), -centerOfMass);
+			// * modelTransMat.at(i);
+
+		currentModelCubes.at(i) = model * glm::vec4(modelCubePositions.at(renderIndex).at(i), 1.0);
+	}
+
+	float smallestZ = 2 * modelPosition.at(renderIndex).z;
+	for (int i = 0; i < numCubePieces; i++)
+		smallestZ = smallestZ < currentModelCubes.at(i).z ? smallestZ : currentModelCubes.at(i).z;
+
+	return smallestZ;
+}
