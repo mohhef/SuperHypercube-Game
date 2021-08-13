@@ -33,8 +33,11 @@
 
 using namespace irrklang;
 using namespace std;
-// Rotation control
+// Rotation disabled when contact with wall
 bool rotatable = true;
+// Score multiplier variables
+int scoreMultiplier = 1;
+int multiplierCounter = 0;
 // Modified throughout run and to reset between runs.
 // Possibly bound to a single model (modelIndex)
 vector<glm::mat4> modelTransMat;
@@ -304,8 +307,6 @@ bool isFit()
 	return true;
 }
 
-int scoreMultiplier = 1;
-int multiplierCounter = 0;
 //update the displacement of the object
 void updateDisplacement(float currentFrame) {
 	//update z displacement
