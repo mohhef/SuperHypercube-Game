@@ -293,11 +293,6 @@ void Renderer::updateCenterOfMass()
 	centerOfMass.z /= numOfCubes.z;
 }
 
-glm::vec3 Renderer::getCenterOfMass()
-{
-	return centerOfMass;
-}
-
 float Renderer::calculateFurthestZ(glm::mat4 modelRotMat, vector<glm::mat4> modelTransMat, glm::vec3 displacement)
 {
 	int numCubePieces = modelCubePositions.at(renderIndex).size();
