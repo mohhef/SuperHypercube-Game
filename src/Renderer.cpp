@@ -121,28 +121,62 @@ void Renderer::drawFloor(VertexArray& va, Shader& shader, glm::mat4 view, glm::m
 	texture.unbind();
 }
 
-void Renderer::drawCube(VertexArray& va, Shader& shader, glm::mat4 view, glm::mat4 projection, glm::vec3 lightPos, glm::vec3 cameraPos, Texture& texture) {
+void Renderer::drawCube(VertexArray& va, Shader& shader, glm::mat4 view, glm::mat4 projection) {
 	// Bind the vertex array and shader
 	va.bind();
 	shader.bind();
 
+
+
 	shader.setUniform3Vec("lightColor", glm::vec3(1.0f, 1.0f, 1.0f));
 	shader.setUniform4Mat("projection", projection);
 	shader.setUniform4Mat("view", view);
-	shader.setUniform3Vec("ourColor", glm::vec3(1.0f, 0.0f, 0.0f));	
+	shader.setUniform3Vec("ourColor", glm::vec3(1.0f, 0.0f, 0.0f));
 
 	glm::mat4 model = glm::mat4(1.0f)
-		* glm::scale(glm::mat4(1.0f), glm::vec3(20));
-
+		* glm::scale(glm::mat4(1.0f), glm::vec3(19.9)) * glm::translate(glm::mat4(1.0f), glm::vec3(2.0f, 0.5f, 2.0f));
 	shader.setUniform4Mat("model", model);
 	glDrawArrays(GL_TRIANGLES, 0, 36);
+	glm::mat4 model1 = glm::mat4(1.0f)
+		* glm::scale(glm::mat4(1.0f), glm::vec3(20)) * glm::translate(glm::mat4(1.0f), glm::vec3(-2.0f, 0.5f, -2.0f));
+	shader.setUniform4Mat("model", model1);
+	glDrawArrays(GL_TRIANGLES, 0, 36);
+	glm::mat4 model2 = glm::mat4(1.0f)
+		* glm::scale(glm::mat4(1.0f), glm::vec3(20)) * glm::translate(glm::mat4(1.0f), glm::vec3(-2.0f, 0.5f, 2.0f));
+	shader.setUniform4Mat("model", model2);
+	glDrawArrays(GL_TRIANGLES, 0, 36);
+	glm::mat4 model3 = glm::mat4(1.0f)
+		* glm::scale(glm::mat4(1.0f), glm::vec3(20)) * glm::translate(glm::mat4(1.0f), glm::vec3(2.0f, 0.5f, -2.0f));
+	shader.setUniform4Mat("model", model3);
+	glDrawArrays(GL_TRIANGLES, 0, 36);
+	// unbind for easier debugging
+	va.unbind();
+	shader.unbind();
+}
+
+void Renderer::drawModel(VertexArray& va, Shader& shader, glm::mat4 view, glm::mat4 projection) {
+	// Bind the vertex array and shader
+	va.bind();
+	shader.bind();
+
+
+
+	shader.setUniform3Vec("lightColor", glm::vec3(1.0f, 1.0f, 1.0f));
+	shader.setUniform4Mat("projection", projection);
+	shader.setUniform4Mat("view", view);
+	shader.setUniform3Vec("ourColor", glm::vec3(1.0f, 0.0f, 0.0f));
+
+	glm::mat4 model = glm::mat4(1.0f)
+		* glm::scale(glm::mat4(1.0f), glm::vec3(19.9)) * glm::translate(glm::mat4(1.0f), glm::vec3(2.0f, 0.5f, 2.0f));
+	shader.setUniform4Mat("model", model);
 
 
 	// unbind for easier debugging
 	va.unbind();
 	shader.unbind();
-
 }
+
+
 // Draw the model that is currently in use
 void Renderer::drawObject(VertexArray& va, Shader& shader, glm::mat4 view, glm::mat4 projection, glm::vec3 lightPos, glm::vec3 cameraPos, Texture& texture, glm::mat4 modelRotMat, vector<glm::mat4> modelTransMat, float scaleFactor, glm::vec3 displacement)
 {

@@ -145,6 +145,9 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <None Include="3Dmodel.shader" />
+    <None Include="3DmodelFragment.shader" />
+    <None Include="3DmodelVertex.shader" />
     <None Include="axes.shader" />
     <None Include="custom_material.shader" />
     <None Include="depthMap.shader" />
@@ -173,6 +176,9 @@
     <ClInclude Include="Camera.h" />
     <ClInclude Include="Constants.h" />
     <ClInclude Include="DepthMapper.h" />
+    <ClInclude Include="Mesh.h" />
+    <ClInclude Include="Model.h" />
+    <ClInclude Include="ModelShader.h" />
     <ClInclude Include="TextRendering.h" />
     <ClInclude Include="Renderer.h" />
     <ClInclude Include="Shader.h" />

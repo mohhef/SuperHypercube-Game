@@ -41,7 +41,10 @@ public:
 
 	// draw functions
 	void clear() const;
-	void drawCube(VertexArray& va, Shader& shader, glm::mat4 view, glm::mat4 projection, glm::vec3 lightPos, glm::vec3 cameraPos, Texture& texture);
+	void drawCube(VertexArray& va, Shader& shader, glm::mat4 view, glm::mat4 projection);
+	void drawModel(VertexArray& va, Shader& shader, glm::mat4 view, glm::mat4 projection);
+
+
 	void drawAxes(VertexArray& va, Shader& shader, glm::mat4 view, glm::mat4 projection);
 	void drawLightingSource(VertexArray& va, Shader& shader, glm::mat4 view, glm::mat4 projection, glm::vec3 lightPos);
 	void drawObject(VertexArray& va, Shader& shader, glm::mat4 view, glm::mat4 projection, glm::vec3 lightPos, glm::vec3 cameraPos, Texture& texture, glm::mat4 modelRotMat, vector<glm::mat4> modelTransMat, float scaleFactor, glm::vec3 displacement);

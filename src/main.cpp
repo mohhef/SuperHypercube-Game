@@ -23,6 +23,16 @@
 #include "Texture.h"
 #include "DepthMapper.h"
 #include "TextRendering.h"
+#include "Mesh.h"
+
+// Trial log 1 # Tried reloading stb image
+// Trial log 2 # Tried compiling stb.cpp
+// Trial log 3 # Tried adding stb folder in lib
+// Trial log 4 # Tried Updating stb header
+// Trial log 5 # Every single error comes back to the stb image from Model
+// fix circular dependencies
+ #include "Model.h"
+
 
 #include "VertexArray.h"
 #include "VertexBufferLayout.h"
@@ -219,7 +229,13 @@ int main(int argc, char* argv[])
 			renderer.drawWall(vA, *shader, view, projection, lightPos, camera->position, brickTexture, modelRotMat, scaleFactor, displacement);
 			renderer.drawLightingSource(vaLightingSource, *lightingSourceShader, view, projection, lightPos);
 			renderer.drawAxes(vaAxes, *axesShader, view, projection);
-			renderer.drawCube(vA, *lightingShader, view, projection, lightPos, camera->position, metalTexture);
+			
+			
+			//Position for the 3D model sample
+			renderer.drawCube(vA, *lightingShader, view, projection);
+
+			//Render the 3D
+			renderer.drawModel(vA, *lightingShader, view, projection);
 
 			// Render floor with tiles or draw the mesh depending on if we are drawing with or without textures
 			renderer.drawFloor(vaFloor, *shader, view, projection, lightPos, camera->position, tileTexture);
