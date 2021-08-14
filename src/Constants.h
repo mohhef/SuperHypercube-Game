@@ -108,12 +108,12 @@ static float vertices[] =
 // Position(f,f,f) Normal(f,f,f) Texture(f,f)
 static float squareVertices[] =
 {
-	-0.5f, 0.0f, -0.5f, 0.0f, 1.0f, 0.0f, 0.0f, 1.0f,
-	0.5f,  0.0f, 0.5f, 0.0f, 1.0f, 0.0f, 1.0f, 0.0f,
+	-0.5f, 0.0f, -0.5f, 0.0f, 1.0f, 0.0f, 0.0f, 100.0f,
+	0.5f,  0.0f, 0.5f, 0.0f, 1.0f, 0.0f, 100.0f, 0.0f,
 	-0.5f, 0.0f, 0.5f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f,
-	-0.5f, 0.0f, -0.5f, 0.0f, 1.0f, 0.0f, 0.0f, 1.0f,
-	0.5f,  0.0f, 0.5f, 0.0f, 1.0f, 0.0f, 1.0f, 0.0f,
-	0.5f, 0.0f, -0.5f, 0.0f, 1.0f, 0.0f, 1.0f, 1.0f
+	-0.5f, 0.0f, -0.5f, 0.0f, 1.0f, 0.0f, 0.0f, 100.0f,
+	0.5f,  0.0f, 0.5f, 0.0f, 1.0f, 0.0f, 100.0f, 0.0f,
+	0.5f, 0.0f, -0.5f, 0.0f, 1.0f, 0.0f, 100.0f, 100.0f
 };
 
 // Vertices for a line which is used by the axes

@@ -15,8 +15,6 @@
 void glClearError();
 bool glLogCall(const char* function, const char* file, int line);
 
-
-
 class Renderer
 {
 private:
@@ -38,6 +36,7 @@ public:
 	void setRenderIndex(unsigned int index);
 	void setIsFindingDepth(bool findDepth);
 	void updateCenterOfMass();
+	glm::vec3 getCenterOfMass();
 	float calculateFurthestZ(glm::mat4 modelRotMat, vector<glm::mat4> modelTransMat, glm::vec3 displacement);
 
 	// draw functions

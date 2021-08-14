@@ -36,6 +36,8 @@
 using namespace irrklang;
 using namespace std;
 
+bool developmentMode = false;
+
 // Models
 vector<glm::mat4> modelTransMat;
 glm::mat4 modelRotMat;
@@ -102,8 +104,11 @@ int main(int argc, char* argv[])
 		createModel(model);
 	}
 
-	// SoundEngine->setSoundVolume(0.1f);
-	// SoundEngine->play2D("audio/Kirby.mp3", true);
+	if (!developmentMode)
+	{
+		// SoundEngine->setSoundVolume(0.1f);
+		// SoundEngine->play2D("audio/Kirby.mp3", true);
+	}
 
 	GLFWwindow* window = initializeWindow();
 	{
@@ -167,12 +172,25 @@ int main(int argc, char* argv[])
 		// Create camera instance
 		// Position: behind model, along Z-axis.
 		// Target: world origin (initially)
-		camera = new Camera(glm::vec3(modelPosition.at(modelIndex).x, modelPosition.at(modelIndex).y + 40, 100.0f),
-			glm::vec3(0.0f, 1.0f, 0.0f),
-			glm::vec3(0.0f, 0.0f, 0.0f));
+		
+		if (developmentMode)
+		{
+			// Development
+			camera = new Camera(glm::vec3(modelPosition.at(modelIndex).x, modelPosition.at(modelIndex).y + 40, 100.0f),
+				glm::vec3(0.0f, 1.0f, 0.0f),
+				glm::vec3(0.0f, 0.0f, 0.0f));
+		}
+		else
+		{
+			// Release
+			renderer.updateCenterOfMass();
+			camera = new Camera(glm::vec3(renderer.getCenterOfMass().x, renderer.getCenterOfMass().x + 15, renderer.getCenterOfMass().z + 40),
+				glm::vec3(0.0f, 1.0f, 0.0f),
+				glm::vec3(renderer.getCenterOfMass().x, renderer.getCenterOfMass().x, wallZPos));
+		}
 
 		// Position of the light source
-		glm::vec3 lightPos(0.0, 40.0f, 20.0f);
+		glm::vec3 lightPos(0.0, 40.0f, 50.0f);
 
 		// Initialize model matricies for each cube within each model 
 		resetModel(true);
@@ -199,6 +217,14 @@ int main(int argc, char* argv[])
 
 			updateDisplacement(currentFrame);
 			renderer.updateCenterOfMass();
+			
+			if (!developmentMode)
+			{
+				// Release
+				camera = new Camera(glm::vec3(renderer.getCenterOfMass().x, renderer.getCenterOfMass().x + 15, renderer.getCenterOfMass().z + 40 + displacement.z),
+					glm::vec3(0.0f, 1.0f, 0.0f),
+					glm::vec3(renderer.getCenterOfMass().x, renderer.getCenterOfMass().x, wallZPos));
+			}
 
 			// Clear color and depth buffers
 			renderer.clear();
@@ -224,14 +250,15 @@ int main(int argc, char* argv[])
 			// Render each object (wall, model, static models, axes, and mesh floor)
 			renderer.drawObject(vA, *shader, view, projection, lightPos, camera->position, metalTexture, modelRotMat, modelTransMat, scaleFactor, displacement);
 			renderer.drawWall(vA, *shader, view, projection, lightPos, camera->position, brickTexture, modelRotMat, scaleFactor, displacement);
-			renderer.drawLightingSource(vaLightingSource, *lightingSourceShader, view, projection, lightPos);
-			renderer.drawAxes(vaAxes, *axesShader, view, projection);
+
+			if (developmentMode)
+			{
+				renderer.drawLightingSource(vaLightingSource, *lightingSourceShader, view, projection, lightPos);
+				renderer.drawAxes(vaAxes, *axesShader, view, projection);
+			}
 
 			// Render floor with tiles or draw the mesh depending on if we are drawing with or without textures
 			renderer.drawFloor(vaFloor, *shader, view, projection, lightPos, camera->position, tileTexture);
-			
-			// Render light source
-			renderer.drawLightingSource(vaLightingSource, *lightingSourceShader, view, projection, lightPos);
 			
 			// Update timer
 			int totalSeconds = 120 - (int) ((clock() - timer) / (double) CLOCKS_PER_SEC);
@@ -243,12 +270,12 @@ int main(int argc, char* argv[])
 
 			// Render text
 			textRendering.enable();
-			textRendering.RenderText(*textShader, "Score: " + to_string(score), 50.0f, 700.0f, 0.75f, glm::vec3(0.5, 0.8f, 0.2f));
+			textRendering.RenderText(*textShader, "Score: " + to_string(score), 50.0f, 700.0f, 0.50f, glm::vec3(0.5, 0.8f, 0.2f));
 			if (seconds < 10)
-				textRendering.RenderText(*textShader, "Time: " + to_string(minutes) + ":0" + to_string(seconds), 800.0f, 700.0f, 0.75f, glm::vec3(0.5, 0.8f, 0.2f));
+				textRendering.RenderText(*textShader, "Time: " + to_string(minutes) + ":0" + to_string(seconds), 800.0f, 700.0f, 0.50f, glm::vec3(0.5, 0.8f, 0.2f));
 			else
-				textRendering.RenderText(*textShader, "Time: " + to_string(minutes) + ":" + to_string(seconds), 800.0f, 700.0f, 0.75f, glm::vec3(0.5, 0.8f, 0.2f));
-			textRendering.RenderText(*textShader, "Number of cubes in cluster : " + to_string(numCubes), 50.0f, 650.0f, 0.75f, glm::vec3(0.5, 0.8f, 0.2f));
+				textRendering.RenderText(*textShader, "Time: " + to_string(minutes) + ":" + to_string(seconds), 800.0f, 700.0f, 0.50f, glm::vec3(0.5, 0.8f, 0.2f));
+			textRendering.RenderText(*textShader, "Number of cubes in cluster : " + to_string(numCubes), 50.0f, 650.0f, 0.50f, glm::vec3(0.5, 0.8f, 0.2f));
 			textRendering.disable();
 
 			// End frame
@@ -307,7 +334,8 @@ GLFWwindow* initializeWindow()
 	}
 
 	// Background color
-	glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
+	// glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
+	glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
 	return window;
 }
 
@@ -348,8 +376,9 @@ void updateDisplacement(float currentFrame)
 	if (renderer.calculateFurthestZ(modelRotMat, modelTransMat, displacement) < wallZPos + 2)
 		if (!isFit())
 			resetModel(true);
+
 	// Reset upon wall pass
-		else if (displacement.z < -30) {
+		else if (displacement.z < -28) {
 
 			// Increment if model fits through hole
 			if (isFit()) 
@@ -425,9 +454,23 @@ void processInput(GLFWwindow* window, int key, int scancode, int action, int mod
 
 	// Camera reset (HOME)
 	if (glfwGetKey(window, GLFW_KEY_HOME) == GLFW_PRESS)
-		camera = new Camera(glm::vec3(modelPosition.at(modelIndex).x, modelPosition.at(modelIndex).y + 40, 100.0f),
-			glm::vec3(0.0f, 1.0f, 0.0f),
-			glm::vec3(0.0f, 0.0f, 0.0f));
+	{
+		if (developmentMode)
+		{
+			// Development
+			camera = new Camera(glm::vec3(modelPosition.at(modelIndex).x, modelPosition.at(modelIndex).y + 40, 100.0f),
+				glm::vec3(0.0f, 1.0f, 0.0f),
+				glm::vec3(0.0f, 0.0f, 0.0f));
+		}
+		else
+		{
+			// Release
+			renderer.updateCenterOfMass();
+			camera = new Camera(glm::vec3(renderer.getCenterOfMass().x, renderer.getCenterOfMass().x + 15, renderer.getCenterOfMass().z + 40),
+				glm::vec3(0.0f, 1.0f, 0.0f),
+				glm::vec3(renderer.getCenterOfMass().x, renderer.getCenterOfMass().x, wallZPos));
+		}
+	}
 
 	// Reset model (SPACEBAR)
 	if (glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS)

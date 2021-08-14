@@ -103,10 +103,9 @@ void Renderer::drawFloor(VertexArray& va, Shader& shader, glm::mat4 view, glm::m
 		shader.setUniform1i("textureStatus", 1);
 	}
 	
-
 	// scale and align with XZ plane
 	glm::mat4 model = glm::mat4(1.0f)
-		* glm::scale(glm::mat4(1.0f), glm::vec3(100.0f));
+		* glm::scale(glm::mat4(1.0f), glm::vec3(1000.0f));
 
 	shader.setUniform4Mat("model", model);
 	glDrawArrays(GL_TRIANGLES, 0, 6);
@@ -262,6 +261,7 @@ void Renderer::drawWall(VertexArray& va, Shader& shader, glm::mat4 view, glm::ma
 	texture.unbind();
 }
 
+// Update model's center of mass
 void Renderer::updateCenterOfMass()
 {
 	int numCubePieces = modelCubePositions.at(renderIndex).size();
@@ -293,6 +293,7 @@ void Renderer::updateCenterOfMass()
 	centerOfMass.z /= numOfCubes.z;
 }
 
+// Calculate furthest Z point of model (displacement included)
 float Renderer::calculateFurthestZ(glm::mat4 modelRotMat, vector<glm::mat4> modelTransMat, glm::vec3 displacement)
 {
 	int numCubePieces = modelCubePositions.at(renderIndex).size();
@@ -319,4 +320,9 @@ float Renderer::calculateFurthestZ(glm::mat4 modelRotMat, vector<glm::mat4> mode
 		smallestZ = smallestZ < currentModelCubes.at(i).z ? smallestZ : currentModelCubes.at(i).z;
 
 	return smallestZ;
+}
+
+glm::vec3 Renderer::getCenterOfMass() 
+{
+	return centerOfMass;
 }
