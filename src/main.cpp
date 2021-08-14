@@ -23,7 +23,6 @@
 #include "Texture.h"
 #include "DepthMapper.h"
 #include "TextRendering.h"
-#include "Mesh.h"
 
 // Trial log 1 # Tried reloading stb image
 // Trial log 2 # Tried compiling stb.cpp

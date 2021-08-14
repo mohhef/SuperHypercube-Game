@@ -1,5 +1,4 @@
-#ifndef MODELSHADER_H
-#define MODELSHADER_H
+#pragma once
 
 #include <glm/glm.hpp>
 
@@ -187,4 +186,3 @@ private:
         }
     }
 };
-#endif
