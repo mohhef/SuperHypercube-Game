@@ -18,7 +18,7 @@ RotationMat::RotationMat(glm::vec3 rot) : currentRot(rot), maxRot(rot) {
 void RotationMat::reset() {
 	currentRot = glm::vec3(0.0f);
 	maxRot = glm::vec3(0.0f);
-	convertCurrentToHard();
+	this->rotMatrix = convertCurrentToHard();
 }
 
 // converts the current rotation vertex to a matrix
