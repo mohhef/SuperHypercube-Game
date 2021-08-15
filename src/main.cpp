@@ -51,6 +51,7 @@ bool shadows = true;
 
 // Text
 int score = 0;
+int wallsCleared = 0;
 int numCubes = 0;
 clock_t timer;
 
@@ -244,7 +245,8 @@ int main(int argc, char* argv[])
 				textRendering.RenderText(*textShader, "Time: " + to_string(minutes) + ":0" + to_string(seconds), 800.0f, 700.0f, 0.75f, glm::vec3(0.5, 0.8f, 0.2f));
 			else
 				textRendering.RenderText(*textShader, "Time: " + to_string(minutes) + ":" + to_string(seconds), 800.0f, 700.0f, 0.75f, glm::vec3(0.5, 0.8f, 0.2f));
-			textRendering.RenderText(*textShader, "Number of cubes in cluster : " + to_string(numCubes), 50.0f, 650.0f, 0.75f, glm::vec3(0.5, 0.8f, 0.2f));
+			textRendering.RenderText(*textShader, "Walls cleared : " + to_string(wallsCleared), 50.0f, 650.0f, 0.75f, glm::vec3(0.5, 0.8f, 0.2f));
+			textRendering.RenderText(*textShader, "Number of cubes in cluster : " + to_string(numCubes), 50.0f, 600.0f, 0.75f, glm::vec3(0.5, 0.8f, 0.2f));
 			textRendering.disable();
 
 			// End frame
@@ -344,8 +346,11 @@ void updateDisplacement(float currentFrame)
 	if (displacement.z < -30) {
 
 		// Increment if model fits through hole
-		if (isFit()) 
+		if (isFit()) {
+			// Separated score counter from walls for multiplier 
 			score += 1;
+			wallsCleared += 1;
+		}
 
 		modelIndex = (modelIndex+1) % models.size();
 		Renderer::getInstance().setRenderIndex(modelIndex);
