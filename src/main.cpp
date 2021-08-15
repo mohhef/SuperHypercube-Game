@@ -84,6 +84,10 @@ int getTotalCubes(vector <vector<int>> model);
 bool isFit();
 void resetScoreAndTimer();
 
+// animation
+bool resetAfterCollision = false;
+float resetTime = 0.0f;
+
 // Window size
 int HEIGHT = 768;
 int WIDTH = 1024;
@@ -197,6 +201,12 @@ int main(int argc, char* argv[])
 			float currentFrame = glfwGetTime();
 			deltaTime = currentFrame - lastFrame;
 			lastFrame = currentFrame;
+			if (resetAfterCollision && currentFrame > resetTime) {
+				resetAfterCollision = false;
+				resetTime = 0.0f;
+				resetModel(true);
+			}
+
 			rotMat.updateRotation(currentFrame);
 
 			updateDisplacement(currentFrame);
@@ -352,33 +362,42 @@ bool isFit()
 //update the displacement of the object
 void updateDisplacement(float currentFrame) 
 {
-	float acceleration = 10.0f;
 	static float prevFrame = currentFrame;
 	// Update z displacement
-	displacement.z += (prevFrame - currentFrame) * displacementSpeed;
+	if (!resetAfterCollision) {
+		displacement.z += (prevFrame - currentFrame) * displacementSpeed;
+	}
+	else {
+		displacement.y += (prevFrame - currentFrame) * 20.0f;
+	}
+	
 	prevFrame = currentFrame;
 
 	// Check for collision
 	if (renderer.calculateFurthestZ(rotMat.getMatrix(), modelTransMat, displacement) < wallZPos + 2)
-		if (!isFit())
-			resetModel(true);
+		if (!isFit() && !resetAfterCollision) {
+			rotMat.setSoft(glm::vec3(0.0f, 0.0f, 20.0f));
+			resetTime = currentFrame + 0.5f;
+			resetAfterCollision = true;
+		}	
 	// Reset upon wall pass
 		else if (displacement.z < -30) {
 
 			// Increment if model fits through hole
-			if (isFit()) 
+			if (isFit())
 				score += 1;
 
-			modelIndex = (modelIndex+1) % models.size();
+			modelIndex = (modelIndex + 1) % models.size();
 			Renderer::getInstance().setRenderIndex(modelIndex);
-		
+
 			// Z displacement and speed
 			displacement.z = 0;
-		
+
 			resetModel();
 			randomRotation();
 			updateNumberOfCubes();
 		}
+		else displacementSpeed = 10.0f;
 }
 
 // Update the number of cubes in cluster based on current model
