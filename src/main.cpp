@@ -371,13 +371,6 @@ void updateDisplacement(float currentFrame)
 			scoreMultiplier += 1;
 			multiplierCounter = 0;
 		}
-		// NOTE: CURRENTLY PRINTING HERE TO SHOW YOU THAT IT WORKS
-		cout << "score: " << endl;
-		cout << score << endl;
-		cout << "multiplier: " << endl;
-		cout << scoreMultiplier << endl;
-		cout << "multiplierCounter: " << endl;
-		cout << multiplierCounter << endl;
 
 		modelIndex = (modelIndex+1) % models.size();
 		Renderer::getInstance().setRenderIndex(modelIndex);
