@@ -369,19 +369,13 @@ void updateDisplacement(float currentFrame)
 			if (isFit()) {
 				score += 1 * scoreMultiplier;
 				multiplierCounter++;
-        wallsCleared += 1;
+				wallsCleared += 1;
 			}
 			// update multiplier upon threshold
 			if (multiplierCounter >= incMultiplierThreshold) {
 				scoreMultiplier += 1;
 				multiplierCounter = 0;
 			}
-		// Increment if model fits through hole
-		if (isFit()) {
-			// Separated score counter from walls for multiplier 
-			score += 1;
-			wallsCleared += 1;
-		}
 		modelIndex = (modelIndex+1) % models.size();
 		Renderer::getInstance().setRenderIndex(modelIndex);
 		
