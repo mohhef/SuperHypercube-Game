@@ -207,7 +207,6 @@ int main(int argc, char* argv[])
 
 			glm::mat4 projection = glm::perspective(glm::radians(camera->zoom), (float)WIDTH / (float)HEIGHT, 0.1f, 200.0f);
 			glm::mat4 view = camera->getViewMatrix();
-			displacement.y = 10.0f;
 
 			// Shadow mapping
 			depthMapper.Draw(depthShader, lightPos, [&]() {
@@ -315,7 +314,6 @@ GLFWwindow* initializeWindow()
 }
 
 // Wall check for score
-// TODO: MAKE IT SO THAT IT CAN ACCEPT OTHER WAYS
 bool isFit() 
 {
 	int numCubePieces = modelCubePositions.at(modelIndex).size();
@@ -324,16 +322,26 @@ bool isFit()
 		int rows = models.at(modelIndex).size();
 		int columns = models.at(modelIndex).at(0).size();
 
-		glm::vec4 axes = glm::vec4(columns, rows, 1.0f, 1.0f);
-		glm::mat4 model = glm::mat4(1.0f) * rotMat.getMatrix();
-		glm::vec4 cubePos = model * glm::vec4(modelCubePositions.at(modelIndex).at(i), 1.0f);
+		//glm::vec4 axes = glm::vec4(columns, rows, 1.0f, 1.0f);
+		glm::mat4 model = glm::mat4(1.0f);
+		glm::vec4 cubePos = model
+			* glm::translate(glm::mat4(1.0f), renderer.centerOfMass)
+			* rotMat.getMatrix()
+			* glm::translate(glm::mat4(1.0f), -renderer.centerOfMass)
+			* glm::vec4(modelCubePositions.at(modelIndex).at(i), 1.0f);
 
-		cubePos.x = round(cubePos.x);
-		cubePos.y = round(cubePos.y);
+		cubePos.x = round(abs( cubePos.x));
+		cubePos.y = round(abs(cubePos.y));
 
-		if (cubePos.x != modelCubePositions.at(modelIndex).at(i).x
-			|| cubePos.y != modelCubePositions.at(modelIndex).at(i).y)
-		{
+		bool foundPlace = false;
+		for (int x = 0; x < numCubePieces; x++) {
+			if (cubePos.x == modelCubePositions.at(modelIndex).at(x).x && cubePos.y == modelCubePositions.at(modelIndex).at(x).y) {
+				foundPlace = true;
+				break;
+			}
+		}
+
+		if (!foundPlace) {
 			return false;
 		}
 	}

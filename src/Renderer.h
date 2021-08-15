@@ -26,12 +26,12 @@ private:
 	// models
 	unsigned int renderIndex = 0;
 	glm::mat4 rotationMatrix = glm::mat4(1.0f);
-	glm::vec3 centerOfMass;
 	bool isFindingDepth = false;
 
 	Renderer();
 
 public:
+	glm::vec3 centerOfMass;
 	static Renderer& getInstance();
 	Renderer(const Renderer&) = delete;
 	bool isTextureEnabled = true;
