@@ -42,7 +42,7 @@ bool developmentMode = false;
 vector<glm::mat4> modelTransMat;
 glm::mat4 modelRotMat;
 glm::vec3 displacement;
-float displacementSpeed = 1.0;
+float displacementSpeed = 0.5;
 float scaleFactor = 1.0f;
 bool textureStatus = true;
 vector<vector<glm::vec3>> modelCubePositions;
@@ -84,6 +84,7 @@ void updateNumberOfCubes();
 int getTotalCubes(vector <vector<int>> model);
 bool isFit();
 void resetScoreAndTimer();
+void cameraReset();
 
 // Window size
 int HEIGHT = 768;
@@ -170,24 +171,7 @@ int main(int argc, char* argv[])
 		glDepthFunc(GL_LESS);
 
 		// Create camera instance
-		// Position: behind model, along Z-axis.
-		// Target: world origin (initially)
-		
-		if (developmentMode)
-		{
-			// Development
-			camera = new Camera(glm::vec3(modelPosition.at(modelIndex).x, modelPosition.at(modelIndex).y + 40, 100.0f),
-				glm::vec3(0.0f, 1.0f, 0.0f),
-				glm::vec3(0.0f, 0.0f, 0.0f));
-		}
-		else
-		{
-			// Release
-			renderer.updateCenterOfMass();
-			camera = new Camera(glm::vec3(renderer.getCenterOfMass().x, renderer.getCenterOfMass().x + 15, renderer.getCenterOfMass().z + 40),
-				glm::vec3(0.0f, 1.0f, 0.0f),
-				glm::vec3(renderer.getCenterOfMass().x, renderer.getCenterOfMass().x, wallZPos));
-		}
+		cameraReset();
 
 		// Position of the light source
 		glm::vec3 lightPos(0.0, 40.0f, 50.0f);
@@ -217,14 +201,6 @@ int main(int argc, char* argv[])
 
 			updateDisplacement(currentFrame);
 			renderer.updateCenterOfMass();
-			
-			if (!developmentMode)
-			{
-				// Release
-				camera = new Camera(glm::vec3(renderer.getCenterOfMass().x, renderer.getCenterOfMass().x + 15, renderer.getCenterOfMass().z + 40 + displacement.z),
-					glm::vec3(0.0f, 1.0f, 0.0f),
-					glm::vec3(renderer.getCenterOfMass().x, renderer.getCenterOfMass().x, wallZPos));
-			}
 
 			// Clear color and depth buffers
 			renderer.clear();
@@ -367,10 +343,15 @@ bool isFit()
 }
 
 //update the displacement of the object
-void updateDisplacement(float currentFrame) 
+void updateDisplacement(float deltaTime) 
 {
 	// Update z displacement
-	displacement.z = currentFrame * -1 * displacementSpeed;
+	displacement.z += deltaTime * -1 * displacementSpeed;
+
+	if (!developmentMode)
+	{
+		camera->position.z -= (deltaTime * displacementSpeed);
+	}
 
 	// Check for collision
 	if (renderer.calculateFurthestZ(modelRotMat, modelTransMat, displacement) < wallZPos + 2)
@@ -378,19 +359,15 @@ void updateDisplacement(float currentFrame)
 			resetModel(true);
 
 	// Reset upon wall pass
-		else if (displacement.z < -28) {
-
+		else if (displacement.z < -28) 
+		{
 			// Increment if model fits through hole
 			if (isFit()) 
 				score += 1;
 
 			modelIndex = (modelIndex+1) % models.size();
 			Renderer::getInstance().setRenderIndex(modelIndex);
-		
-			// Z displacement and speed
-			displacement.z = 0;
-			displacementSpeed = 1;
-		
+
 			resetModel();
 			randomRotation();
 			updateNumberOfCubes();
@@ -432,7 +409,9 @@ void resetModel(bool randomRot)
 	resetRotMat(randomRot);
 	glfwSetTime(0.0f);
 	displacement = glm::vec3();
+	displacementSpeed = 0.25;
 	scaleFactor = 1.0f;
+	cameraReset();
 }
 
 // Handle all keyboard inputs
@@ -455,32 +434,18 @@ void processInput(GLFWwindow* window, int key, int scancode, int action, int mod
 	// Camera reset (HOME)
 	if (glfwGetKey(window, GLFW_KEY_HOME) == GLFW_PRESS)
 	{
-		if (developmentMode)
-		{
-			// Development
-			camera = new Camera(glm::vec3(modelPosition.at(modelIndex).x, modelPosition.at(modelIndex).y + 40, 100.0f),
-				glm::vec3(0.0f, 1.0f, 0.0f),
-				glm::vec3(0.0f, 0.0f, 0.0f));
-		}
-		else
-		{
-			// Release
-			renderer.updateCenterOfMass();
-			camera = new Camera(glm::vec3(renderer.getCenterOfMass().x, renderer.getCenterOfMass().x + 15, renderer.getCenterOfMass().z + 40),
-				glm::vec3(0.0f, 1.0f, 0.0f),
-				glm::vec3(renderer.getCenterOfMass().x, renderer.getCenterOfMass().x, wallZPos));
-		}
+		cameraReset();
 	}
 
 	// Reset model (SPACEBAR)
 	if (glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS)
 		resetModel();
 
-	// Model displacement (W/S/A/D) and rotation (w/s/a/d), the latter of which around it's own axis.
 	if (mode == GLFW_MOD_SHIFT) {
-		displacementSpeed *= 1.5f;
+		displacementSpeed = 3.0f;
 	}
-
+	
+	// Model displacement (W/S/A/D) and rotation (w/s/a/d), the latter of which around it's own axis.
 	if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
 	{
 		glm::mat4 model = glm::mat4(1.0f);
@@ -517,6 +482,7 @@ void processInput(GLFWwindow* window, int key, int scancode, int action, int mod
 		model = glm::rotate(model, glm::radians(-90.0f), glm::vec3(0.0f, 0.0f, 1.0f));
 		modelRotMat = model * modelRotMat;
 	}
+	
 	// Toggle rendering mode between point, line and fill mode (P/L/T)
 	if (glfwGetKey(window, GLFW_KEY_P) == GLFW_PRESS)
 		glPolygonMode(GL_FRONT_AND_BACK, GL_POINT);
@@ -657,4 +623,24 @@ void resetScoreAndTimer()
 {
 	score = 0;
 	timer = clock();
+}
+
+// Reset camera instance
+void cameraReset()
+{
+	if (developmentMode)
+	{
+		// Development
+		camera = new Camera(glm::vec3(modelPosition.at(modelIndex).x, modelPosition.at(modelIndex).y + 40, 100.0f),
+			glm::vec3(0.0f, 1.0f, 0.0f),
+			glm::vec3(0.0f, 0.0f, 0.0f));
+	}
+	else
+	{
+		// Release
+		renderer.updateCenterOfMass();
+		camera = new Camera(glm::vec3(renderer.getCenterOfMass().x, renderer.getCenterOfMass().x + 15, renderer.getCenterOfMass().z + 40 + displacement.z),
+			glm::vec3(0.0f, 1.0f, 0.0f),
+			glm::vec3(renderer.getCenterOfMass().x, renderer.getCenterOfMass().x, wallZPos));
+	}
 }
