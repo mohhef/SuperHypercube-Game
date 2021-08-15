@@ -87,6 +87,8 @@ void resetScoreAndTimer();
 // animation
 bool resetAfterCollision = false;
 float resetTime = 0.0f;
+glm::vec3 cameraInitialPos = glm::vec3(modelPosition.at(modelIndex).x, modelPosition.at(modelIndex).y + 40, 100.0f);
+glm::vec3 modelPos;
 
 // Window size
 int HEIGHT = 768;
@@ -179,6 +181,8 @@ int main(int argc, char* argv[])
 		// Position of the light source
 		glm::vec3 lightPos(-10.0, 35.0f, 40.0f);
 
+		modelPos = (modelPosition.at(modelIndex) * scaleFactor) + modelCenter.at(modelIndex) + glm::vec3(1.0f, modelHeight + 1.0f, 0.0f);
+
 		// Initialize model matricies for each cube within each model 
 		resetModel(true);
 		glfwSetKeyCallback(window, processInput);
@@ -205,6 +209,10 @@ int main(int argc, char* argv[])
 				resetAfterCollision = false;
 				resetTime = 0.0f;
 				resetModel(true);
+			}
+
+			if (resetAfterCollision) {
+				camera->lookAt(modelPos + displacement);
 			}
 
 			rotMat.updateRotation(currentFrame);
@@ -366,6 +374,7 @@ void updateDisplacement(float currentFrame)
 	// Update z displacement
 	if (!resetAfterCollision) {
 		displacement.z += (prevFrame - currentFrame) * displacementSpeed;
+		camera->moveCamera(glm::vec3(0.0f, 0.0f, (prevFrame - currentFrame) * displacementSpeed));
 	}
 	else {
 		displacement.y += (prevFrame - currentFrame) * 20.0f;
@@ -397,7 +406,10 @@ void updateDisplacement(float currentFrame)
 			randomRotation();
 			updateNumberOfCubes();
 		}
-		else displacementSpeed = 10.0f;
+		else {
+			displacementSpeed = 10.0f;
+			camera->lookAt(modelPos + displacement);
+		}
 }
 
 // Update the number of cubes in cluster based on current model
@@ -433,8 +445,11 @@ void resetModel(bool randomRot)
 {
 	resetTransMat();
 	resetRotMat(randomRot);
+	glm::vec3 cameraPos = modelPos + glm::vec3(0.0f, 0.0f, 40.0f);
+	camera->resetPos(cameraPos);
+	camera->lookAt(cameraPos + glm::vec3(0.0f, 0.0f, -50.0f));
 	glfwSetTime(0.0f);
-	displacement = glm::vec3();
+	displacement = glm::vec3(0.0f);
 	displacementSpeed = 2.0f;
 	scaleFactor = 1.0f;
 }

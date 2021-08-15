@@ -6,8 +6,6 @@
 #include "Renderer.h"
 #include "Constants.h"
 
-static float modelHeight = 10.0f;
-
 // Clear openGL errors, makes it easier for debugging
 void glClearError()
 {
