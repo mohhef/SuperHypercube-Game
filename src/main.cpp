@@ -31,7 +31,8 @@
 // Trial log 5 # Every single error comes back to the stb image from Model
 // fix circular dependencies
  #include "Model.h"
-
+#include "ModelShader.h"
+#include "Mesh.h"
 
 #include "VertexArray.h"
 #include "VertexBufferLayout.h"
@@ -144,6 +145,9 @@ int main(int argc, char* argv[])
 		Shader* depthShader = new Shader("depthMap.shader");
 		Shader* textShader = new Shader("text.shader");
 
+		ModelShader ourShader("1.model_loading.vs", "1.model_loading.fs");
+		Model ourModel("resources/objects/Ivysaur_Outlined_OBJ/pokemon.obj");
+		
 		// telling the shader which textures go where
 		shader->bind();
 		shader->setUniform1i("textureObject", 0);
