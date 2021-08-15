@@ -36,6 +36,12 @@
 using namespace irrklang;
 using namespace std;
 
+// Score multiplier variables
+int scoreMultiplier = 1;
+int multiplierCounter = 0;
+int incMultiplierThreshold = 2;
+// Modified throughout run and to reset between runs.
+// Possibly bound to a single model (modelIndex)
 // Models
 vector<glm::mat4> modelTransMat;
 glm::mat4 modelRotMat;
@@ -251,6 +257,8 @@ int main(int argc, char* argv[])
 				textRendering.RenderText(*textShader, "Time: " + to_string(minutes) + ":" + to_string(seconds), 800.0f, 700.0f, 0.75f, glm::vec3(0.5, 0.8f, 0.2f));
 			textRendering.RenderText(*textShader, "Walls cleared : " + to_string(wallsCleared), 50.0f, 650.0f, 0.75f, glm::vec3(0.5, 0.8f, 0.2f));
 			textRendering.RenderText(*textShader, "Number of cubes in cluster : " + to_string(numCubes), 50.0f, 600.0f, 0.75f, glm::vec3(0.5, 0.8f, 0.2f));
+      textRendering.RenderText(*textShader, "Multiplier: " + to_string(scoreMultiplier), 50.0f, 550.0f, 0.75f, glm::vec3(0.5, 0.8f, 0.2f));
+
 			textRendering.disable();
 
 			// End frame
@@ -348,29 +356,37 @@ void updateDisplacement(float currentFrame)
 
 	// Check for collision
 	if (renderer.calculateFurthestZ(modelRotMat, modelTransMat, displacement) < wallZPos + 2)
-		if (!isFit())
+		if (!isFit()) {
 			resetModel(true);
+			multiplierCounter = 0;
+			// reduce multipler to half
+			if (scoreMultiplier > 1)scoreMultiplier = scoreMultiplier / 2;
+		}
 	// Reset upon wall pass
 		else if (displacement.z < -30) {
 
-		// Increment if model fits through hole
-		if (isFit()) {
-			// Separated score counter from walls for multiplier 
-			score += 1;
-			wallsCleared += 1;
-		}
-
-			modelIndex = (modelIndex+1) % models.size();
-			Renderer::getInstance().setRenderIndex(modelIndex);
+			// Increment if model fits through hole
+			if (isFit()) {
+				score += 1 * scoreMultiplier;
+				multiplierCounter++;
+				wallsCleared += 1;
+			}
+			// update multiplier upon threshold
+			if (multiplierCounter >= incMultiplierThreshold) {
+				scoreMultiplier += 1;
+				multiplierCounter = 0;
+			}
+		modelIndex = (modelIndex+1) % models.size();
+		Renderer::getInstance().setRenderIndex(modelIndex);
 		
-			// Z displacement and speed
-			displacement.z = 0;
-			displacementSpeed = 1;
-		
-			resetModel();
-			randomRotation();
-			updateNumberOfCubes();
-		}
+		// Z displacement and speed
+		displacement.z = 0;
+		displacementSpeed = 1;
+				
+		resetModel();
+		randomRotation();
+		updateNumberOfCubes();
+	}
 }
 
 // Update the number of cubes in cluster based on current model
@@ -417,7 +433,7 @@ void processInput(GLFWwindow* window, int key, int scancode, int action, int mod
 	// Closes window
 	if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
 		glfwSetWindowShouldClose(window, true);
-	
+
 	// Camera rotation around world axis (UP/DOWN/LEFT/RIGHT)
 	if (glfwGetKey(window, GLFW_KEY_UP) == GLFW_PRESS)
 		camera->processMovement(KEY::UP, deltaTime);
@@ -442,43 +458,42 @@ void processInput(GLFWwindow* window, int key, int scancode, int action, int mod
 	if (mode == GLFW_MOD_SHIFT) {
 		displacementSpeed *= 1.5f;
 	}
-
-	if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
-	{
-		glm::mat4 model = glm::mat4(1.0f);
-		model = glm::rotate(model, glm::radians(-90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
-		modelRotMat= model * modelRotMat;
-	}
-	if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
-	{
-		glm::mat4 model = glm::mat4(1.0f);
-		model = glm::rotate(model, glm::radians(90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
-		modelRotMat = model * modelRotMat;
-	}
-	if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
-	{
-		glm::mat4 model = glm::mat4(1.0f);
-		model = glm::rotate(model, glm::radians(90.0f), glm::vec3(0.0f, 1.0f, 0.0f));
-		modelRotMat = model * modelRotMat;
-	}
-	if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
-	{
-		glm::mat4 model = glm::mat4(1.0f);
-		model = glm::rotate(model, glm::radians(-90.0f), glm::vec3(0.0f, 1.0f, 0.0f));
-		modelRotMat = model * modelRotMat;
-	}
-	if (glfwGetKey(window, GLFW_KEY_Q) == GLFW_PRESS)
-	{
-		glm::mat4 model = glm::mat4(1.0f);
-		model = glm::rotate(model, glm::radians(90.0f), glm::vec3(0.0f, 0.0f, 1.0f));
-		modelRotMat= model * modelRotMat;
-	}
-	if (glfwGetKey(window, GLFW_KEY_E) == GLFW_PRESS)
-	{
-		glm::mat4 model = glm::mat4(1.0f);
-		model = glm::rotate(model, glm::radians(-90.0f), glm::vec3(0.0f, 0.0f, 1.0f));
-		modelRotMat = model * modelRotMat;
-	}
+		if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
+		{
+			glm::mat4 model = glm::mat4(1.0f);
+			model = glm::rotate(model, glm::radians(-90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
+			modelRotMat= model * modelRotMat;
+		}
+		if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
+		{
+			glm::mat4 model = glm::mat4(1.0f);
+			model = glm::rotate(model, glm::radians(90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
+			modelRotMat = model * modelRotMat;
+		}
+		if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
+		{
+			glm::mat4 model = glm::mat4(1.0f);
+			model = glm::rotate(model, glm::radians(90.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+			modelRotMat = model * modelRotMat;
+		}
+		if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
+		{
+			glm::mat4 model = glm::mat4(1.0f);
+			model = glm::rotate(model, glm::radians(-90.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+			modelRotMat = model * modelRotMat;
+		}
+		if (glfwGetKey(window, GLFW_KEY_Q) == GLFW_PRESS)
+		{
+			glm::mat4 model = glm::mat4(1.0f);
+			model = glm::rotate(model, glm::radians(90.0f), glm::vec3(0.0f, 0.0f, 1.0f));
+			modelRotMat= model * modelRotMat;
+		}
+		if (glfwGetKey(window, GLFW_KEY_E) == GLFW_PRESS)
+		{
+			glm::mat4 model = glm::mat4(1.0f);
+			model = glm::rotate(model, glm::radians(-90.0f), glm::vec3(0.0f, 0.0f, 1.0f));
+			modelRotMat = model * modelRotMat;
+		}
 	// Toggle rendering mode between point, line and fill mode (P/L/T)
 	if (glfwGetKey(window, GLFW_KEY_P) == GLFW_PRESS)
 		glPolygonMode(GL_FRONT_AND_BACK, GL_POINT);
