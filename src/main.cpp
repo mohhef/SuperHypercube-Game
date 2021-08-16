@@ -195,7 +195,7 @@ int main(int argc, char* argv[])
 			glm::vec3(0.0f, 20.0f, 0.0f));
 
 		// Position of the light source
-		glm::vec3 lightPos(-10.0, 35.0f, 40.0f);
+		glm::vec3 lightPos(-10.0, 40.0f, 40.0f);
 
 		modelPos = (modelPosition.at(modelIndex) * scaleFactor) + modelCenter.at(modelIndex) + glm::vec3(1.0f, modelHeight + 1.0f, 0.0f);
 
