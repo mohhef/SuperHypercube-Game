@@ -44,6 +44,11 @@ using namespace std;
 int scoreMultiplier = 1;
 int multiplierCounter = 0;
 int incMultiplierThreshold = 2;
+// collision variables
+float prevDisplacementSpeed = 0.0f;
+bool displacementSpeedUpdate = true;
+float speedAfterPass = 6.6f;
+glm::vec3 lockedCameraLookAt = glm::vec3(1.0f);
 // Modified throughout run and to reset between runs.
 // Possibly bound to a single model (modelIndex)
 // Models
@@ -422,6 +427,7 @@ bool isFit()
 	return true;
 }
 
+
 //update the displacement of the object
 void updateDisplacement(float currentFrame) 
 {
@@ -436,14 +442,32 @@ void updateDisplacement(float currentFrame)
 	}
 	
 	prevFrame = currentFrame;
-
+	
 	// Check for collision
 	if (renderer.calculateFurthestZ(rotMat.getMatrix(), modelTransMat, displacement) < wallZPos + 2)
 		if (!isFit() && !resetAfterCollision) {
-			rotMat.setSoft(glm::vec3(0.0f, 0.0f, 20.0f));
+			// random rotation and x movement
+			float LO = -1.0f;
+			float HI = 1.0f;
+			float r = LO + static_cast <float> (rand()) / (static_cast <float> (RAND_MAX / (HI - LO)));
+			rotMat.setSoft(glm::vec3(0.0f, 0.0f, r * 20.0f));
+			displacement.x += 1.3 * r;
 			resetTime = currentFrame + 0.5f;
 			resetAfterCollision = true;
 		}	
+		// camera lookAt does not move forward, slows down when passed
+		else if (displacement.z < -18 && displacement.z > -30){
+			if (displacementSpeedUpdate) {
+				if (displacementSpeed >= 10.0f) { prevDisplacementSpeed = speedAfterPass; }
+				else {
+					prevDisplacementSpeed = displacementSpeed;
+				}
+				displacementSpeedUpdate = false;
+				lockedCameraLookAt = (modelPos + displacement);
+			}
+			displacementSpeed = prevDisplacementSpeed;
+			camera->lookAt(lockedCameraLookAt);
+		}
 	// Reset upon wall pass
 		else if (displacement.z < -30) {
 
@@ -465,6 +489,7 @@ void updateDisplacement(float currentFrame)
 			// Z displacement and speed
 			displacement.z = 0;
 
+			displacementSpeedUpdate = true;
 			resetModel();
 			randomRotation();
 			updateNumberOfCubes();
