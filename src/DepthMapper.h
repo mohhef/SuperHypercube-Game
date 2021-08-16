@@ -5,8 +5,6 @@
 
 #include "Shader.h"
 
-
-
 static float near = 1.0f;
 static float far = 125.0f; // set to render all the map for the lighting + shadows
 

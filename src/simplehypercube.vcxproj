@@ -79,12 +79,12 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>
     <IncludePath>$(SolutionDir)\OpenGL\Include\;$(IncludePath)</IncludePath>
-    <LibraryPath>$(SolutionDir)\OpenGL\Lib\FreeType;$(SolutionDir)\OpenGL\Lib\GLFW;$(SolutionDir)\OpenGL\Lib\GL;$(SolutionDir)\OpenGL\Lib\FreeImage;$(SolutionDir)\OpenGL\Lib\irrKlang\Winx64-visualStudio;$(LibraryPath)</LibraryPath>
+    <LibraryPath>$(SolutionDir)\OpenGl\Lib\Assimp;$(SolutionDir)\OpenGL\Lib\FreeType;$(SolutionDir)\OpenGL\Lib\GLFW;$(SolutionDir)\OpenGL\Lib\GL;$(SolutionDir)\OpenGL\Lib\FreeImage;$(SolutionDir)\OpenGl\Lib\Assimp;$(SolutionDir)\OpenGL\Lib\irrKlang\Winx64-visualStudio;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LinkIncremental>false</LinkIncremental>
     <IncludePath>$(SolutionDir)\OpenGL\Include\;$(IncludePath)</IncludePath>
-    <LibraryPath>$(SolutionDir)\OpenGL\Lib\FreeType;$(SolutionDir)\OpenGL\Lib\GLFW;$(SolutionDir)\OpenGL\Lib\GL;$(SolutionDir)\OpenGL\Lib\FreeImage;$(SolutionDir)\OpenGL\Lib\irrKlang\Winx64-visualStudio;$(LibraryPath)</LibraryPath>
+    <LibraryPath>$(SolutionDir)\OpenGl\Lib\Assimp;$(SolutionDir)\OpenGL\Lib\FreeType;$(SolutionDir)\OpenGL\Lib\GLFW;$(SolutionDir)\OpenGL\Lib\GL;$(SolutionDir)\OpenGL\Lib\FreeImage;$(SolutionDir)\OpenGL\Lib\irrKlang\Winx64-visualStudio;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -96,6 +96,8 @@
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalDependencies>
+      </AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -124,7 +126,7 @@
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>irrKlang.lib;FreeImage.lib;opengl32.lib;glew32s.lib;glfw3.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;freetype.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>assimp-vc142-mtd.lib;irrKlang.lib;FreeImage.lib;opengl32.lib;glew32s.lib;glfw3.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;freetype.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -141,10 +143,13 @@
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>irrKlang.lib;FreeImage.lib;opengl32.lib;glew32s.lib;glfw3.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;freetype.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>assimp-vc142-mtd.lib;irrKlang.lib;FreeImage.lib;opengl32.lib;glew32s.lib;glfw3.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;freetype.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <None Include="3Dmodel.shader" />
+    <None Include="3DmodelFragment.shader" />
+    <None Include="3DmodelVertex.shader" />
     <None Include="axes.shader" />
     <None Include="depthMap.shader" />
     <None Include="lighting.shader" />
@@ -157,8 +162,12 @@
     <ClCompile Include="Camera.cpp" />
     <ClCompile Include="DepthMapper.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="Mesh.cpp" />
+    <ClCompile Include="Model.cpp" />
+    <ClCompile Include="ModelShader.cpp" />
     <ClCompile Include="Renderer.cpp" />
     <ClCompile Include="Shader.cpp" />
+    <ClCompile Include="stb_image.cpp" />
     <ClCompile Include="TextRendering.cpp" />
     <ClCompile Include="Texture.cpp" />
     <ClCompile Include="VertexArray.cpp" />
@@ -170,6 +179,9 @@
     <ClInclude Include="Camera.h" />
     <ClInclude Include="Constants.h" />
     <ClInclude Include="DepthMapper.h" />
+    <ClInclude Include="Mesh.h" />
+    <ClInclude Include="Model.h" />
+    <ClInclude Include="ModelShader.h" />
     <ClInclude Include="TextRendering.h" />
     <ClInclude Include="Renderer.h" />
     <ClInclude Include="Shader.h" />

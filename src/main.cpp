@@ -8,7 +8,6 @@
 
 
 #define GLEW_STATIC 1
-#define STB_IMAGE_IMPLEMENTATION
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
 #include <iostream>
@@ -25,6 +24,10 @@
 #include "DepthMapper.h"
 #include "TextRendering.h"
 #include "Animations.h"
+
+#include "Model.h"
+#include "ModelShader.h"
+#include "Mesh.h"
 
 #include "VertexArray.h"
 #include "VertexBufferLayout.h"
@@ -116,8 +119,8 @@ int main(int argc, char* argv[])
 		createModel(model);
 	}
 
-	// SoundEngine->setSoundVolume(1.0f);
-	// SoundEngine->play2D("audio/Kirby.mp3", true);
+	SoundEngine->setSoundVolume(0.75f);
+	SoundEngine->play2D("audio/Kirby.mp3", true);
 
 	GLFWwindow* window = initializeWindow();
 	{
@@ -164,6 +167,12 @@ int main(int argc, char* argv[])
 		Shader* depthShader = new Shader("depthMap.shader");
 		Shader* textShader = new Shader("text.shader");
 
+		// 3D Models
+		ModelShader* d3Shader = new ModelShader("3DmodelVertex.shader", "3DmodelFragment.shader");
+		Model ivysaurmodel("3D_Model/pokemon.obj");   // ivysaur
+		Model charizardmodel("3D_Model/pokemon1.obj"); // charizard
+		Model squirtlemodel("3D_Model/pokemon2.obj"); // squirtle
+
 		// telling the shader which textures go where
 		shader->bind();
 		shader->setUniform1i("textureObject", 0);
@@ -183,10 +192,10 @@ int main(int argc, char* argv[])
 		// Target: world origin (initially)
 		camera = new Camera(glm::vec3(modelPosition.at(modelIndex).x, modelPosition.at(modelIndex).y + 40, 100.0f),
 			glm::vec3(0.0f, 1.0f, 0.0f),
-			glm::vec3(0.0f, 0.0f, 0.0f));
+			glm::vec3(0.0f, 20.0f, 0.0f));
 
 		// Position of the light source
-		glm::vec3 lightPos(-10.0, 35.0f, 40.0f);
+		glm::vec3 lightPos(-10.0, 40.0f, 40.0f);
 
 		modelPos = (modelPosition.at(modelIndex) * scaleFactor) + modelCenter.at(modelIndex) + glm::vec3(1.0f, modelHeight + 1.0f, 0.0f);
 
@@ -255,15 +264,44 @@ int main(int argc, char* argv[])
 			// Render each object (wall, model, static models, axes, and mesh floor)
 			renderer.drawObject(vA, *shader, view, projection, lightPos, camera->position, tetrisTexture, rotMat.getMatrix(), modelTransMat, scaleFactor, displacement);
 			renderer.drawWall(vA, *shader, view, projection, lightPos, camera->position, brickTexture, rotMat.getMatrix(), scaleFactor, displacement);
-			
-			// Draw light source (for development)
-			// renderer.drawLightingSource(vaLightingSource, *lightingSourceShader, view, projection, lightPos);
-			
-			// Render axes (for development)
-			// renderer.drawAxes(vaAxes, *axesShader, view, projection);
-
-			// Render floor
+			renderer.drawLightingSource(vaLightingSource, *lightingSourceShader, view, projection, lightPos);
 			renderer.drawFloor(vaFloor, *shader, view, projection, lightPos, camera->position, galaxyTexture);
+
+			// Development purpose
+			// renderer.drawAxes(vaAxes, *axesShader, view, projection);	
+
+			// Draw Ivysaur
+			renderer.draw3DModel(
+				*d3Shader,
+				view,
+				projection,
+				glm::vec3(20.0f, 20.0f, 20.0f),
+				glm::vec3(40.0f, 5.0f, -30.0f),
+				glm::vec3(0.0f, 135.0f, 0.0f),
+				ivysaurmodel
+			);
+
+			// Draw Charizard
+			renderer.draw3DModel(
+				*d3Shader,
+				view,
+				projection,
+				glm::vec3(2.0f, 2.0f, 2.0f),
+				glm::vec3(4.0f, -2.0f * (float)glfwGetTime() + 25.0f, -40.0f),
+				glm::vec3(10.0f, 0.0f, 10.0f),
+				charizardmodel
+			);
+
+			// Draw Squirtle
+			renderer.draw3DModel(
+				*d3Shader,
+				view,
+				projection,
+				glm::vec3(5.0f, 5.0f, 5.0f),
+				glm::vec3(-50.0f, 10.0f, -20.0f),
+				glm::vec3(0.0f, 105.0f, 0.0f),
+				squirtlemodel
+			);
 			
 			// Render light source
 			renderer.drawLightingSource(vaLightingSource, *lightingSourceShader, view, projection, lightPos);

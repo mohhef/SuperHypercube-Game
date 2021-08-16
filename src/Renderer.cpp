@@ -321,3 +321,21 @@ float Renderer::calculateFurthestZ(glm::mat4 modelRotMat, vector<glm::mat4> mode
 
 	return smallestZ;
 }
+
+// Draw 3D Model
+void Renderer::draw3DModel(ModelShader& shader, glm::mat4 view, glm::mat4 projection, glm::vec3 scale, glm::vec3 translate, glm::vec3 rotation, Model modelObject)
+{
+	shader.use();
+	shader.setMat4("projection", projection);
+	shader.setMat4("view", view);
+
+	glm::mat4 model = glm::mat4(1.0f);
+	model = glm::translate(model, translate); // translate it down so it's at the center of the scene
+	model = glm::scale(model, scale);    // it's a bit too big for our scene, so scale it down
+	model = glm::rotate(model, glm::radians(rotation.x), glm::vec3(1.0f, 0.0f, 0.0f));
+	model = glm::rotate(model, glm::radians(rotation.y), glm::vec3(0.0f, 1.0f, 0.0f));
+	model = glm::rotate(model, glm::radians(rotation.z), glm::vec3(0.0f, 0.0f, 1.0f));
+	shader.setMat4("model", model);
+
+	modelObject.Draw(shader);
+}
