@@ -198,9 +198,9 @@ int main(int argc, char* argv[])
 		updateNumberOfCubes();
 
 		// Load texture ids
-		Texture brickTexture("brick.jpg");
-		Texture tileTexture("tiles.jpg");
-		Texture metalTexture("metal.jpg");
+		Texture tetrisTexture("texture/tetris.jpg");
+		Texture galaxyTexture("texture/galaxy.jpg");
+		Texture brickTexture("texture/white_brick.jpg");
 
 		// Set timer
 		timer = clock();
@@ -234,13 +234,13 @@ int main(int argc, char* argv[])
 			// Clear color and depth buffers
 			renderer.clear();
 
-			glm::mat4 projection = glm::perspective(glm::radians(camera->zoom), (float)WIDTH / (float)HEIGHT, 0.1f, 200.0f);
+			glm::mat4 projection = glm::perspective(glm::radians(camera->zoom), (float)WIDTH / (float)HEIGHT, 0.1f, 600.0f);
 			glm::mat4 view = camera->getViewMatrix();
 
 			// Shadow mapping
 			depthMapper.Draw(depthShader, lightPos, [&]() {
 				// Render objects to be drawn by the depth mapper object
-				renderer.drawObject(vA, *depthShader, view, projection, lightPos, camera->position, metalTexture, rotMat.getMatrix(), modelTransMat, scaleFactor, displacement);
+				renderer.drawObject(vA, *depthShader, view, projection, lightPos, camera->position, tetrisTexture, rotMat.getMatrix(), modelTransMat, scaleFactor, displacement);
 				renderer.drawWall(vA, *depthShader, view, projection, lightPos, camera->position, brickTexture, rotMat.getMatrix(), scaleFactor, displacement);
 				});
 
@@ -253,13 +253,17 @@ int main(int argc, char* argv[])
 			depthMapper.bind();
 
 			// Render each object (wall, model, static models, axes, and mesh floor)
-			renderer.drawObject(vA, *shader, view, projection, lightPos, camera->position, metalTexture, rotMat.getMatrix(), modelTransMat, scaleFactor, displacement);
+			renderer.drawObject(vA, *shader, view, projection, lightPos, camera->position, tetrisTexture, rotMat.getMatrix(), modelTransMat, scaleFactor, displacement);
 			renderer.drawWall(vA, *shader, view, projection, lightPos, camera->position, brickTexture, rotMat.getMatrix(), scaleFactor, displacement);
-			renderer.drawLightingSource(vaLightingSource, *lightingSourceShader, view, projection, lightPos);
-			renderer.drawAxes(vaAxes, *axesShader, view, projection);
+			
+			// Draw light source (for development)
+			// renderer.drawLightingSource(vaLightingSource, *lightingSourceShader, view, projection, lightPos);
+			
+			// Render axes (for development)
+			// renderer.drawAxes(vaAxes, *axesShader, view, projection);
 
-			// Render floor with tiles or draw the mesh depending on if we are drawing with or without textures
-			renderer.drawFloor(vaFloor, *shader, view, projection, lightPos, camera->position, tileTexture);
+			// Render floor
+			renderer.drawFloor(vaFloor, *shader, view, projection, lightPos, camera->position, galaxyTexture);
 			
 			// Render light source
 			renderer.drawLightingSource(vaLightingSource, *lightingSourceShader, view, projection, lightPos);
@@ -274,15 +278,14 @@ int main(int argc, char* argv[])
 
 			// Render text
 			textRendering.enable();
-			textRendering.RenderText(*textShader, "Score: " + to_string(score), 50.0f, 700.0f, 0.75f, glm::vec3(0.5, 0.8f, 0.2f));
+			textRendering.RenderText(*textShader, "Score: " + to_string(score), 50.0f, 700.0f, 0.50f, modelColor.at(modelIndex));
+			textRendering.RenderText(*textShader, "Multiplier: " + to_string(scoreMultiplier), 50.0f, 670.0f, 0.50f, modelColor.at(modelIndex));
+			textRendering.RenderText(*textShader, "Walls cleared : " + to_string(wallsCleared), 50.0f, 640.0f, 0.50f, modelColor.at(modelIndex));
+			textRendering.RenderText(*textShader, "Number of cubes in cluster : " + to_string(numCubes), 50.0f, 610.0f, 0.50f, modelColor.at(modelIndex));
 			if (seconds < 10)
-				textRendering.RenderText(*textShader, "Time: " + to_string(minutes) + ":0" + to_string(seconds), 800.0f, 700.0f, 0.75f, glm::vec3(0.5, 0.8f, 0.2f));
+				textRendering.RenderText(*textShader, "Time: " + to_string(minutes) + ":0" + to_string(seconds), 850.0f, 700.0f, 0.50f, modelColor.at(modelIndex));
 			else
-				textRendering.RenderText(*textShader, "Time: " + to_string(minutes) + ":" + to_string(seconds), 800.0f, 700.0f, 0.75f, glm::vec3(0.5, 0.8f, 0.2f));
-			textRendering.RenderText(*textShader, "Walls cleared : " + to_string(wallsCleared), 50.0f, 650.0f, 0.75f, glm::vec3(0.5, 0.8f, 0.2f));
-			textRendering.RenderText(*textShader, "Number of cubes in cluster : " + to_string(numCubes), 50.0f, 600.0f, 0.75f, glm::vec3(0.5, 0.8f, 0.2f));
-      textRendering.RenderText(*textShader, "Multiplier: " + to_string(scoreMultiplier), 50.0f, 550.0f, 0.75f, glm::vec3(0.5, 0.8f, 0.2f));
-
+				textRendering.RenderText(*textShader, "Time: " + to_string(minutes) + ":" + to_string(seconds), 850.0f, 700.0f, 0.50f, modelColor.at(modelIndex));
 			textRendering.disable();
 
 			// End frame
@@ -341,7 +344,7 @@ GLFWwindow* initializeWindow()
 	}
 
 	// Background color
-	glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
+	glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 	return window;
 }
 

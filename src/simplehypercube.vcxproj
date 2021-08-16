@@ -153,11 +153,6 @@
     <None Include="vertex_fragment.shader" />
   </ItemGroup>
   <ItemGroup>
-    <Image Include="brick.jpg" />
-    <Image Include="metal.jpg" />
-    <Image Include="tiles.jpg" />
-  </ItemGroup>
-  <ItemGroup>
     <ClCompile Include="Animations.cpp" />
     <ClCompile Include="Camera.cpp" />
     <ClCompile Include="DepthMapper.cpp" />

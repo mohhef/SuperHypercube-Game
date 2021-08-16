@@ -106,7 +106,7 @@ void Renderer::drawFloor(VertexArray& va, Shader& shader, glm::mat4 view, glm::m
 
 	// scale and align with XZ plane
 	glm::mat4 model = glm::mat4(1.0f)
-		* glm::scale(glm::mat4(1.0f), glm::vec3(100.0f));
+		* glm::scale(glm::mat4(1.0f), glm::vec3(500.0f));
 
 	shader.setUniform4Mat("model", model);
 	glDrawArrays(GL_TRIANGLES, 0, 6);
@@ -140,13 +140,13 @@ void Renderer::drawObject(VertexArray& va, Shader& shader, glm::mat4 view, glm::
 		if (isTextureEnabled)
 		{
 			shader.setUniform1i("textureStatus", 1);
-			shader.setUniform3Vec("ourColor", glm::vec3(0.0f, 1.0f, 1.0f));
+			shader.setUniform3Vec("ourColor", modelColor.at(renderIndex));
 			shader.setUniform1i("shininess", 16);
 		}
 		else
 		{
 			shader.setUniform1i("textureStatus", 0);
-			shader.setUniform3Vec("ourColor", glm::vec3(0.0f, 1.0f, 1.0f));
+			shader.setUniform3Vec("ourColor", modelColor.at(renderIndex));
 			shader.setUniform1i("shininess", 32);
 		}
 	}
