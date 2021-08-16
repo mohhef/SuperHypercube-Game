@@ -8,7 +8,6 @@
 
 
 #define GLEW_STATIC 1
-#define STB_IMAGE_IMPLEMENTATION
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
 #include <iostream>
@@ -270,9 +269,10 @@ int main(int argc, char* argv[])
 			d3Shader->setMat4("view", view);
 			// render the loaded model
 			glm::mat4 model = glm::mat4(1.0f);
-			model = glm::translate(model, glm::vec3(0.0f, 30.0f, -30.0f)); // translate it down so it's at the center of the scene
+			model = glm::translate(model, glm::vec3(0.0f, 20.0f, -40.0f)); // translate it down so it's at the center of the scene
 			model = glm::scale(model, glm::vec3(30.0f, 30.0f, 30.0f));    // it's a bit too big for our scene, so scale it down
 			model = glm::rotate(model, glm::radians(-180.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+			model = glm::rotate(model, glm::radians(-30.0f), glm::vec3(1.0f, 0.0f, 0.0f));
 			d3Shader->setMat4("model", model);
 			ourModel.Draw(*d3Shader);
 			
