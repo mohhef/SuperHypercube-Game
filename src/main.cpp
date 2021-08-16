@@ -198,10 +198,9 @@ int main(int argc, char* argv[])
 		updateNumberOfCubes();
 
 		// Load texture ids
-		Texture brickTexture("texture/brick.jpg");
 		Texture tetrisTexture("texture/tetris.jpg");
 		Texture galaxyTexture("texture/galaxy.jpg");
-		Texture stoneTexture("texture/white_brick.jpg");
+		Texture brickTexture("texture/white_brick.jpg");
 
 		// Set timer
 		timer = clock();
@@ -242,7 +241,7 @@ int main(int argc, char* argv[])
 			depthMapper.Draw(depthShader, lightPos, [&]() {
 				// Render objects to be drawn by the depth mapper object
 				renderer.drawObject(vA, *depthShader, view, projection, lightPos, camera->position, tetrisTexture, rotMat.getMatrix(), modelTransMat, scaleFactor, displacement);
-				renderer.drawWall(vA, *depthShader, view, projection, lightPos, camera->position, stoneTexture, rotMat.getMatrix(), scaleFactor, displacement);
+				renderer.drawWall(vA, *depthShader, view, projection, lightPos, camera->position, nrickTexture, rotMat.getMatrix(), scaleFactor, displacement);
 				});
 
 			// Bind universal attributes necessary for drawing all the objects on the map
@@ -255,9 +254,13 @@ int main(int argc, char* argv[])
 
 			// Render each object (wall, model, static models, axes, and mesh floor)
 			renderer.drawObject(vA, *shader, view, projection, lightPos, camera->position, tetrisTexture, rotMat.getMatrix(), modelTransMat, scaleFactor, displacement);
-			renderer.drawWall(vA, *shader, view, projection, lightPos, camera->position, stoneTexture, rotMat.getMatrix(), scaleFactor, displacement);
-			renderer.drawLightingSource(vaLightingSource, *lightingSourceShader, view, projection, lightPos);
-			renderer.drawAxes(vaAxes, *axesShader, view, projection);
+			renderer.drawWall(vA, *shader, view, projection, lightPos, camera->position, brickTexture, rotMat.getMatrix(), scaleFactor, displacement);
+			
+			// Draw light source (for development)
+			// renderer.drawLightingSource(vaLightingSource, *lightingSourceShader, view, projection, lightPos);
+			
+			// Render axes (for development)
+			// renderer.drawAxes(vaAxes, *axesShader, view, projection);
 
 			// Render floor
 			renderer.drawFloor(vaFloor, *shader, view, projection, lightPos, camera->position, galaxyTexture);
