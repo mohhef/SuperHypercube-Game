@@ -44,17 +44,6 @@
     </None>
   </ItemGroup>
   <ItemGroup>
-    <Image Include="brick.jpg">
-      <Filter>Resource Files</Filter>
-    </Image>
-    <Image Include="metal.jpg">
-      <Filter>Resource Files</Filter>
-    </Image>
-    <Image Include="tiles.jpg">
-      <Filter>Resource Files</Filter>
-    </Image>
-  </ItemGroup>
-  <ItemGroup>
     <ClCompile Include="Camera.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>

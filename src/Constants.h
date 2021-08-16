@@ -109,12 +109,12 @@ static float vertices[] =
 // Position(f,f,f) Normal(f,f,f) Texture(f,f)
 static float squareVertices[] =
 {
-	-0.5f, 0.0f, -0.5f, 0.0f, 1.0f, 0.0f, 0.0f, 1.0f,
-	0.5f,  0.0f, 0.5f, 0.0f, 1.0f, 0.0f, 1.0f, 0.0f,
+	-0.5f, 0.0f, -0.5f, 0.0f, 1.0f, 0.0f, 0.0f, 10.0f,
+	0.5f,  0.0f, 0.5f, 0.0f, 1.0f, 0.0f, 10.0f, 0.0f,
 	-0.5f, 0.0f, 0.5f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f,
-	-0.5f, 0.0f, -0.5f, 0.0f, 1.0f, 0.0f, 0.0f, 1.0f,
-	0.5f,  0.0f, 0.5f, 0.0f, 1.0f, 0.0f, 1.0f, 0.0f,
-	0.5f, 0.0f, -0.5f, 0.0f, 1.0f, 0.0f, 1.0f, 1.0f
+	-0.5f, 0.0f, -0.5f, 0.0f, 1.0f, 0.0f, 0.0f, 10.0f,
+	0.5f,  0.0f, 0.5f, 0.0f, 1.0f, 0.0f, 10.0f, 0.0f,
+	0.5f, 0.0f, -0.5f, 0.0f, 1.0f, 0.0f, 10.0f, 10.0f
 };
 
 // Vertices for a line which is used by the axes
@@ -201,3 +201,14 @@ static vector<glm::vec3> modelCenter = {
 	glm::vec3(2.5f, 3.5f, 0.0f),
 	glm::vec3(2.5f, 3.5f, 0.0f)
 };
+
+// The centers for each model
+static vector<glm::vec3> modelColor = 
+{
+	glm::vec3((float)155 / 255, 1, (float)75 / 255),
+	glm::vec3(1, (float) 50/255, (float) 19 / 255),
+	glm::vec3(1, (float) 151/255, (float) 28/255),
+	glm::vec3(1, (float) 213/255, 0),
+	glm::vec3(0, (float) 180/255, 1)
+};
+
