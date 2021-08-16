@@ -35,6 +35,21 @@ void Camera::processMovement(KEY key, float deltaTime)
 		rotateCameraGlobal(factor, glm::vec3(0.0f, 1.0f, 0.0f));
 }
 
+void Camera::lookAt(glm::vec3 pos) {
+	target = pos;
+	front = glm::normalize(target - this->position);
+	right = glm::normalize(glm::cross(front, worldUp));
+	up = glm::normalize(glm::cross(right, front));
+}
+
+void Camera::moveCamera(glm::vec3 displacement) {
+	this->position.z += displacement.z;
+}
+
+void Camera::resetPos(glm::vec3 position) {
+	this->position = position;
+}
+
 glm::mat4 Camera::getViewMatrix()
 {
 	return glm::lookAt(position, position + front, up);
