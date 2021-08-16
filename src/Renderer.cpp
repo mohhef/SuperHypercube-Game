@@ -32,9 +32,7 @@ void Renderer::clear() const
 // Renderer singleton instance
 Renderer Renderer::s_Instance;
 
-Renderer::Renderer() 
-{
-};
+Renderer::Renderer() {};
 
 // Getting singleton instance
 Renderer& Renderer::getInstance()
@@ -119,39 +117,6 @@ void Renderer::drawFloor(VertexArray& va, Shader& shader, glm::mat4 view, glm::m
 		shader.unbind();
 	}
 	texture.unbind();
-}
-
-void Renderer::drawCube(VertexArray& va, Shader& shader, glm::mat4 view, glm::mat4 projection) {
-	// Bind the vertex array and shader
-	va.bind();
-	shader.bind();
-
-
-
-	shader.setUniform3Vec("lightColor", glm::vec3(1.0f, 1.0f, 1.0f));
-	shader.setUniform4Mat("projection", projection);
-	shader.setUniform4Mat("view", view);
-	shader.setUniform3Vec("ourColor", glm::vec3(1.0f, 0.0f, 0.0f));
-
-	glm::mat4 model = glm::mat4(1.0f)
-		* glm::scale(glm::mat4(1.0f), glm::vec3(19.9)) * glm::translate(glm::mat4(1.0f), glm::vec3(2.0f, 0.5f, 2.0f));
-	shader.setUniform4Mat("model", model);
-	glDrawArrays(GL_TRIANGLES, 0, 36);
-	glm::mat4 model1 = glm::mat4(1.0f)
-		* glm::scale(glm::mat4(1.0f), glm::vec3(20)) * glm::translate(glm::mat4(1.0f), glm::vec3(-2.0f, 0.5f, -2.0f));
-	shader.setUniform4Mat("model", model1);
-	glDrawArrays(GL_TRIANGLES, 0, 36);
-	glm::mat4 model2 = glm::mat4(1.0f)
-		* glm::scale(glm::mat4(1.0f), glm::vec3(20)) * glm::translate(glm::mat4(1.0f), glm::vec3(-2.0f, 0.5f, 2.0f));
-	shader.setUniform4Mat("model", model2);
-	glDrawArrays(GL_TRIANGLES, 0, 36);
-	glm::mat4 model3 = glm::mat4(1.0f)
-		* glm::scale(glm::mat4(1.0f), glm::vec3(20)) * glm::translate(glm::mat4(1.0f), glm::vec3(2.0f, 0.5f, -2.0f));
-	shader.setUniform4Mat("model", model3);
-	glDrawArrays(GL_TRIANGLES, 0, 36);
-	// unbind for easier debugging
-	va.unbind();
-	shader.unbind();
 }
 
 // Draw the model that is currently in use
@@ -328,3 +293,30 @@ void Renderer::updateCenterOfMass()
 	centerOfMass.z /= numOfCubes.z;
 }
 
+float Renderer::calculateFurthestZ(glm::mat4 modelRotMat, vector<glm::mat4> modelTransMat, glm::vec3 displacement)
+{
+	int numCubePieces = modelCubePositions.at(renderIndex).size();
+	glm::mat4 trans = glm::translate(glm::mat4(1.0f), glm::vec3(displacement.x, 0.0f, displacement.z));
+	glm::mat4 initialPos = glm::translate(glm::mat4(1.0f), modelPosition.at(renderIndex));
+
+	vector<glm::vec3> currentModelCubes;
+	currentModelCubes.resize(numCubePieces);
+
+	for (int i = 0; i < numCubePieces; i++)
+	{
+		glm::mat4 model = glm::mat4(1.0f)
+			* trans
+			* initialPos
+			* glm::translate(glm::mat4(1.0f), centerOfMass)
+			* modelRotMat
+			* glm::translate(glm::mat4(1.0f), -centerOfMass);
+
+		currentModelCubes.at(i) = model * glm::vec4(modelCubePositions.at(renderIndex).at(i), 1.0);
+	}
+
+	float smallestZ = 2 * modelPosition.at(renderIndex).z;
+	for (int i = 0; i < numCubePieces; i++)
+		smallestZ = smallestZ < currentModelCubes.at(i).z ? smallestZ : currentModelCubes.at(i).z;
+
+	return smallestZ;
+}

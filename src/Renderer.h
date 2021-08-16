@@ -39,17 +39,13 @@ public:
 	void setRenderIndex(unsigned int index);
 	void setIsFindingDepth(bool findDepth);
 	void updateCenterOfMass();
+	float calculateFurthestZ(glm::mat4 modelRotMat, vector<glm::mat4> modelTransMat, glm::vec3 displacement);
 
 	// draw functions
 	void clear() const;
-	void drawCube(VertexArray& va, Shader& shader, glm::mat4 view, glm::mat4 projection);
-
-
 	void drawAxes(VertexArray& va, Shader& shader, glm::mat4 view, glm::mat4 projection);
 	void drawLightingSource(VertexArray& va, Shader& shader, glm::mat4 view, glm::mat4 projection, glm::vec3 lightPos);
 	void drawObject(VertexArray& va, Shader& shader, glm::mat4 view, glm::mat4 projection, glm::vec3 lightPos, glm::vec3 cameraPos, Texture& texture, glm::mat4 modelRotMat, vector<glm::mat4> modelTransMat, float scaleFactor, glm::vec3 displacement);
 	void drawWall(VertexArray & va, Shader & shader, glm::mat4 view, glm::mat4 projection, glm::vec3 lightPos, glm::vec3 cameraPos, Texture& texture, glm::mat4 modelRotMat, float scaleFactor, glm::vec3 displacement);
 	void drawFloor(VertexArray& va, Shader& shader, glm::mat4 view, glm::mat4 projection, glm::vec3 lightPos, glm::vec3 cameraPos, Texture& texture);
-	void drawTimer(VertexArray& va, Shader& shader);
-	void drawScore(VertexArray& va, VertexBuffer& vb, Shader& shader, int score);
 };

@@ -18,9 +18,6 @@
     <None Include="axes.shader">
       <Filter>Resource Files</Filter>
     </None>
-    <None Include="custom_material.shader">
-      <Filter>Resource Files</Filter>
-    </None>
     <None Include="depthMap.shader">
       <Filter>Resource Files</Filter>
     </None>
@@ -83,6 +80,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="VertexBufferLayout.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="TextRendering.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
