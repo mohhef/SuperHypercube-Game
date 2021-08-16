@@ -233,9 +233,6 @@ int main(int argc, char* argv[])
 			renderer.drawLightingSource(vaLightingSource, *lightingSourceShader, view, projection, lightPos);
 			renderer.drawAxes(vaAxes, *axesShader, view, projection);			
 			
-			//Position for the 3D model sample
-			//renderer.drawCube(vA, *lightingShader, view, projection);
-
 			d3Shader->use();
 			d3Shader->setMat4("projection", projection);
 			d3Shader->setMat4("view", view);
