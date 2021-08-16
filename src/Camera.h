@@ -26,6 +26,9 @@ public:
 	float cameraSpeed; // Factor for camera rotation around world axis
 	float mouseSensitivity; // Factor for camera rotation around camera axis
 	float zoom; // Total zoom factor
+	void moveCamera(glm::vec3 displacement);
+	void lookAt(glm::vec3 pos);
+	void resetPos(glm::vec3 position);
 
 	Camera(glm::vec3 position, glm::vec3 worldUp, glm::vec3 target);
 

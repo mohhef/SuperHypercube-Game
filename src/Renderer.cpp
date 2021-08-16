@@ -156,7 +156,7 @@ void Renderer::drawObject(VertexArray& va, Shader& shader, glm::mat4 view, glm::
 	for (int i = 0; i < numCubePieces; i++)
 	{
 		// adjust position based on user input
-		glm::mat4 trans = glm::translate(glm::mat4(1.0f), glm::vec3(displacement.x, 0.0f, displacement.z));
+		glm::mat4 trans = glm::translate(glm::mat4(1.0f), glm::vec3(displacement.x, modelHeight + displacement.y, displacement.z));
 		glm::mat4 initialPos = glm::translate(glm::mat4(1.0f), modelPosition.at(renderIndex));
 
 		// unit matrix * scaling input * xz_translation * model_translation (align with hole) * model_scale * model_rotation * model_cube_translation
@@ -246,6 +246,7 @@ void Renderer::drawWall(VertexArray& va, Shader& shader, glm::mat4 view, glm::ma
 		glm::mat4 model = glm::mat4(1.0f)
 			* glm::scale(glm::mat4(1.0f), glm::vec3(scaleFactor))
 			* initialPos
+			* glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, modelHeight, 0.0f))
 			* rotationMatrix
 			* modelScale.at(renderIndex)
 			* glm::translate(glm::mat4(1.0f), wallCubePositions.at(renderIndex).at(i));
