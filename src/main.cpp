@@ -263,8 +263,8 @@ int main(int argc, char* argv[])
 			// Render each object (wall, model, static models, axes, and mesh floor)
 			renderer.drawObject(vA, *shader, view, projection, lightPos, camera->position, tetrisTexture, rotMat.getMatrix(), modelTransMat, scaleFactor, displacement);
 			renderer.drawWall(vA, *shader, view, projection, lightPos, camera->position, brickTexture, rotMat.getMatrix(), scaleFactor, displacement);
-			//renderer.drawLightingSource(vaLightingSource, *lightingSourceShader, view, projection, lightPos);
-			//renderer.drawAxes(vaAxes, *axesShader, view, projection);	
+			renderer.drawLightingSource(vaLightingSource, *lightingSourceShader, view, projection, lightPos);
+			renderer.drawAxes(vaAxes, *axesShader, view, projection);	
 			renderer.drawFloor(vaFloor, *shader, view, projection, lightPos, camera->position, galaxyTexture);
 
 			// Draw Ivysaur
@@ -277,62 +277,28 @@ int main(int argc, char* argv[])
 				glm::vec3(0.0f, 135.0f, 0.0f),
 				ivysaurmodel
 			);
+			// Draw Charizard
+			renderer.draw3DModel(
+				*d3Shader,
+				view,
+				projection,
+				glm::vec3(2.0f, 2.0f, 2.0f),
+				glm::vec3(4.0f, -2.0f * (float)glfwGetTime() + 25.0f, -40.0f),
+				glm::vec3(10.0f, 0.0f, 10.0f),
+				charizardmodel
+			);
 
-			/**
-			d3Shader->use();
-			d3Shader->setMat4("projection", projection);
-			d3Shader->setMat4("view", view);
+			// Draw Squirtle
+			renderer.draw3DModel(
+				*d3Shader,
+				view,
+				projection,
+				glm::vec3(5.0f, 5.0f, 5.0f),
+				glm::vec3(-50.0f, 10.0f, -20.0f),
+				glm::vec3(0.0f, 105.0f, 0.0f),
+				squirtlemodel
+			);
 
-			// render the loaded model
-			glm::mat4 model = glm::mat4(1.0f);
-			model = glm::translate(model, glm::vec3(40.0f, 5.0f, -30.0f)); // translate it down so it's at the center of the scene
-			model = glm::scale(model, glm::vec3(20.0f, 20.0f, 20.0f));    // it's a bit too big for our scene, so scale it down
-			model = glm::rotate(model, glm::radians(135.0f), glm::vec3(0.0f, 1.0f, 0.0f));
-			model = glm::rotate(model, glm::radians(0.0f), glm::vec3(1.0f, 0.0f, 0.0f));
-			d3Shader->setMat4("model", model);
-			ivysaurmodel.Draw(*d3Shader);
-
-			glm::mat4 model1 = glm::mat4(1.0f);
-			model1 = glm::translate(model1, glm::vec3(4.0f, -2.0f * (float)glfwGetTime() + 25.0f, -40.0f)); // translate it down so it's at the center of the scene
-			model1 = glm::scale(model1, glm::vec3(2.0f, 2.0f, 2.0f));    // it's a bit too big for our scene, so scale it down
-			model1 = glm::rotate(model1, glm::radians(0.0f), glm::vec3(0.0f, 10.0f, 0.0f));
-			model1 = glm::rotate(model1, glm::radians(10.0f), glm::vec3(0.0f, 0.0f, 1.0f));
-			model1 = glm::rotate(model1, glm::radians(10.0f), glm::vec3(1.0f, 0.0f, 0.0f));
-			d3Shader->setMat4("model", model1);
-			charizardmodel.Draw(*d3Shader);
-
-			glm::mat4 model3 = glm::mat4(1.0f);
-			model3 = glm::translate(model3, glm::vec3(-36.0f, 10.0f, 0.0f)); // translate it down so it's at the center of the scene
-			model3 = glm::scale(model3, glm::vec3(4.0f, 4.0f, 4.0f));    // it's a bit too big for our scene, so scale it down
-			model3 = glm::rotate(model3, glm::radians(105.0f), glm::vec3(0.0f, 1.0f, 0.0f));
-			model3 = glm::rotate(model3, glm::radians(-10.0f), glm::vec3(1.0f, 0.0f, 0.0f));
-			d3Shader->setMat4("model", model3);
-			squirtlemodel.Draw(*d3Shader);
-
-			glm::mat4 kirby1 = glm::mat4(1.0f);
-			kirby1 = glm::translate(kirby1, glm::vec3(4.5f, -2.0f * (float)glfwGetTime() + 45.0f, -10.0f)); // translate it down so it's at the center of the scene
-			kirby1 = glm::scale(kirby1, glm::vec3(5.0f, 5.0f, 5.0f));    // it's a bit too big for our scene, so scale it down
-			kirby1 = glm::rotate(kirby1, glm::radians(0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
-			kirby1 = glm::rotate(kirby1, glm::radians(20.0f), glm::vec3(1.0f, 0.0f, 0.0f));
-			d3Shader->setMat4("model", kirby1);
-			kirbymodel.Draw(*d3Shader);
-
-			glm::mat4 kirby2 = glm::mat4(1.0f);
-			kirby2 = glm::translate(kirby2, glm::vec3(-10.0f, 28.3f, 7.5f)); // translate it down so it's at the center of the scene
-			kirby2 = glm::scale(kirby2, glm::vec3(10.0f, 10.0f, 10.0f));    // it's a bit too big for our scene, so scale it down
-			kirby2 = glm::rotate(kirby2, glm::radians((float)glfwGetTime() *75.0f), glm::vec3(0.0f, 1.0f, 0.0f));
-			kirby2 = glm::rotate(kirby2, glm::radians(20.0f), glm::vec3(1.0f, 0.0f, 0.0f));
-			d3Shader->setMat4("model", kirby2);
-			kirbymodel.Draw(*d3Shader);
-
-			glm::mat4 kirby3 = glm::mat4(1.0f);
-			kirby3 = glm::translate(kirby3, glm::vec3(30.0f, 25.0f, -18.0f)); // translate it down so it's at the center of the scene
-			kirby3 = glm::scale(kirby3, glm::vec3(10.0f, 10.0f, 10.0f));    // it's a bit too big for our scene, so scale it down
-			kirby3 = glm::rotate(kirby3, glm::radians((float)glfwGetTime()*-225.0f-35.0f), glm::vec3(0.0f, 1.0f, 0.0f));
-			kirby3 = glm::rotate(kirby3, glm::radians(20.0f), glm::vec3(1.0f, 0.0f, 0.0f));
-			d3Shader->setMat4("model", kirby3);
-			kirbymodel.Draw(*d3Shader);
-			*/
 
 			// Render floor with tiles or draw the mesh depending on if we are drawing with or without textures
 			//renderer.drawFloor(vaFloor, *shader, view, projection, lightPos, camera->position, tileTexture);
