@@ -120,7 +120,7 @@ int main(int argc, char* argv[])
 	}
 
 	// SoundEngine->setSoundVolume(1.0f);
-	// SoundEngine->play2D("audio/Kirby.mp3", true);
+	SoundEngine->play2D("audio/Kirby.mp3", true);
 
 	GLFWwindow* window = initializeWindow();
 	{
