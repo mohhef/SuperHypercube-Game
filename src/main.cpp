@@ -145,7 +145,7 @@ int main(int argc, char* argv[])
 		Shader* depthShader = new Shader("depthMap.shader");
 		Shader* textShader = new Shader("text.shader");
 
-		ModelShader ourShader("1.model_loading.vs", "1.model_loading.fs");
+		ModelShader *d3Shader= new ModelShader("3DmodelVertex.shader", "3DmodelFragment.shader");
 		Model ourModel("resources/objects/Ivysaur_Outlined_OBJ/pokemon.obj");
 		
 		// telling the shader which textures go where
@@ -237,8 +237,20 @@ int main(int argc, char* argv[])
 			//Position for the 3D model sample
 			renderer.drawCube(vA, *lightingShader, view, projection);
 
+
+			d3Shader->setMat4("projection", projection);
+			d3Shader->setMat4("view", view);
+
+			// render the loaded model
+			glm::mat4 model = glm::mat4(1.0f);
+			model = glm::translate(model, glm::vec3(0.0f, 0.0f, 0.0f)); // translate it down so it's at the center of the scene
+			model = glm::scale(model, glm::vec3(1.0f, 1.0f, 1.0f));    // it's a bit too big for our scene, so scale it down
+			d3Shader->setMat4("model", model);
+			ourModel.Draw(*d3Shader);
+			
+			// render the loaded model
 			//Render the 3D
-			renderer.drawModel(vA, *lightingShader, view, projection);
+			//renderer.drawModel(vA, *lightingShader, view, projection);
 
 			// Render floor with tiles or draw the mesh depending on if we are drawing with or without textures
 			renderer.drawFloor(vaFloor, *shader, view, projection, lightPos, camera->position, tileTexture);
