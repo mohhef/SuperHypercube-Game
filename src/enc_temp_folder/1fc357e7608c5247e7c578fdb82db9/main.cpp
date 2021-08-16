@@ -231,14 +231,18 @@ int main(int argc, char* argv[])
 			renderer.drawObject(vA, *shader, view, projection, lightPos, camera->position, metalTexture, modelRotMat, modelTransMat, scaleFactor, displacement);
 			renderer.drawWall(vA, *shader, view, projection, lightPos, camera->position, brickTexture, modelRotMat, scaleFactor, displacement);
 			renderer.drawLightingSource(vaLightingSource, *lightingSourceShader, view, projection, lightPos);
-			renderer.drawAxes(vaAxes, *axesShader, view, projection);			
+			renderer.drawAxes(vaAxes, *axesShader, view, projection);
+			
 			
 			//Position for the 3D model sample
 			//renderer.drawCube(vA, *lightingShader, view, projection);
 
+
 			d3Shader->use();
+
 			d3Shader->setMat4("projection", projection);
 			d3Shader->setMat4("view", view);
+
 			// render the loaded model
 			glm::mat4 model = glm::mat4(1.0f);
 			model = glm::translate(model, glm::vec3(0.0f, 50.0f, 0.0f)); // translate it down so it's at the center of the scene
@@ -246,6 +250,9 @@ int main(int argc, char* argv[])
 			d3Shader->setMat4("model", model);
 			ourModel.Draw(*d3Shader);
 			
+			//Render the 3D
+			//renderer.drawModel(*d3Shader, view, projection);
+
 			// Render floor with tiles or draw the mesh depending on if we are drawing with or without textures
 			renderer.drawFloor(vaFloor, *shader, view, projection, lightPos, camera->position, tileTexture);
 			

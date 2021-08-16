@@ -3,6 +3,7 @@
 #include "VertexArray.h"
 #include "Texture.h"
 #include "Shader.h"
+#include "ModelShader.h"
 #include <map>
 
 // Assertion check helper for gl commands
@@ -42,7 +43,6 @@ public:
 	// draw functions
 	void clear() const;
 	void drawCube(VertexArray& va, Shader& shader, glm::mat4 view, glm::mat4 projection);
-	void drawModel(VertexArray& va, Shader& shader, glm::mat4 view, glm::mat4 projection);
 
 
 	void drawAxes(VertexArray& va, Shader& shader, glm::mat4 view, glm::mat4 projection);
