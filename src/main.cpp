@@ -168,9 +168,9 @@ int main(int argc, char* argv[])
 		Shader* textShader = new Shader("text.shader");
 
 		ModelShader *d3Shader= new ModelShader("3DmodelVertex.shader", "3DmodelFragment.shader");
-		Model ourModel("3D_Model/pokemon.obj");
-		Model ourModel1("3D_Model/pokemon1.obj");
-		Model ourModel2("3D_Model/pokemon2.obj");
+		Model ourModel("3D_Model/pokemon.obj");   // ivysaur
+		Model ourModel1("3D_Model/pokemon1.obj"); // charizard
+		Model ourModel2("3D_Model/pokemon2.obj"); // squirtle
 
 		// telling the shader which textures go where
 		shader->bind();
@@ -265,13 +265,13 @@ int main(int argc, char* argv[])
 			renderer.drawWall(vA, *shader, view, projection, lightPos, camera->position, brickTexture, rotMat.getMatrix(), scaleFactor, displacement);
 			//renderer.drawLightingSource(vaLightingSource, *lightingSourceShader, view, projection, lightPos);
 			//renderer.drawAxes(vaAxes, *axesShader, view, projection);			
-			
+			renderer.drawFloor(vaFloor, *shader, view, projection, lightPos, camera->position, galaxyTexture);
 			d3Shader->use();
 			d3Shader->setMat4("projection", projection);
 			d3Shader->setMat4("view", view);
 			// render the loaded model
 			glm::mat4 model = glm::mat4(1.0f);
-			model = glm::translate(model, glm::vec3(4.0f, 20.0f, -40.0f)); // translate it down so it's at the center of the scene
+			model = glm::translate(model, glm::vec3(4.0f, 15.0f, -40.0f)); // translate it down so it's at the center of the scene
 			model = glm::scale(model, glm::vec3(20.0f, 20.0f, 20.0f));    // it's a bit too big for our scene, so scale it down
 			model = glm::rotate(model, glm::radians(-180.0f), glm::vec3(0.0f, 1.0f, 0.0f));
 			model = glm::rotate(model, glm::radians(-30.0f), glm::vec3(1.0f, 0.0f, 0.0f));
@@ -279,18 +279,18 @@ int main(int argc, char* argv[])
 			ourModel.Draw(*d3Shader);
 			
 			glm::mat4 model1 = glm::mat4(1.0f);
-			model1 = glm::translate(model1, glm::vec3(40.0f, 20.0f, -40.0f)); // translate it down so it's at the center of the scene
-			model1 = glm::scale(model1, glm::vec3(20.0f, 20.0f, 20.0f));    // it's a bit too big for our scene, so scale it down
-			model1 = glm::rotate(model1, glm::radians(-225.0f), glm::vec3(0.0f, 1.0f, 0.0f));
-			model1 = glm::rotate(model1, glm::radians(-30.0f), glm::vec3(1.0f, 0.0f, 0.0f));
+			model1 = glm::translate(model1, glm::vec3(40.0f, 10.0f, -40.0f)); // translate it down so it's at the center of the scene
+			model1 = glm::scale(model1, glm::vec3(3.0f, 3.0f, 3.0f));    // it's a bit too big for our scene, so scale it down
+			model1 = glm::rotate(model1, glm::radians(-45.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+			model1 = glm::rotate(model1, glm::radians(0.0f), glm::vec3(1.0f, 0.0f, 0.0f));
 			d3Shader->setMat4("model", model1);
 			ourModel1.Draw(*d3Shader);
 
 			glm::mat4 model2 = glm::mat4(1.0f);
-			model2 = glm::translate(model2, glm::vec3(-32.0f, 20.0f, -40.0f)); // translate it down so it's at the center of the scene
-			model2 = glm::scale(model2, glm::vec3(20.0f, 20.0f, 20.0f));    // it's a bit too big for our scene, so scale it down
-			model2 = glm::rotate(model2, glm::radians(-135.0f), glm::vec3(0.0f, 1.0f, 0.0f));
-			model2 = glm::rotate(model2, glm::radians(-30.0f), glm::vec3(1.0f, 0.0f, 0.0f));
+			model2 = glm::translate(model2, glm::vec3(-32.0f, 15.0f, -40.0f)); // translate it down so it's at the center of the scene
+			model2 = glm::scale(model2, glm::vec3(4.0f, 4.0f, 4.0f));    // it's a bit too big for our scene, so scale it down
+			model2 = glm::rotate(model2, glm::radians(60.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+			model2 = glm::rotate(model2, glm::radians(0.0f), glm::vec3(1.0f, 0.0f, 0.0f));
 			d3Shader->setMat4("model", model2);
 			ourModel2.Draw(*d3Shader);
 
