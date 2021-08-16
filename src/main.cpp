@@ -168,8 +168,10 @@ int main(int argc, char* argv[])
 		Shader* textShader = new Shader("text.shader");
 
 		ModelShader *d3Shader= new ModelShader("3DmodelVertex.shader", "3DmodelFragment.shader");
-		Model ourModel("resources/objects/Ivysaur_Outlined_OBJ/pokemon.obj");
-		
+		Model ourModel("3D_Model/pokemon.obj");
+		Model ourModel1("3D_Model/pokemon1.obj");
+		Model ourModel2("3D_Model/pokemon2.obj");
+
 		// telling the shader which textures go where
 		shader->bind();
 		shader->setUniform1i("textureObject", 0);
@@ -269,13 +271,29 @@ int main(int argc, char* argv[])
 			d3Shader->setMat4("view", view);
 			// render the loaded model
 			glm::mat4 model = glm::mat4(1.0f);
-			model = glm::translate(model, glm::vec3(0.0f, 20.0f, -40.0f)); // translate it down so it's at the center of the scene
-			model = glm::scale(model, glm::vec3(30.0f, 30.0f, 30.0f));    // it's a bit too big for our scene, so scale it down
+			model = glm::translate(model, glm::vec3(4.0f, 20.0f, -40.0f)); // translate it down so it's at the center of the scene
+			model = glm::scale(model, glm::vec3(20.0f, 20.0f, 20.0f));    // it's a bit too big for our scene, so scale it down
 			model = glm::rotate(model, glm::radians(-180.0f), glm::vec3(0.0f, 1.0f, 0.0f));
 			model = glm::rotate(model, glm::radians(-30.0f), glm::vec3(1.0f, 0.0f, 0.0f));
 			d3Shader->setMat4("model", model);
 			ourModel.Draw(*d3Shader);
 			
+			glm::mat4 model1 = glm::mat4(1.0f);
+			model1 = glm::translate(model1, glm::vec3(40.0f, 20.0f, -40.0f)); // translate it down so it's at the center of the scene
+			model1 = glm::scale(model1, glm::vec3(20.0f, 20.0f, 20.0f));    // it's a bit too big for our scene, so scale it down
+			model1 = glm::rotate(model1, glm::radians(-225.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+			model1 = glm::rotate(model1, glm::radians(-30.0f), glm::vec3(1.0f, 0.0f, 0.0f));
+			d3Shader->setMat4("model", model1);
+			ourModel1.Draw(*d3Shader);
+
+			glm::mat4 model2 = glm::mat4(1.0f);
+			model2 = glm::translate(model2, glm::vec3(-32.0f, 20.0f, -40.0f)); // translate it down so it's at the center of the scene
+			model2 = glm::scale(model2, glm::vec3(20.0f, 20.0f, 20.0f));    // it's a bit too big for our scene, so scale it down
+			model2 = glm::rotate(model2, glm::radians(-135.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+			model2 = glm::rotate(model2, glm::radians(-30.0f), glm::vec3(1.0f, 0.0f, 0.0f));
+			d3Shader->setMat4("model", model2);
+			ourModel2.Draw(*d3Shader);
+
 			// Render floor with tiles or draw the mesh depending on if we are drawing with or without textures
 			//renderer.drawFloor(vaFloor, *shader, view, projection, lightPos, camera->position, tileTexture);
 			
