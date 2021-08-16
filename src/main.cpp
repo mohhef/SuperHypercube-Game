@@ -703,5 +703,6 @@ int getTotalCubes(vector<vector<int>> model) {
 void resetScoreAndTimer()
 {
 	score = 0;
+	wallsCleared = 0;
 	timer = clock();
 }
