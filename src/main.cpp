@@ -119,7 +119,7 @@ int main(int argc, char* argv[])
 		createModel(model);
 	}
 
-	// SoundEngine->setSoundVolume(1.0f);
+	SoundEngine->setSoundVolume(0.75f);
 	SoundEngine->play2D("audio/Kirby.mp3", true);
 
 	GLFWwindow* window = initializeWindow();
@@ -167,11 +167,12 @@ int main(int argc, char* argv[])
 		Shader* depthShader = new Shader("depthMap.shader");
 		Shader* textShader = new Shader("text.shader");
 
-		ModelShader *d3Shader= new ModelShader("3DmodelVertex.shader", "3DmodelFragment.shader");
+		// 3D Models
+		ModelShader* d3Shader = new ModelShader("3DmodelVertex.shader", "3DmodelFragment.shader");
 		Model ivysaurmodel("3D_Model/pokemon.obj");   // ivysaur
 		Model charizardmodel("3D_Model/pokemon1.obj"); // charizard
-		Model kirbymodel("3D_Model/kirby.obj"); // kirby
-		Model squirtlemodel("3D_Model/pokemon2.obj"); //
+		Model squirtlemodel("3D_Model/pokemon2.obj"); // squirtle
+
 		// telling the shader which textures go where
 		shader->bind();
 		shader->setUniform1i("textureObject", 0);
@@ -264,8 +265,10 @@ int main(int argc, char* argv[])
 			renderer.drawObject(vA, *shader, view, projection, lightPos, camera->position, tetrisTexture, rotMat.getMatrix(), modelTransMat, scaleFactor, displacement);
 			renderer.drawWall(vA, *shader, view, projection, lightPos, camera->position, brickTexture, rotMat.getMatrix(), scaleFactor, displacement);
 			renderer.drawLightingSource(vaLightingSource, *lightingSourceShader, view, projection, lightPos);
-			renderer.drawAxes(vaAxes, *axesShader, view, projection);	
 			renderer.drawFloor(vaFloor, *shader, view, projection, lightPos, camera->position, galaxyTexture);
+
+			// Development purpose
+			// renderer.drawAxes(vaAxes, *axesShader, view, projection);	
 
 			// Draw Ivysaur
 			renderer.draw3DModel(
@@ -277,6 +280,7 @@ int main(int argc, char* argv[])
 				glm::vec3(0.0f, 135.0f, 0.0f),
 				ivysaurmodel
 			);
+
 			// Draw Charizard
 			renderer.draw3DModel(
 				*d3Shader,
@@ -298,10 +302,6 @@ int main(int argc, char* argv[])
 				glm::vec3(0.0f, 105.0f, 0.0f),
 				squirtlemodel
 			);
-
-
-			// Render floor with tiles or draw the mesh depending on if we are drawing with or without textures
-			//renderer.drawFloor(vaFloor, *shader, view, projection, lightPos, camera->position, tileTexture);
 			
 			// Render light source
 			renderer.drawLightingSource(vaLightingSource, *lightingSourceShader, view, projection, lightPos);
