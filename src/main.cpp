@@ -467,9 +467,9 @@ void resetModel(bool randomRot)
 {
 	resetTransMat();
 	resetRotMat(randomRot);
-	glm::vec3 cameraPos = modelPos + glm::vec3(0.0f, 0.0f, 40.0f);
+	glm::vec3 cameraPos = modelPos + glm::vec3(0.0f, 10.0f, 40.0f);
 	camera->resetPos(cameraPos);
-	camera->lookAt(cameraPos + glm::vec3(0.0f, 0.0f, -50.0f));
+	camera->lookAt(cameraPos + glm::vec3(0.0f, -10.0f, -50.0f));
 	glfwSetTime(0.0f);
 	displacement = glm::vec3(0.0f);
 	displacementSpeed = 2.0f;
@@ -494,10 +494,11 @@ void processInput(GLFWwindow* window, int key, int scancode, int action, int mod
 		camera->processMovement(KEY::RIGHT, deltaTime);
 
 	// Camera reset (HOME)
-	if (glfwGetKey(window, GLFW_KEY_HOME) == GLFW_PRESS)
-		camera = new Camera(glm::vec3(modelPosition.at(modelIndex).x, modelPosition.at(modelIndex).y + 40, 100.0f),
-			glm::vec3(0.0f, 1.0f, 0.0f),
-			glm::vec3(0.0f, 0.0f, 0.0f));
+	if (glfwGetKey(window, GLFW_KEY_HOME) == GLFW_PRESS) {
+		glm::vec3 cameraPos = modelPos + glm::vec3(0.0f, 0.0f, 40.0f);
+		camera->resetPos(cameraPos + displacement);
+		camera->lookAt(cameraPos + glm::vec3(0.0f, 0.0f, -50.0f));
+	}
 
 	// Reset model (SPACEBAR)
 	if (glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS)

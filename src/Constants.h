@@ -193,7 +193,7 @@ static vector<glm::vec3> modelPosition =
 	glm::vec3(0.0f, 1.0f, 10.0f)
 };
 
-
+// The centers for each model
 static vector<glm::vec3> modelCenter = {
 	glm::vec3(2.5f, 3.5f, 0.0f),
 	glm::vec3(2.5f, 4.5f, 0.0f),
