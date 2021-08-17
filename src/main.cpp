@@ -75,7 +75,8 @@ Renderer& renderer = Renderer::getInstance();
 
 // Sound
 ISoundEngine* SoundEngine = createIrrKlangDevice();
-
+float bgmVolume = 0.25;
+int lastMinusState = GLFW_RELEASE;
 // Cursor positions for mouse inputs
 float lastMouseX;
 float lastMouseY;
@@ -113,6 +114,7 @@ int WIDTH = 1024;
 float lastX = WIDTH / 2;
 float lastY = HEIGHT / 2;
 
+
 // Main function
 int main(int argc, char* argv[])
 {
@@ -124,8 +126,8 @@ int main(int argc, char* argv[])
 		createModel(model);
 	}
 
-	// SoundEngine->setSoundVolume(1.0f);
-	// SoundEngine->play2D("audio/Kirby.mp3", true);
+	SoundEngine->setSoundVolume(bgmVolume);
+	SoundEngine->play2D("audio/breakout.mp3", true);
 
 	GLFWwindow* window = initializeWindow();
 	{
@@ -220,7 +222,10 @@ int main(int argc, char* argv[])
 
 		// Entering main loop
 		while (!glfwWindowShouldClose(window))
-		{
+		{	
+			SoundEngine->setSoundVolume(bgmVolume);
+			//SoundEngine->play2D("audio/Kirby.mp3", true);
+			
 			// Update last frame
 			float currentFrame = glfwGetTime();
 			deltaTime = currentFrame - lastFrame;
@@ -250,11 +255,13 @@ int main(int argc, char* argv[])
 			glm::mat4 projection = glm::perspective(glm::radians(camera->zoom), (float)WIDTH / (float)HEIGHT, 0.1f, 600.0f);
 			glm::mat4 view = camera->getViewMatrix();
 
+			bool wallColorChange = !isFit()  && (displacement.z < -18) /*&& !resetAfterCollision*/;
+
 			// Shadow mapping
 			depthMapper.Draw(depthShader, lightPos, [&]() {
 				// Render objects to be drawn by the depth mapper object
 				renderer.drawObject(vA, *depthShader, view, projection, lightPos, camera->position, tetrisTexture, rotMat.getMatrix(), modelTransMat, scaleFactor, displacement);
-				renderer.drawWall(vA, *depthShader, view, projection, lightPos, camera->position, brickTexture, rotMat.getMatrix(), scaleFactor, displacement);
+				renderer.drawWall(vA, *depthShader, view, projection, lightPos, camera->position, brickTexture, rotMat.getMatrix(), scaleFactor, displacement, wallColorChange);
 				});
 
 			// Bind universal attributes necessary for drawing all the objects on the map
@@ -267,7 +274,8 @@ int main(int argc, char* argv[])
 
 			// Render each object (wall, model, static models, axes, and mesh floor)
 			renderer.drawObject(vA, *shader, view, projection, lightPos, camera->position, tetrisTexture, rotMat.getMatrix(), modelTransMat, scaleFactor, displacement);
-			renderer.drawWall(vA, *shader, view, projection, lightPos, camera->position, brickTexture, rotMat.getMatrix(), scaleFactor, displacement);
+			
+			renderer.drawWall(vA, *shader, view, projection, lightPos, camera->position, brickTexture, rotMat.getMatrix(), scaleFactor, displacement, wallColorChange);
 			renderer.drawLightingSource(vaLightingSource, *lightingSourceShader, view, projection, lightPos);
 			renderer.drawAxes(vaAxes, *axesShader, view, projection);	
 			renderer.drawFloor(vaFloor, *shader, view, projection, lightPos, camera->position, galaxyTexture);
@@ -427,7 +435,6 @@ bool isFit()
 	return true;
 }
 
-
 //update the displacement of the object
 void updateDisplacement(float currentFrame) 
 {
@@ -456,7 +463,7 @@ void updateDisplacement(float currentFrame)
 			resetAfterCollision = true;
 		}	
 		// camera lookAt does not move forward, slows down when passed
-		else if (displacement.z < -18 && displacement.z > -30){
+		else if (displacement.z < -18 && displacement.z > -25){
 			if (displacementSpeedUpdate) {
 				if (displacementSpeed >= 10.0f) { prevDisplacementSpeed = speedAfterPass; }
 				else {
@@ -469,8 +476,7 @@ void updateDisplacement(float currentFrame)
 			camera->lookAt(lockedCameraLookAt);
 		}
 	// Reset upon wall pass
-		else if (displacement.z < -30) {
-
+		else if (displacement.z < -25) {
 			// Increment if model fits through hole
 			if (isFit()) {
 				score += 1 * scoreMultiplier;
@@ -613,6 +619,14 @@ void processInput(GLFWwindow* window, int key, int scancode, int action, int mod
 	if (glfwGetKey(window, GLFW_KEY_B) == GLFW_PRESS)
 	{
 		shadows = !shadows;
+	}
+	// bgm sound adjust
+	if (lastMinusState == GLFW_RELEASE && glfwGetKey(window, GLFW_KEY_MINUS) == GLFW_PRESS) {
+		bgmVolume -= 0.05;
+	}
+	lastMinusState = glfwGetKey(window, GLFW_KEY_MINUS);
+	if (glfwGetKey(window, GLFW_KEY_EQUAL) == GLFW_PRESS) {
+		bgmVolume += 0.05;
 	}
 }
 
