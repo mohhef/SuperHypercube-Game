@@ -131,6 +131,7 @@ int main(int argc, char* argv[])
 		createModel(model);
 	}
 
+
 	SoundEngine->setSoundVolume(bgmVolume);
 	SoundEngine->play2D("audio/Kirby.mp3",  true, false, true);
 
@@ -186,10 +187,12 @@ int main(int argc, char* argv[])
 		Shader* depthShader = new Shader("depthMap.shader");
 		Shader* textShader = new Shader("text.shader");
 
-		ModelShader *d3Shader= new ModelShader("3DmodelVertex.shader", "3DmodelFragment.shader");
+		// 3D Models
+		ModelShader* d3Shader = new ModelShader("3DmodelVertex.shader", "3DmodelFragment.shader");
 		Model ivysaurmodel("3D_Model/pokemon.obj");   // ivysaur
 		Model charizardmodel("3D_Model/pokemon1.obj"); // charizard
-		Model squirtlemodel("3D_Model/pokemon2.obj"); //
+		Model squirtlemodel("3D_Model/pokemon2.obj"); // squirtle
+
 		// telling the shader which textures go where
 		shader->bind();
 		shader->setUniform1i("textureObject", 0);
@@ -212,7 +215,7 @@ int main(int argc, char* argv[])
 			glm::vec3(0.0f, 20.0f, 0.0f));
 
 		// Position of the light source
-		glm::vec3 lightPos(-10.0, 35.0f, 40.0f);
+		glm::vec3 lightPos(-10.0, 40.0f, 40.0f);
 
 		modelPos = (modelPosition.at(modelIndex) * scaleFactor) + modelCenter.at(modelIndex) + glm::vec3(1.0f, modelHeight + 1.0f, 0.0f);
 
@@ -288,8 +291,10 @@ int main(int argc, char* argv[])
 			
 			renderer.drawWall(vA, *shader, view, projection, lightPos, camera->position, brickTexture, rotMat.getMatrix(), scaleFactor, displacement, wallColorChange);
 			renderer.drawLightingSource(vaLightingSource, *lightingSourceShader, view, projection, lightPos);
-			renderer.drawAxes(vaAxes, *axesShader, view, projection);	
 			renderer.drawFloor(vaFloor, *shader, view, projection, lightPos, camera->position, galaxyTexture);
+
+			// Development purpose
+			// renderer.drawAxes(vaAxes, *axesShader, view, projection);	
 
 			// Draw Ivysaur
 			renderer.draw3DModel(
@@ -301,6 +306,7 @@ int main(int argc, char* argv[])
 				glm::vec3(0.0f, 135.0f, 0.0f),
 				ivysaurmodel
 			);
+
 			// Draw Charizard
 			renderer.draw3DModel(
 				*d3Shader,
@@ -322,10 +328,6 @@ int main(int argc, char* argv[])
 				glm::vec3(0.0f, 70.0f, 0.0f),
 				squirtlemodel
 			);
-
-
-			// Render floor with tiles or draw the mesh depending on if we are drawing with or without textures
-			//renderer.drawFloor(vaFloor, *shader, view, projection, lightPos, camera->position, tileTexture);
 			
 			// Render light source
 			renderer.drawLightingSource(vaLightingSource, *lightingSourceShader, view, projection, lightPos);
