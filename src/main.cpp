@@ -97,6 +97,7 @@ void resetScoreAndTimer();
 // animation
 bool resetAfterCollision = false;
 float resetTime = 0.0f;
+bool fittingThrough = false;
 glm::vec3 cameraInitialPos = glm::vec3(modelPosition.at(modelIndex).x, modelPosition.at(modelIndex).y + 40, 100.0f);
 glm::vec3 modelPos;
 
@@ -250,7 +251,7 @@ int main(int argc, char* argv[])
 			depthMapper.Draw(depthShader, lightPos, [&]() {
 				// Render objects to be drawn by the depth mapper object
 				renderer.drawObject(vA, *depthShader, view, projection, lightPos, camera->position, tetrisTexture, rotMat.getMatrix(), modelTransMat, scaleFactor, displacement);
-				renderer.drawWall(vA, *depthShader, view, projection, lightPos, camera->position, brickTexture, rotMat.getMatrix(), scaleFactor, displacement);
+				renderer.drawWall(vA, *depthShader, view, projection, lightPos, camera->position, brickTexture, rotMat.getMatrix(), scaleFactor, displacement, resetAfterCollision, fittingThrough);
 				});
 
 			// Bind universal attributes necessary for drawing all the objects on the map
@@ -263,7 +264,7 @@ int main(int argc, char* argv[])
 
 			// Render each object (wall, model, static models, axes, and mesh floor)
 			renderer.drawObject(vA, *shader, view, projection, lightPos, camera->position, tetrisTexture, rotMat.getMatrix(), modelTransMat, scaleFactor, displacement);
-			renderer.drawWall(vA, *shader, view, projection, lightPos, camera->position, brickTexture, rotMat.getMatrix(), scaleFactor, displacement);
+			renderer.drawWall(vA, *shader, view, projection, lightPos, camera->position, brickTexture, rotMat.getMatrix(), scaleFactor, displacement, resetAfterCollision, fittingThrough);
 			renderer.drawLightingSource(vaLightingSource, *lightingSourceShader, view, projection, lightPos);
 			renderer.drawFloor(vaFloor, *shader, view, projection, lightPos, camera->position, galaxyTexture);
 
@@ -436,13 +437,13 @@ void updateDisplacement(float currentFrame)
 	}
 	
 	prevFrame = currentFrame;
-
 	// Check for collision
 	if (renderer.calculateFurthestZ(rotMat.getMatrix(), modelTransMat, displacement) < wallZPos + 2)
 		if (!isFit() && !resetAfterCollision) {
 			rotMat.setSoft(glm::vec3(0.0f, 0.0f, 20.0f));
 			resetTime = currentFrame + 0.5f;
 			resetAfterCollision = true;
+			fittingThrough = false;
 		}	
 	// Reset upon wall pass
 		else if (displacement.z < -30) {
@@ -472,6 +473,7 @@ void updateDisplacement(float currentFrame)
 		else {
 			displacementSpeed = 10.0f;
 			camera->lookAt(modelPos + displacement);
+			if(isFit()) fittingThrough = true;
 		}
 }
 
@@ -479,6 +481,7 @@ void updateDisplacement(float currentFrame)
 void updateNumberOfCubes()
 {
 	numCubes = getTotalCubes(models.at(modelIndex));
+	fittingThrough = false;
 }
 
 // Reset translation matrix for each model's cube.
