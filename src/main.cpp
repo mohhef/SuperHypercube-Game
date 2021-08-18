@@ -75,8 +75,13 @@ Renderer& renderer = Renderer::getInstance();
 
 // Sound
 ISoundEngine* SoundEngine = createIrrKlangDevice();
-float bgmVolume = 0.25;
+ISoundEngine* SoundEngine2 = createIrrKlangDevice();
+float bgmVolume = 0.25f;
+float effectVolume = 0.50f;
 int lastMinusState = GLFW_RELEASE;
+int lastEqualState = GLFW_RELEASE;
+int lastBackSpaceState = GLFW_RELEASE;
+int soundSwitch = 1;
 // Cursor positions for mouse inputs
 float lastMouseX;
 float lastMouseY;
@@ -127,7 +132,14 @@ int main(int argc, char* argv[])
 	}
 
 	SoundEngine->setSoundVolume(bgmVolume);
-	SoundEngine->play2D("audio/breakout.mp3", true);
+	SoundEngine->play2D("audio/Kirby.mp3",  true, false, true);
+
+	SoundEngine2->setSoundVolume(effectVolume);
+	SoundEngine2->addSoundSourceFromFile("audio/breakout.mp3", ESM_AUTO_DETECT, true); // third parameter set to true == preload
+	SoundEngine2->addSoundSourceFromFile("audio/punch.mp3", ESM_AUTO_DETECT, true); // third parameter set to true == preload
+	SoundEngine2->addSoundSourceFromFile("audio/bow.mp3", ESM_AUTO_DETECT, true); // third parameter set to true == preload
+	SoundEngine2->addSoundSourceFromFile("audio/score.wav", ESM_AUTO_DETECT, true); // third parameter set to true == preload
+	SoundEngine2->addSoundSourceFromFile("audio/click.mp3", ESM_AUTO_DETECT, true); // third parameter set to true == preload
 
 	GLFWwindow* window = initializeWindow();
 	{
@@ -177,7 +189,6 @@ int main(int argc, char* argv[])
 		ModelShader *d3Shader= new ModelShader("3DmodelVertex.shader", "3DmodelFragment.shader");
 		Model ivysaurmodel("3D_Model/pokemon.obj");   // ivysaur
 		Model charizardmodel("3D_Model/pokemon1.obj"); // charizard
-		Model kirbymodel("3D_Model/kirby.obj"); // kirby
 		Model squirtlemodel("3D_Model/pokemon2.obj"); //
 		// telling the shader which textures go where
 		shader->bind();
@@ -285,8 +296,8 @@ int main(int argc, char* argv[])
 				*d3Shader,
 				view,
 				projection,
-				glm::vec3(20.0f, 20.0f, 20.0f),
-				glm::vec3(40.0f, 5.0f, -30.0f),
+				glm::vec3(2.0f, 2.0f, 2.0f),
+				glm::vec3(8.0f, 20.0f, -10.0f),
 				glm::vec3(0.0f, 135.0f, 0.0f),
 				ivysaurmodel
 			);
@@ -295,8 +306,8 @@ int main(int argc, char* argv[])
 				*d3Shader,
 				view,
 				projection,
-				glm::vec3(2.0f, 2.0f, 2.0f),
-				glm::vec3(4.0f, -2.0f * (float)glfwGetTime() + 25.0f, -40.0f),
+				glm::vec3(0.2f, 0.2f, 0.2f),
+				glm::vec3(4.0f, 20.0f, -10.0f),
 				glm::vec3(10.0f, 0.0f, 10.0f),
 				charizardmodel
 			);
@@ -306,9 +317,9 @@ int main(int argc, char* argv[])
 				*d3Shader,
 				view,
 				projection,
-				glm::vec3(5.0f, 5.0f, 5.0f),
-				glm::vec3(-50.0f, 10.0f, -20.0f),
-				glm::vec3(0.0f, 105.0f, 0.0f),
+				glm::vec3(0.7f, 0.7f, 0.7f),
+				glm::vec3(-2.5f, 20.0f, -12.5f),
+				glm::vec3(0.0f, 70.0f, 0.0f),
 				squirtlemodel
 			);
 
@@ -321,6 +332,7 @@ int main(int argc, char* argv[])
 			
 			// Update timer
 			int totalSeconds = 120 - (int) ((clock() - timer) / (double) CLOCKS_PER_SEC);
+
 			if (totalSeconds < 0)
 				resetScoreAndTimer();
 
@@ -453,6 +465,7 @@ void updateDisplacement(float currentFrame)
 	// Check for collision
 	if (renderer.calculateFurthestZ(rotMat.getMatrix(), modelTransMat, displacement) < wallZPos + 2)
 		if (!isFit() && !resetAfterCollision) {
+			SoundEngine2->play2D("audio/punch.mp3", false);
 			// random rotation and x movement
 			float LO = -1.0f;
 			float HI = 1.0f;
@@ -479,6 +492,7 @@ void updateDisplacement(float currentFrame)
 		else if (displacement.z < -25) {
 			// Increment if model fits through hole
 			if (isFit()) {
+				SoundEngine2->play2D("audio/score.wav", false);
 				score += 1 * scoreMultiplier;
 				multiplierCounter++;
 				wallsCleared += 1;
@@ -577,33 +591,39 @@ void processInput(GLFWwindow* window, int key, int scancode, int action, int mod
 		resetModel();
 
 	// Model displacement (W/S/A/D) and rotation (w/s/a/d), the latter of which around it's own axis.
-	if (mode == GLFW_MOD_SHIFT) {
+	if (glfwGetKey(window, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS) {
 		displacementSpeed = 60.0f;
 	}
 
 	// rotation movemement
 	if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
 	{
+		SoundEngine2->play2D("audio/click.mp3", false);
 		rotMat.setSoft(glm::vec3(-90.0f, 0.0f, 0.0f));
 	}
 	if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
 	{
+		SoundEngine2->play2D("audio/click.mp3", false);
 		rotMat.setSoft(glm::vec3(90.0f, 0.0f, 0.0f));
 	}
 	if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
 	{
+		SoundEngine2->play2D("audio/click.mp3", false);
 		rotMat.setSoft(glm::vec3(0.0f, 90.0f, 0.0f));
 	}
 	if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
 	{
+		SoundEngine2->play2D("audio/click.mp3", false);
 		rotMat.setSoft(glm::vec3(0.0f, -90.0f, 0.0f));
 	}
 	if (glfwGetKey(window, GLFW_KEY_Q) == GLFW_PRESS)
 	{
+		SoundEngine2->play2D("audio/click.mp3", false);
 		rotMat.setSoft(glm::vec3(0.0f, 0.0f, 90.0f));
 	}
 	if (glfwGetKey(window, GLFW_KEY_E) == GLFW_PRESS)
 	{
+		SoundEngine2->play2D("audio/click.mp3", false);
 		rotMat.setSoft(glm::vec3(0.0f, 0.0f, -90.0f));
 	}
 	// Toggle rendering mode between point, line and fill mode (P/L/T)
@@ -625,9 +645,27 @@ void processInput(GLFWwindow* window, int key, int scancode, int action, int mod
 		bgmVolume -= 0.05;
 	}
 	lastMinusState = glfwGetKey(window, GLFW_KEY_MINUS);
-	if (glfwGetKey(window, GLFW_KEY_EQUAL) == GLFW_PRESS) {
+	if (lastEqualState == GLFW_RELEASE && glfwGetKey(window, GLFW_KEY_EQUAL) == GLFW_PRESS) {
 		bgmVolume += 0.05;
 	}
+	lastEqualState = glfwGetKey(window, GLFW_KEY_EQUAL);
+	if (lastBackSpaceState == GLFW_RELEASE && glfwGetKey(window, GLFW_KEY_BACKSPACE) == GLFW_PRESS) {
+		SoundEngine->stopAllSounds();
+		switch (soundSwitch) {
+		case 0:
+			SoundEngine->play2D("audio/Kirby.mp3", true, false, true);
+			break;
+		case 1:
+			SoundEngine->play2D("audio/breakout.mp3", true, false, true);
+			break;
+		case 2:
+			SoundEngine->play2D("audio/salt.mp3", true, false, true);
+			break;
+		}
+		soundSwitch++;
+		if (soundSwitch >= 3) soundSwitch = 0;
+	}
+	lastBackSpaceState = glfwGetKey(window, GLFW_KEY_BACKSPACE);
 }
 
 // Function for processing mouse input
