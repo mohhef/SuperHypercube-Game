@@ -205,7 +205,7 @@ void Renderer::drawLightingSource(VertexArray& va, Shader& shader, glm::mat4 vie
 }
 
 // Draw the wall that is currently in use
-void Renderer::drawWall(VertexArray& va, Shader& shader, glm::mat4 view, glm::mat4 projection, glm::vec3 lightPos, glm::vec3 cameraPos, Texture& texture, glm::mat4 modelRotMat, float scaleFactor, glm::vec3 displacement, bool colorChange)
+void Renderer::drawWall(VertexArray& va, Shader& shader, glm::mat4 view, glm::mat4 projection, glm::vec3 lightPos, glm::vec3 cameraPos, Texture& texture, glm::mat4 modelRotMat, float scaleFactor, glm::vec3 displacement, bool dead, bool fittingThrough)
 {
 	// bind the vertex array and shader
 	va.bind();
@@ -227,12 +227,12 @@ void Renderer::drawWall(VertexArray& va, Shader& shader, glm::mat4 view, glm::ma
 		if (isTextureEnabled)
 		{
 			shader.setUniform1i("textureStatus", 1);
-			if (colorChange) {
+			if (dead)
 				shader.setUniform3Vec("ourColor", glm::vec3(1.0f, 0.0f, 0.0f));
-			}
-			else{
+			else if (fittingThrough)
+				shader.setUniform3Vec("ourColor", glm::vec3(0.0f, 1.0f, 0.0f));
+			else
 				shader.setUniform3Vec("ourColor", glm::vec3(1.0f, 1.0f, 1.0f));
-			}
 		}
 		else
 		{

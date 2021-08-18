@@ -107,6 +107,7 @@ void resetScoreAndTimer();
 
 // animation
 bool resetAfterCollision = false;
+bool fittingThrough = false;
 float resetTime = 0.0f;
 glm::vec3 cameraInitialPos = glm::vec3(modelPosition.at(modelIndex).x, modelPosition.at(modelIndex).y + 40, 100.0f);
 glm::vec3 modelPos;
@@ -269,13 +270,11 @@ int main(int argc, char* argv[])
 			glm::mat4 projection = glm::perspective(glm::radians(camera->zoom), (float)WIDTH / (float)HEIGHT, 0.1f, 600.0f);
 			glm::mat4 view = camera->getViewMatrix();
 
-			bool wallColorChange = !isFit()  && (displacement.z < -18) /*&& !resetAfterCollision*/;
-
 			// Shadow mapping
 			depthMapper.Draw(depthShader, lightPos, [&]() {
 				// Render objects to be drawn by the depth mapper object
 				renderer.drawObject(vA, *depthShader, view, projection, lightPos, camera->position, tetrisTexture, rotMat.getMatrix(), modelTransMat, scaleFactor, displacement);
-				renderer.drawWall(vA, *depthShader, view, projection, lightPos, camera->position, brickTexture, rotMat.getMatrix(), scaleFactor, displacement, wallColorChange);
+				renderer.drawWall(vA, *depthShader, view, projection, lightPos, camera->position, brickTexture, rotMat.getMatrix(), scaleFactor, displacement, resetAfterCollision, fittingThrough);
 				});
 
 			// Bind universal attributes necessary for drawing all the objects on the map
@@ -289,7 +288,7 @@ int main(int argc, char* argv[])
 			// Render each object (wall, model, static models, axes, and mesh floor)
 			renderer.drawObject(vA, *shader, view, projection, lightPos, camera->position, tetrisTexture, rotMat.getMatrix(), modelTransMat, scaleFactor, displacement);
 			
-			renderer.drawWall(vA, *shader, view, projection, lightPos, camera->position, brickTexture, rotMat.getMatrix(), scaleFactor, displacement, wallColorChange);
+			renderer.drawWall(vA, *shader, view, projection, lightPos, camera->position, brickTexture, rotMat.getMatrix(), scaleFactor, displacement, resetAfterCollision, fittingThrough);
 			renderer.drawLightingSource(vaLightingSource, *lightingSourceShader, view, projection, lightPos);
 			renderer.drawFloor(vaFloor, *shader, view, projection, lightPos, camera->position, galaxyTexture);
 
@@ -476,6 +475,7 @@ void updateDisplacement(float currentFrame)
 			displacement.x += 1.3 * r;
 			resetTime = currentFrame + 0.5f;
 			resetAfterCollision = true;
+			fittingThrough = false;
 		}	
 		// camera lookAt does not move forward, slows down when passed
 		else if (displacement.z < -18 && displacement.z > -25){
@@ -489,6 +489,7 @@ void updateDisplacement(float currentFrame)
 			}
 			displacementSpeed = prevDisplacementSpeed;
 			camera->lookAt(lockedCameraLookAt);
+			if (isFit()) fittingThrough = true;
 		}
 	// Reset upon wall pass
 		else if (displacement.z < -25) {
@@ -526,6 +527,7 @@ void updateDisplacement(float currentFrame)
 void updateNumberOfCubes()
 {
 	numCubes = getTotalCubes(models.at(modelIndex));
+	fittingThrough = false;
 }
 
 // Reset translation matrix for each model's cube.
