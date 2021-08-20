@@ -141,9 +141,8 @@ int main(int argc, char* argv[])
 
 	SoundEngine->setSoundVolume(bgmVolume);
 	SoundEngine->play2D("audio/Halo.mp3", true);
-  
-	SoundEngine2->setSoundVolume( );
-	SoundEngine2->addSoundSourceFromFile("audio/breakout.mp3", ESM_AUTO_DETECT, true); // third parameter set to true == preload
+
+	SoundEngine2->setSoundVolume(effectVolume);
 	SoundEngine2->addSoundSourceFromFile("audio/punch.mp3", ESM_AUTO_DETECT, true); // third parameter set to true == preload
 	SoundEngine2->addSoundSourceFromFile("audio/bow.mp3", ESM_AUTO_DETECT, true); // third parameter set to true == preload
 	SoundEngine2->addSoundSourceFromFile("audio/score.wav", ESM_AUTO_DETECT, true); // third parameter set to true == preload
@@ -706,7 +705,7 @@ void processInput(GLFWwindow* window, int key, int scancode, int action, int mod
 		{
 			mainMenu = false;
 			SoundEngine->stopAllSounds();
-			SoundEngine2->play2D("audio/Kirby.mp3", true);
+			SoundEngine->play2D("audio/Kirby.mp3", true, false, true);
 			resetModel();
 			randomRotation();
 			updateNumberOfCubes();
@@ -793,41 +792,41 @@ void processInput(GLFWwindow* window, int key, int scancode, int action, int mod
 		{
 			shadows = !shadows;
 		}
+
+		// Change BGM
+		if (lastBackSpaceState == GLFW_RELEASE && glfwGetKey(window, GLFW_KEY_BACKSPACE) == GLFW_PRESS) {
+			SoundEngine->stopAllSounds();
+			switch (soundSwitch) {
+			case 0:
+				SoundEngine->play2D("audio/Kirby.mp3", true, false, true);
+				break;
+			case 1:
+				SoundEngine->play2D("audio/breakout.mp3", true, false, true);
+				break;
+			case 2:
+				SoundEngine->play2D("audio/salt.mp3", true, false, true);
+				break;
+			}
+			soundSwitch++;
+			if (soundSwitch >= 3) soundSwitch = 0;
+		}
+		lastBackSpaceState = glfwGetKey(window, GLFW_KEY_BACKSPACE);
 	}
 	
-	// bgm sound adjust
+	// Sound adjust
 	if (lastMinusState == GLFW_RELEASE && glfwGetKey(window, GLFW_KEY_MINUS) == GLFW_PRESS) {
 		bgmVolume -= 0.05;
 		if (bgmVolume < 0)
 			bgmVolume = 0;
 	}
-	
 	lastMinusState = glfwGetKey(window, GLFW_KEY_MINUS);
+
 	if (lastEqualState == GLFW_RELEASE && glfwGetKey(window, GLFW_KEY_EQUAL) == GLFW_PRESS) {
 		bgmVolume += 0.05;
 		if (bgmVolume > 1.0)
 			bgmVolume = 1;
 	}
-
 	lastEqualState = glfwGetKey(window, GLFW_KEY_EQUAL);
-
-	if (lastBackSpaceState == GLFW_RELEASE && glfwGetKey(window, GLFW_KEY_BACKSPACE) == GLFW_PRESS) {
-		SoundEngine->stopAllSounds();
-		switch (soundSwitch) {
-		case 0:
-			SoundEngine->play2D("audio/Kirby.mp3", true, false, true);
-			break;
-		case 1:
-			SoundEngine->play2D("audio/breakout.mp3", true, false, true);
-			break;
-		case 2:
-			SoundEngine->play2D("audio/salt.mp3", true, false, true);
-			break;
-		}
-		soundSwitch++;
-		if (soundSwitch >= 3) soundSwitch = 0;
-	}
-	lastBackSpaceState = glfwGetKey(window, GLFW_KEY_BACKSPACE);
 }
 
 // Function for processing mouse input
