@@ -101,6 +101,10 @@ float resetTime = 0.0f;
 glm::vec3 cameraInitialPos = glm::vec3(modelPosition.at(modelIndex).x, modelPosition.at(modelIndex).y + 40, 100.0f);
 glm::vec3 modelPos;
 
+bool paused = false;
+float timeBeforePause = 0.0f;
+int timeLeft = 120;
+
 // Window size
 int HEIGHT = 768;
 int WIDTH = 1024;
@@ -166,12 +170,20 @@ int main(int argc, char* argv[])
 		layoutFloor.push<float>(2);
 		vaFloor.addBuffer(vbFloor, layoutFloor);
 
+		// setup for menu
+		VertexArray vaMenu;
+		VertexBuffer vbMenu(flatSquare, sizeof(flatSquare));
+		VertexBufferLayout layoutMenu;
+		layoutMenu.push<float>(3);
+		vaMenu.addBuffer(vbMenu, layoutMenu);
+
 		// Create shader instances
 		Shader* shader = new Shader("vertex_fragment.shader");
 		Shader* axesShader = new Shader("axes.shader");
 		Shader* lightingSourceShader = new Shader("lightingSource.shader");
 		Shader* depthShader = new Shader("depthMap.shader");
 		Shader* textShader = new Shader("text.shader");
+		Shader* menuShader = new Shader("menu.shader");
 
 		// 3D Models
 		ModelShader* d3Shader = new ModelShader("3DmodelVertex.shader", "3DmodelFragment.shader");
@@ -223,115 +235,132 @@ int main(int argc, char* argv[])
 		// Entering main loop
 		while (!glfwWindowShouldClose(window))
 		{
-			// Update last frame
-			float currentFrame = glfwGetTime();
-			deltaTime = currentFrame - lastFrame;
-			lastFrame = currentFrame;
-			if (resetAfterCollision && currentFrame > resetTime) {
-				resetAfterCollision = false;
-				resetTime = 0.0f;
-				resetModel(true);
-				// handle multiplier
-				multiplierCounter = 0;
-				// reduce multipler to half
-				if (scoreMultiplier > 1)scoreMultiplier = scoreMultiplier / 2;
+			if (!paused) {
+				// Update last frame
+				float currentFrame = glfwGetTime();
+				deltaTime = currentFrame - lastFrame;
+				lastFrame = currentFrame;
+				if (resetAfterCollision && currentFrame > resetTime) {
+					resetAfterCollision = false;
+					resetTime = 0.0f;
+					resetModel(true);
+					// handle multiplier
+					multiplierCounter = 0;
+					// reduce multipler to half
+					if (scoreMultiplier > 1)scoreMultiplier = scoreMultiplier / 2;
+				}
+
+				if (resetAfterCollision) {
+					camera->lookAt(modelPos + displacement);
+				}
+
+				rotMat.updateRotation(currentFrame);
+
+				updateDisplacement(currentFrame);
+				renderer.updateCenterOfMass();
+
+				// Clear color and depth buffers
+				renderer.clear();
+
+				glm::mat4 projection = glm::perspective(glm::radians(camera->zoom), (float)WIDTH / (float)HEIGHT, 0.1f, 600.0f);
+				glm::mat4 view = camera->getViewMatrix();
+
+				// Shadow mapping
+				depthMapper.Draw(depthShader, lightPos, [&]() {
+					// Render objects to be drawn by the depth mapper object
+					renderer.drawObject(vA, *depthShader, view, projection, lightPos, camera->position, tetrisTexture, rotMat.getMatrix(), modelTransMat, scaleFactor, displacement);
+					renderer.drawWall(vA, *depthShader, view, projection, lightPos, camera->position, brickTexture, rotMat.getMatrix(), scaleFactor, displacement);
+					});
+
+				// Bind universal attributes necessary for drawing all the objects on the map
+				shader->bind();
+				shader->setUniform3Vec("lightPosition", lightPos);
+				shader->setUniform3Vec("viewPos", camera->position);
+				shader->setUniform1i("drawShadows", shadows);
+				shader->setUniform1f("map_range", far);
+				depthMapper.bind();
+
+				// Render each object (wall, model, static models, axes, and mesh floor)
+				renderer.drawObject(vA, *shader, view, projection, lightPos, camera->position, tetrisTexture, rotMat.getMatrix(), modelTransMat, scaleFactor, displacement);
+				renderer.drawWall(vA, *shader, view, projection, lightPos, camera->position, brickTexture, rotMat.getMatrix(), scaleFactor, displacement);
+				renderer.drawLightingSource(vaLightingSource, *lightingSourceShader, view, projection, lightPos);
+				renderer.drawFloor(vaFloor, *shader, view, projection, lightPos, camera->position, galaxyTexture);
+
+				// Development purpose
+				// renderer.drawAxes(vaAxes, *axesShader, view, projection);	
+
+				// Draw Ivysaur
+				renderer.draw3DModel(
+					*d3Shader,
+					view,
+					projection,
+					glm::vec3(2.0f, 2.0f, 2.0f),
+					glm::vec3(8.0f, 20.0f, -10.0f),
+					glm::vec3(0.0f, 135.0f, 0.0f),
+					ivysaurmodel
+				);
+
+				// Draw Charizard
+				renderer.draw3DModel(
+					*d3Shader,
+					view,
+					projection,
+					glm::vec3(0.2f, 0.2f, 0.2f),
+					glm::vec3(4.0f, 20.0f, -10.0f),
+					glm::vec3(10.0f, 0.0f, 10.0f),
+					charizardmodel
+				);
+
+				// Draw Squirtle
+				renderer.draw3DModel(
+					*d3Shader,
+					view,
+					projection,
+					glm::vec3(0.7f, 0.7f, 0.7f),
+					glm::vec3(-2.5f, 20.0f, -12.5f),
+					glm::vec3(0.0f, 70.0f, 0.0f),
+					squirtlemodel
+				);
+
+				// Render light source
+				renderer.drawLightingSource(vaLightingSource, *lightingSourceShader, view, projection, lightPos);
+
+				// Update timer
+				int totalSeconds = timeLeft - (int)((clock() - timer) / (double)CLOCKS_PER_SEC);
+
+				if (totalSeconds < 0)
+					resetScoreAndTimer();
+
+				int minutes = totalSeconds / 60;
+				int seconds = totalSeconds % 60;
+
+				// Render text
+				textRendering.enable();
+				textRendering.RenderText(*textShader, "Score: " + to_string(score), 50.0f, 700.0f, 0.50f, modelColor.at(modelIndex));
+				textRendering.RenderText(*textShader, "Multiplier: " + to_string(scoreMultiplier), 50.0f, 670.0f, 0.50f, modelColor.at(modelIndex));
+				textRendering.RenderText(*textShader, "Walls cleared : " + to_string(wallsCleared), 50.0f, 640.0f, 0.50f, modelColor.at(modelIndex));
+				textRendering.RenderText(*textShader, "Number of cubes in cluster : " + to_string(numCubes), 50.0f, 610.0f, 0.50f, modelColor.at(modelIndex));
+				if (seconds < 10)
+					textRendering.RenderText(*textShader, "Time: " + to_string(minutes) + ":0" + to_string(seconds), 850.0f, 700.0f, 0.50f, modelColor.at(modelIndex));
+				else
+					textRendering.RenderText(*textShader, "Time: " + to_string(minutes) + ":" + to_string(seconds), 850.0f, 700.0f, 0.50f, modelColor.at(modelIndex));
+				textRendering.disable();
+
 			}
-
-			if (resetAfterCollision) {
-				camera->lookAt(modelPos + displacement);
-			}
-
-			rotMat.updateRotation(currentFrame);
-
-			updateDisplacement(currentFrame);
-			renderer.updateCenterOfMass();
-
-			// Clear color and depth buffers
+			else {
 			renderer.clear();
-
-			glm::mat4 projection = glm::perspective(glm::radians(camera->zoom), (float)WIDTH / (float)HEIGHT, 0.1f, 600.0f);
-			glm::mat4 view = camera->getViewMatrix();
-
-			// Shadow mapping
-			depthMapper.Draw(depthShader, lightPos, [&]() {
-				// Render objects to be drawn by the depth mapper object
-				renderer.drawObject(vA, *depthShader, view, projection, lightPos, camera->position, tetrisTexture, rotMat.getMatrix(), modelTransMat, scaleFactor, displacement);
-				renderer.drawWall(vA, *depthShader, view, projection, lightPos, camera->position, brickTexture, rotMat.getMatrix(), scaleFactor, displacement);
-				});
-
-			// Bind universal attributes necessary for drawing all the objects on the map
-			shader->bind();
-			shader->setUniform3Vec("lightPosition", lightPos);
-			shader->setUniform3Vec("viewPos", camera->position);
-			shader->setUniform1i("drawShadows", shadows);
-			shader->setUniform1f("map_range", far);
-			depthMapper.bind();
-
-			// Render each object (wall, model, static models, axes, and mesh floor)
-			renderer.drawObject(vA, *shader, view, projection, lightPos, camera->position, tetrisTexture, rotMat.getMatrix(), modelTransMat, scaleFactor, displacement);
-			renderer.drawWall(vA, *shader, view, projection, lightPos, camera->position, brickTexture, rotMat.getMatrix(), scaleFactor, displacement);
-			renderer.drawLightingSource(vaLightingSource, *lightingSourceShader, view, projection, lightPos);
-			renderer.drawFloor(vaFloor, *shader, view, projection, lightPos, camera->position, galaxyTexture);
-
-			// Development purpose
-			// renderer.drawAxes(vaAxes, *axesShader, view, projection);	
-
-			// Draw Ivysaur
-			renderer.draw3DModel(
-				*d3Shader,
-				view,
-				projection,
-				glm::vec3(2.0f, 2.0f, 2.0f),
-				glm::vec3(8.0f, 20.0f, -10.0f),
-				glm::vec3(0.0f, 135.0f, 0.0f),
-				ivysaurmodel
-			);
-
-			// Draw Charizard
-			renderer.draw3DModel(
-				*d3Shader,
-				view,
-				projection,
-				glm::vec3(0.2f, 0.2f, 0.2f),
-				glm::vec3(4.0f, 20.0f, -10.0f),
-				glm::vec3(10.0f, 0.0f, 10.0f),
-				charizardmodel
-			);
-
-			// Draw Squirtle
-			renderer.draw3DModel(
-				*d3Shader,
-				view,
-				projection,
-				glm::vec3(0.7f, 0.7f, 0.7f),
-				glm::vec3(-2.5f, 20.0f, -12.5f),
-				glm::vec3(0.0f, 70.0f, 0.0f),
-				squirtlemodel
-			);
 			
-			// Render light source
-			renderer.drawLightingSource(vaLightingSource, *lightingSourceShader, view, projection, lightPos);
-			
-			// Update timer
-			int totalSeconds = 120 - (int) ((clock() - timer) / (double) CLOCKS_PER_SEC);
-			
-			if (totalSeconds < 0)
-				resetScoreAndTimer();
 
-			int minutes = totalSeconds / 60;
-			int seconds = totalSeconds % 60;
-
-			// Render text
-			textRendering.enable();
-			textRendering.RenderText(*textShader, "Score: " + to_string(score), 50.0f, 700.0f, 0.50f, modelColor.at(modelIndex));
-			textRendering.RenderText(*textShader, "Multiplier: " + to_string(scoreMultiplier), 50.0f, 670.0f, 0.50f, modelColor.at(modelIndex));
-			textRendering.RenderText(*textShader, "Walls cleared : " + to_string(wallsCleared), 50.0f, 640.0f, 0.50f, modelColor.at(modelIndex));
-			textRendering.RenderText(*textShader, "Number of cubes in cluster : " + to_string(numCubes), 50.0f, 610.0f, 0.50f, modelColor.at(modelIndex));
-			if (seconds < 10)
-				textRendering.RenderText(*textShader, "Time: " + to_string(minutes) + ":0" + to_string(seconds), 850.0f, 700.0f, 0.50f, modelColor.at(modelIndex));
-			else
-				textRendering.RenderText(*textShader, "Time: " + to_string(minutes) + ":" + to_string(seconds), 850.0f, 700.0f, 0.50f, modelColor.at(modelIndex));
-			textRendering.disable();
+				vaMenu.bind();
+				menuShader->bind();
+				glDrawArrays(GL_TRIANGLES, 0, 6);
+				menuShader->unbind();
+				vaMenu.unbind();
+				textRendering.enable();
+				textRendering.RenderText(*textShader, "Hello", 300.0f, 450.0f, 0.5f, glm::vec3(1.0f, 1.0f, 1.0f));
+				textRendering.disable();
+			}
+			
 
 			// End frame
 			glfwSwapBuffers(window);
@@ -590,8 +619,17 @@ void processInput(GLFWwindow* window, int key, int scancode, int action, int mod
 		rotMat.setSoft(glm::vec3(0.0f, 0.0f, -90.0f));
 	}
 	// Toggle rendering mode between point, line and fill mode (P/L/T)
-	if (glfwGetKey(window, GLFW_KEY_P) == GLFW_PRESS)
-		glPolygonMode(GL_FRONT_AND_BACK, GL_POINT);
+	if (glfwGetKey(window, GLFW_KEY_P) == GLFW_PRESS) {
+		if (!paused) {
+			timeBeforePause = glfwGetTime();
+			timeLeft = timeLeft - (int)((clock() - timer) / (double)CLOCKS_PER_SEC);
+		}
+		else {
+			timer = clock();
+			glfwSetTime(timeBeforePause);
+		}
+		paused = !paused;
+	}
 
 	if (glfwGetKey(window, GLFW_KEY_L) == GLFW_PRESS)
 		glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);

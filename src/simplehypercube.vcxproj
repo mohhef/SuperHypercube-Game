@@ -154,6 +154,7 @@
     <None Include="depthMap.shader" />
     <None Include="lighting.shader" />
     <None Include="lightingSource.shader" />
+    <None Include="menu.shader" />
     <None Include="text.shader" />
     <None Include="vertex_fragment.shader" />
   </ItemGroup>
