@@ -147,9 +147,6 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <None Include="3Dmodel.shader" />
-    <None Include="3DmodelFragment.shader" />
-    <None Include="3DmodelVertex.shader" />
     <None Include="axes.shader" />
     <None Include="depthMap.shader" />
     <None Include="lighting.shader" />
@@ -165,7 +162,6 @@
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Mesh.cpp" />
     <ClCompile Include="Model.cpp" />
-    <ClCompile Include="ModelShader.cpp" />
     <ClCompile Include="Renderer.cpp" />
     <ClCompile Include="Shader.cpp" />
     <ClCompile Include="stb_image.cpp" />
@@ -182,7 +178,6 @@
     <ClInclude Include="DepthMapper.h" />
     <ClInclude Include="Mesh.h" />
     <ClInclude Include="Model.h" />
-    <ClInclude Include="ModelShader.h" />
     <ClInclude Include="TextRendering.h" />
     <ClInclude Include="Renderer.h" />
     <ClInclude Include="Shader.h" />

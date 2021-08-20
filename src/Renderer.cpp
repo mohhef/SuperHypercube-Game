@@ -204,6 +204,34 @@ void Renderer::drawLightingSource(VertexArray& va, Shader& shader, glm::mat4 vie
 	shader.unbind();
 }
 
+// Draw 3D Model
+void Renderer::draw3DModel(Shader& shader, glm::mat4 view, glm::mat4 projection, glm::vec3 lightPos, glm::vec3 cameraPos, glm::vec3 scale, glm::vec3 translate, glm::vec3 rotation, Model modelObject)
+{
+	if (!isFindingDepth) {
+		shader.bind();
+		shader.setUniform4Mat("projection", projection);
+		shader.setUniform3Vec("viewPos", cameraPos);
+		shader.setUniform4Mat("view", view);
+		shader.setUniform3Vec("lightColor", glm::vec3(1.0f, 1.0f, 1.0f));
+		shader.setUniform3Vec("lightPosition", lightPos);
+		shader.setUniform1i("shininess", 32);
+		shader.setUniform1i("textureStatus", 0);
+		shader.setUniform1i("invertStatus", invertStatus);
+		shader.setUniform1i("textureDiffStatus", 1);
+		shader.setUniform3Vec("ourColor", glm::vec3(1.0f, 1.0f, 1.0f));
+
+	}
+
+	glm::mat4 model = glm::mat4(1.0f);
+	model = glm::translate(model, translate); // translate it down so it's at the center of the scene
+	model = glm::scale(model, scale);    // it's a bit too big for our scene, so scale it down
+	model = glm::rotate(model, glm::radians(rotation.x), glm::vec3(1.0f, 0.0f, 0.0f));
+	model = glm::rotate(model, glm::radians(rotation.y), glm::vec3(0.0f, 1.0f, 0.0f));
+	model = glm::rotate(model, glm::radians(rotation.z), glm::vec3(0.0f, 0.0f, 1.0f));
+	shader.setUniform4Mat("model", model);
+
+	modelObject.Draw(shader);
+}
 // Draw the wall that is currently in use
 void Renderer::drawWall(VertexArray& va, Shader& shader, glm::mat4 view, glm::mat4 projection, glm::vec3 lightPos, glm::vec3 cameraPos, Texture& texture, glm::mat4 modelRotMat, float scaleFactor, glm::vec3 displacement)
 {
@@ -322,20 +350,3 @@ float Renderer::calculateFurthestZ(glm::mat4 modelRotMat, vector<glm::mat4> mode
 	return smallestZ;
 }
 
-// Draw 3D Model
-void Renderer::draw3DModel(ModelShader& shader, glm::mat4 view, glm::mat4 projection, glm::vec3 scale, glm::vec3 translate, glm::vec3 rotation, Model modelObject)
-{
-	shader.use();
-	shader.setMat4("projection", projection);
-	shader.setMat4("view", view);
-
-	glm::mat4 model = glm::mat4(1.0f);
-	model = glm::translate(model, translate); // translate it down so it's at the center of the scene
-	model = glm::scale(model, scale);    // it's a bit too big for our scene, so scale it down
-	model = glm::rotate(model, glm::radians(rotation.x), glm::vec3(1.0f, 0.0f, 0.0f));
-	model = glm::rotate(model, glm::radians(rotation.y), glm::vec3(0.0f, 1.0f, 0.0f));
-	model = glm::rotate(model, glm::radians(rotation.z), glm::vec3(0.0f, 0.0f, 1.0f));
-	shader.setMat4("model", model);
-
-	modelObject.Draw(shader);
-}

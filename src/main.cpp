@@ -26,7 +26,6 @@
 #include "Animations.h"
 
 #include "Model.h"
-#include "ModelShader.h"
 #include "Mesh.h"
 
 #include "VertexArray.h"
@@ -130,7 +129,7 @@ int main(int argc, char* argv[])
 	SoundEngine2->addSoundSourceFromFile("audio/punch.mp3", ESM_AUTO_DETECT, true); // third parameter set to true == preload
 	SoundEngine2->addSoundSourceFromFile("audio/bow.mp3", ESM_AUTO_DETECT, true); // third parameter set to true == preload
 	SoundEngine2->addSoundSourceFromFile("audio/score.wav", ESM_AUTO_DETECT, true); // third parameter set to true == preload
-	SoundEngine2->addSoundSourceFromFile("audio/click.wav", ESM_AUTO_DETECT, true); // third parameter set to true == preload
+	SoundEngine2->addSoundSourceFromFile("audio/click.mp3", ESM_AUTO_DETECT, true); // third parameter set to true == preload
 
 	GLFWwindow* window = initializeWindow();
 	{
@@ -192,10 +191,9 @@ int main(int argc, char* argv[])
 		Shader* menuShader = new Shader("menu.shader");
 
 		// 3D Models
-		ModelShader* d3Shader = new ModelShader("3DmodelVertex.shader", "3DmodelFragment.shader");
-		Model ivysaurmodel("3D_Model/pokemon.obj");   // ivysaur
+		Model ivysaurmodel("3D_Model/pokemon.obj");   // ivysaur //right
 		Model charizardmodel("3D_Model/pokemon1.obj"); // charizard
-		Model squirtlemodel("3D_Model/pokemon2.obj"); // squirtle
+		Model squirtlemodel("3D_Model/pokemon2.obj"); // squirtle //left
 
 		// telling the shader which textures go where
 		shader->bind();
@@ -277,6 +275,46 @@ int main(int argc, char* argv[])
 				// Render objects to be drawn by the depth mapper object
 				renderer.drawObject(vA, *depthShader, view, projection, lightPos, camera->position, tetrisTexture, rotMat.getMatrix(), modelTransMat, scaleFactor, displacement);
 				renderer.drawWall(vA, *depthShader, view, projection, lightPos, camera->position, brickTexture, rotMat.getMatrix(), scaleFactor, displacement);
+				
+				// Draw Squirtle
+				renderer.draw3DModel(
+					*depthShader,
+					view,
+					projection,
+					lightPos,
+					camera->position,
+					glm::vec3(0.7f, 0.7f, 0.7f),
+					glm::vec3(-2.5f, 20.0f, -12.5f),
+					glm::vec3(0.0f, 70.0f, 0.0f),
+					squirtlemodel
+				);
+				shader->setUniform1i("invertStatus", 1);
+				// Draw Charizard
+				renderer.draw3DModel(
+					*depthShader,
+					view,
+					projection,
+					lightPos,
+					camera->position,
+					glm::vec3(0.2f, 0.2f, 0.2f),
+					glm::vec3(4.0f, 20.0f, -10.0f),
+					glm::vec3(10.0f, 0.0f, 10.0f),
+					charizardmodel
+				);
+
+				// Draw Ivysaur
+				renderer.draw3DModel(
+					*depthShader,
+					view,
+					projection,
+					lightPos,
+					camera->position,
+					glm::vec3(2.0f, 2.0f, 2.0f),
+					glm::vec3(8.0f, 20.0f, -10.0f),
+					glm::vec3(0.0f, 135.0f, 0.0f),
+					ivysaurmodel
+				);
+
 				});
 
 			// Bind universal attributes necessary for drawing all the objects on the map
@@ -285,6 +323,7 @@ int main(int argc, char* argv[])
 			shader->setUniform3Vec("viewPos", camera->position);
 			shader->setUniform1i("drawShadows", shadows);
 			shader->setUniform1f("map_range", far);
+			shader->setUniform1i("invertStatus", 0);
 			depthMapper.bind();
 
 			// Render each object (wall, model, static models, axes, and mesh floor)
@@ -296,37 +335,44 @@ int main(int argc, char* argv[])
 			// Development purpose
 			// renderer.drawAxes(vaAxes, *axesShader, view, projection);	
 
-			// Draw Ivysaur
+			renderer.invertStatus = 1;
+			// Draw Squirtle
 			renderer.draw3DModel(
-				*d3Shader,
+				*shader,
 				view,
 				projection,
+				lightPos,
+				camera->position,
+				glm::vec3(0.7f, 0.7f, 0.7f),
+				glm::vec3(-2.5f, 20.0f, -12.5f),
+				glm::vec3(0.0f, 70.0f, 0.0f),
+				squirtlemodel
+			);
+			// Draw Ivysaur
+			renderer.draw3DModel(
+				*shader,
+				view,
+				projection,
+				lightPos,
+				camera->position,
 				glm::vec3(2.0f, 2.0f, 2.0f),
 				glm::vec3(8.0f, 20.0f, -10.0f),
 				glm::vec3(0.0f, 135.0f, 0.0f),
 				ivysaurmodel
 			);
+			renderer.invertStatus = 0;
 
 			// Draw Charizard
 			renderer.draw3DModel(
-				*d3Shader,
+				*shader,
 				view,
 				projection,
+				lightPos,
+				camera->position,
 				glm::vec3(0.2f, 0.2f, 0.2f),
 				glm::vec3(4.0f, 20.0f, -10.0f),
 				glm::vec3(10.0f, 0.0f, 10.0f),
 				charizardmodel
-			);
-
-			// Draw Squirtle
-			renderer.draw3DModel(
-				*d3Shader,
-				view,
-				projection,
-				glm::vec3(0.7f, 0.7f, 0.7f),
-				glm::vec3(-2.5f, 20.0f, -12.5f),
-				glm::vec3(0.0f, 70.0f, 0.0f),
-				squirtlemodel
 			);
 
 			// Render light source
@@ -392,7 +438,6 @@ int main(int argc, char* argv[])
 				textRendering.RenderText(*textShader, "P: Pause/Unpause", 300.0f, 240.0f, 0.5f, glm::vec3(1.0f, 1.0f, 1.0f));
 				textRendering.disable();
 			}
-			
 			// End frame
 			glfwSwapBuffers(window);
 

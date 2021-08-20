@@ -3,7 +3,6 @@
 #include "VertexArray.h"
 #include "Texture.h"
 #include "Shader.h"
-#include "ModelShader.h"
 #include "Model.h"
 #include <map>
 
@@ -33,6 +32,7 @@ private:
 	Renderer();
 
 public:
+	int invertStatus = 0;
 	glm::vec3 centerOfMass;
 	static Renderer& getInstance();
 	Renderer(const Renderer&) = delete;
@@ -49,5 +49,5 @@ public:
 	void drawObject(VertexArray& va, Shader& shader, glm::mat4 view, glm::mat4 projection, glm::vec3 lightPos, glm::vec3 cameraPos, Texture& texture, glm::mat4 modelRotMat, vector<glm::mat4> modelTransMat, float scaleFactor, glm::vec3 displacement);
 	void drawWall(VertexArray & va, Shader & shader, glm::mat4 view, glm::mat4 projection, glm::vec3 lightPos, glm::vec3 cameraPos, Texture& texture, glm::mat4 modelRotMat, float scaleFactor, glm::vec3 displacement);
 	void drawFloor(VertexArray& va, Shader& shader, glm::mat4 view, glm::mat4 projection, glm::vec3 lightPos, glm::vec3 cameraPos, Texture& texture);
-	void draw3DModel(ModelShader& shader, glm::mat4 view, glm::mat4 projection, glm::vec3 scale, glm::vec3 translate, glm::vec3 rotation, Model modelObject);
+	void draw3DModel(Shader& shader, glm::mat4 view, glm::mat4 projection, glm::vec3 lightPos, glm::vec3 cameraPos, glm::vec3 scale, glm::vec3 translate, glm::vec3 rotation, Model modelObject);
 };
