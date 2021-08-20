@@ -378,7 +378,22 @@ int main(int argc, char* argv[])
 					vaMenu.unbind();
 
 					textRendering.enable();
-					textRendering.RenderText(*textShader, "I don't know what to put here", 300.0f, 630.0f, 0.5f, glm::vec3(1.0f, 1.0f, 1.0f));
+					textRendering.RenderText(*textShader, "UP/DOWN: rotate camera along X-axis.", 300.0f, 630.0f, 0.5f, glm::vec3(1.0f, 1.0f, 1.0f));
+					textRendering.RenderText(*textShader, "LEFT/RIGHT: rotate camera along Y-axis.", 300.0f, 600.0f, 0.5f, glm::vec3(1.0f, 1.0f, 1.0f));
+					textRendering.RenderText(*textShader, "HOME: reset camera.", 300.0f, 570.0f, 0.5f, glm::vec3(1.0f, 1.0f, 1.0f));
+					textRendering.RenderText(*textShader, "LMB: zoom camera.", 300.0f, 540.0f, 0.5f, glm::vec3(1.0f, 1.0f, 1.0f));
+					textRendering.RenderText(*textShader, "RMB: pan camera.", 300.0f, 510.0f, 0.5f, glm::vec3(1.0f, 1.0f, 1.0f));
+					textRendering.RenderText(*textShader, "MMB: tilt camera.", 300.0f, 480.0f, 0.5f, glm::vec3(1.0f, 1.0f, 1.0f));
+					textRendering.RenderText(*textShader, "ESC: close window.", 300.0f, 450.0f, 0.5f, glm::vec3(1.0f, 1.0f, 1.0f));
+					textRendering.RenderText(*textShader, "SPACEBAR: reset model position.", 300.0f, 420.0f, 0.5f, glm::vec3(1.0f, 1.0f, 1.0f));
+					textRendering.RenderText(*textShader, "SHIFT: increase model speed.", 300.0f, 390.0f, 0.5f, glm::vec3(1.0f, 1.0f, 1.0f));
+					textRendering.RenderText(*textShader, "W/S: rotate model along X-axis.", 300.0f, 360.0f, 0.5f, glm::vec3(1.0f, 1.0f, 1.0f));
+					textRendering.RenderText(*textShader, "A/D: rotate model along Y-axis.", 300.0f, 330.0f, 0.5f, glm::vec3(1.0f, 1.0f, 1.0f));
+					textRendering.RenderText(*textShader, "Q/E: rotate model along X-axis.", 300.0f, 300.0f, 0.5f, glm::vec3(1.0f, 1.0f, 1.0f));
+					textRendering.RenderText(*textShader, "L/T: toggle object display between line,", 300.0f, 270.0f, 0.5f, glm::vec3(1.0f, 1.0f, 1.0f));
+					textRendering.RenderText(*textShader, "and fill, respectively.", 300.0f, 240.0f, 0.5f, glm::vec3(1.0f, 1.0f, 1.0f));
+					textRendering.RenderText(*textShader, "B: toggle shadows", 300.0f, 210.0f, 0.5f, glm::vec3(1.0f, 1.0f, 1.0f));
+					textRendering.RenderText(*textShader, "P: Pause/Unpause", 300.0f, 180.0f, 0.5f, glm::vec3(1.0f, 1.0f, 1.0f));
 					textRendering.disable();
 				}
 			
@@ -639,7 +654,7 @@ void processInput(GLFWwindow* window, int key, int scancode, int action, int mod
 		SoundEngine2->play2D("audio/click.mp3", false);
 		rotMat.setSoft(glm::vec3(0.0f, 0.0f, -90.0f));
 	}
-	// Toggle rendering mode between point, line and fill mode (P/L/T)
+	// Toggle rendering mode between line and fill mode (L/T)
 	if (glfwGetKey(window, GLFW_KEY_P) == GLFW_PRESS) {
 		if (!paused) {
 			timeBeforePause = glfwGetTime();
