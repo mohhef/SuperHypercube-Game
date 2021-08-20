@@ -644,15 +644,23 @@ void processInput(GLFWwindow* window, int key, int scancode, int action, int mod
 	{
 		shadows = !shadows;
 	}
+	
 	// bgm sound adjust
 	if (lastMinusState == GLFW_RELEASE && glfwGetKey(window, GLFW_KEY_MINUS) == GLFW_PRESS) {
 		bgmVolume -= 0.05;
+		if (bgmVolume < 0)
+			bgmVolume = 0;
 	}
+	
 	lastMinusState = glfwGetKey(window, GLFW_KEY_MINUS);
 	if (lastEqualState == GLFW_RELEASE && glfwGetKey(window, GLFW_KEY_EQUAL) == GLFW_PRESS) {
 		bgmVolume += 0.05;
+		if (bgmVolume > 1.0)
+			bgmVolume = 1;
 	}
+
 	lastEqualState = glfwGetKey(window, GLFW_KEY_EQUAL);
+
 	if (lastBackSpaceState == GLFW_RELEASE && glfwGetKey(window, GLFW_KEY_BACKSPACE) == GLFW_PRESS) {
 		SoundEngine->stopAllSounds();
 		switch (soundSwitch) {
