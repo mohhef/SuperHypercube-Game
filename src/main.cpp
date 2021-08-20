@@ -65,6 +65,8 @@ int wallsCleared = 0;
 int numCubes = 0;
 clock_t timer;
 
+
+bool endgame = false;
 // Renderer
 Renderer& renderer = Renderer::getInstance();
 
@@ -313,25 +315,36 @@ int main(int argc, char* argv[])
 			renderer.drawLightingSource(vaLightingSource, *lightingSourceShader, view, projection, lightPos);
 			
 			// Update timer
-			int totalSeconds = 120 - (int) ((clock() - timer) / (double) CLOCKS_PER_SEC);
+			int totalSeconds = 30 - (int) ((clock() - timer) / (double) CLOCKS_PER_SEC);
+			textRendering.enable();
 			
-			if (totalSeconds < 0)
-				resetScoreAndTimer();
+			
+			if (totalSeconds < 0) {
+				textRendering.RenderText(*textShader, "Congratulation, your Final Score is: " + to_string(score), 50.0f, 700.0f, 0.50f, modelColor.at(modelIndex));
+				textRendering.RenderText(*textShader, "Press x to exit game, or click r to restart ", 50.0f, 670.0f, 0.50f, modelColor.at(modelIndex));
+				endgame = true;
+			}
+				
 
 			int minutes = totalSeconds / 60;
 			int seconds = totalSeconds % 60;
 
 			// Render text
-			textRendering.enable();
-			textRendering.RenderText(*textShader, "Score: " + to_string(score), 50.0f, 700.0f, 0.50f, modelColor.at(modelIndex));
-			textRendering.RenderText(*textShader, "Multiplier: " + to_string(scoreMultiplier), 50.0f, 670.0f, 0.50f, modelColor.at(modelIndex));
-			textRendering.RenderText(*textShader, "Walls cleared : " + to_string(wallsCleared), 50.0f, 640.0f, 0.50f, modelColor.at(modelIndex));
-			textRendering.RenderText(*textShader, "Number of cubes in cluster : " + to_string(numCubes), 50.0f, 610.0f, 0.50f, modelColor.at(modelIndex));
-			if (seconds < 10)
-				textRendering.RenderText(*textShader, "Time: " + to_string(minutes) + ":0" + to_string(seconds), 850.0f, 700.0f, 0.50f, modelColor.at(modelIndex));
-			else
-				textRendering.RenderText(*textShader, "Time: " + to_string(minutes) + ":" + to_string(seconds), 850.0f, 700.0f, 0.50f, modelColor.at(modelIndex));
-			textRendering.disable();
+			
+
+			// If the game has not ended
+			if (!endgame) {
+				textRendering.RenderText(*textShader, "Walls cleared : " + to_string(wallsCleared), 50.0f, 640.0f, 0.50f, modelColor.at(modelIndex));
+				textRendering.RenderText(*textShader, "Number of cubes in cluster : " + to_string(numCubes), 50.0f, 610.0f, 0.50f, modelColor.at(modelIndex));
+				if (seconds < 10)
+					textRendering.RenderText(*textShader, "Time: " + to_string(minutes) + ":0" + to_string(seconds), 850.0f, 700.0f, 0.50f, modelColor.at(modelIndex));
+				else
+					textRendering.RenderText(*textShader, "Time: " + to_string(minutes) + ":" + to_string(seconds), 850.0f, 700.0f, 0.50f, modelColor.at(modelIndex));
+				textRendering.disable();
+			}
+
+			
+		
 
 			// End frame
 			glfwSwapBuffers(window);
@@ -603,6 +616,10 @@ void processInput(GLFWwindow* window, int key, int scancode, int action, int mod
 	{
 		shadows = !shadows;
 	}
+	if (glfwGetKey(window, GLFW_KEY_R) == GLFW_PRESS)
+	{
+		resetScoreAndTimer();
+	}
 }
 
 // Function for processing mouse input
@@ -719,4 +736,5 @@ void resetScoreAndTimer()
 	score = 0;
 	wallsCleared = 0;
 	timer = clock();
+	endgame = false;
 }
