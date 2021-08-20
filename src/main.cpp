@@ -78,7 +78,12 @@ float lastMouseY;
 Camera* camera = NULL;
 
 // Menu
+float startTime = glfwGetTime();
 bool mainMenu = true;
+bool endMenu = false;
+int highestScore;
+float timeBeforeStart = 0.0f;
+float timeBeforeRestart = 0.0f;
 
 // Function calls
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
@@ -104,7 +109,7 @@ glm::vec3 modelPos;
 
 bool paused = false;
 float timeBeforePause = 0.0f;
-int timeLeft = 120;
+int timeLeft = 10;	// 10 for test
 
 // Window size
 int HEIGHT = 768;
@@ -113,6 +118,7 @@ int WIDTH = 1024;
 // Cursor position parameters
 float lastX = WIDTH / 2;
 float lastY = HEIGHT / 2;
+
 
 // Main function
 int main(int argc, char* argv[])
@@ -250,7 +256,8 @@ int main(int argc, char* argv[])
 				textRendering.RenderText(*textShader, "Press ESC to exit.", 300.0f, 420.0f, 0.50f, glm::vec3(1.0f));
 				textRendering.RenderText(*textShader, "Press P to pause game (and see key-bindings).", 300.0f, 390.0f, 0.50f, glm::vec3(1.0f));
 				textRendering.disable();
-
+				timeBeforeStart = clock();
+				timer = clock();
 				// End frame
 				glfwSwapBuffers(window);
 
@@ -259,8 +266,25 @@ int main(int argc, char* argv[])
 
 				continue;
 			}
-	
+			
+			if (endMenu) {
+				renderer.clear();
 
+				textRendering.enable();
+				textRendering.RenderText(*textShader, "SuperHyperCube", 300.0f, 600.0f, 1.00f, glm::vec3(1.0f));
+				textRendering.RenderText(*textShader, "Highest score: " + std::to_string(highestScore), 300.0f, 450.0f, 0.7f, glm::vec3(1.0f, 0.0f, 0.0f));
+				textRendering.RenderText(*textShader, "Press Enter to restart game.", 300.0f, 390.0f, 0.50f, glm::vec3(1.0f));
+				textRendering.RenderText(*textShader, "Press ESC to exit.", 300.0f, 360.0f, 0.50f, glm::vec3(1.0f));
+				textRendering.disable();
+				timeBeforeRestart = clock();
+				timer = clock();
+				// End frame
+				glfwSwapBuffers(window);
+				// Detect inputs
+				glfwPollEvents();
+				
+				continue;
+			}
 			// Update last frame
 			float currentFrame = glfwGetTime();
 			deltaTime = currentFrame - lastFrame;
@@ -411,8 +435,12 @@ int main(int argc, char* argv[])
 				totalSeconds = timeLeft;
 			}
 
-			if (totalSeconds < 0)
+			if (totalSeconds <= 0) {
+				endMenu = true;
+				if (score > highestScore) highestScore = score;
+				score = 0;
 				resetScoreAndTimer();
+			}
 
 			int minutes = totalSeconds / 60;
 			int seconds = totalSeconds % 60;
@@ -670,13 +698,22 @@ void processInput(GLFWwindow* window, int key, int scancode, int action, int mod
 			mainMenu = false;
 			SoundEngine->stopAllSounds();
 			SoundEngine2->play2D("audio/Kirby.mp3", true);
+			glfwSetTime(timeBeforeStart);
 			resetModel();
 			randomRotation();
 			updateNumberOfCubes();
 		}
 	}
-
-	if (!mainMenu)
+	else if (endMenu) {
+		if (glfwGetKey(window, GLFW_KEY_ENTER) == GLFW_PRESS) {
+			endMenu = false;
+			glfwSetTime(timeBeforeRestart);
+			resetModel();
+			randomRotation();
+			updateNumberOfCubes();
+		}
+	}
+	else //if(!mainMenu && !endMenu)
 	{
 		// Camera rotation around world axis (UP/DOWN/LEFT/RIGHT)
 		if (glfwGetKey(window, GLFW_KEY_UP) == GLFW_PRESS)
