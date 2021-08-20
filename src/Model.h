@@ -9,7 +9,6 @@
 #include <assimp/postprocess.h>
 
 #include "Mesh.h"
-#include "ModelShader.h"
 
 using namespace std;
 
@@ -26,7 +25,7 @@ public:
     Model(string const& path, bool gamma = false);
 
     // draws the model, and thus all its meshes
-    void Draw(ModelShader& shader);
+    void Draw(Shader& shader);
 
 private:
     unsigned int TextureFromFile(const char* path, const string& directory, bool gamma);
