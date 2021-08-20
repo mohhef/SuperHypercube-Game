@@ -39,3 +39,7 @@ Yongsu Huang | 40181720
 
 - *Welcome to OpenGL*. Learn OpenGL, extensive tutorial resource for learning Modern OpenGL. (n.d.). https://learnopengl.com/. 
 - YouTube. (2017). *Welcome to OpenGL. YouTube.* https://www.youtube.com/watch?v=W3gAzLwfIP0&amp;list=PLlrATfBNZ98foTJPJ_Ev03o2oq3-GGOS2. 
+- 4zevar. (n.d.). Tetris pixel bricks game vector background. iStock. https://www.istockphoto.com/vector/tetris-pixel-bricks-game-vector-background-gm1132862104-300492538. 
+- Space Pattern. Freepik. (2020, October 29). https://www.freepik.com/free-vector/color-seamless-space-pattern_10838001.htm#&amp;position=0. 
+- qumumusic. (2018, September 13). Kirby's dream land - Green greens [Remix]. YouTube. https://www.youtube.com/watch?v=JFCKPL5qMK0. 
+- YouTube. (2013, January 8). Halo theme Song Original. YouTube. https://www.youtube.com/watch?v=0jXTBAGv9ZQ. 

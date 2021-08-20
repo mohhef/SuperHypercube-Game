@@ -22,6 +22,7 @@ enum class ShaderType
 class Shader 
 {
 public:
+	unsigned int id;
 	Shader(const std::string& v);
 	~Shader();
 
@@ -42,6 +43,5 @@ public:
 
 private:
 	std::string filePath;
-	unsigned int id;
 	std::unordered_map<std::string, int> uniformLocationCache;
 };

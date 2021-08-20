@@ -117,6 +117,28 @@ static float squareVertices[] =
 	0.5f, 0.0f, -0.5f, 0.0f, 1.0f, 0.0f, 10.0f, 10.0f
 };
 
+static float flatSquare[] =
+{
+	-0.5f, -0.8f, -1.0f,
+	0.5f,  0.8f, -1.0f,
+	-0.5f, 0.8f, -1.0f,
+	-0.5f, -0.8f, -1.0f,
+	0.5f,  0.8f, -1.0f,
+	0.5f, -0.8f, -1.0f,
+};
+
+static float flatSquareBoarder[] =
+{
+	-0.5f, -0.8f, -1.0f,
+	-0.5f, 0.8f, -1.0f,
+	0.5f, -0.8f, -1.0f,
+	0.5f,  0.8f, -1.0f,
+	-0.5f, -0.8f, -1.0f,
+	0.5f, -0.8f, -1.0f,
+	-0.5f, 0.8f, -1.0f,
+	0.5f,  0.8f, -1.0f,
+};
+
 // Vertices for a line which is used by the axes
 static float axesVertices[] =
 {
