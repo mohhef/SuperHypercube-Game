@@ -177,6 +177,12 @@ int main(int argc, char* argv[])
 		layoutMenu.push<float>(3);
 		vaMenu.addBuffer(vbMenu, layoutMenu);
 
+		VertexArray vaMenuBorder;
+		VertexBuffer vbMenuBorder(flatSquareBoarder, sizeof(flatSquareBoarder));
+		VertexBufferLayout layoutMenuBorder;
+		layoutMenuBorder.push<float>(3);
+		vaMenuBorder.addBuffer(vbMenuBorder, layoutMenuBorder);
+
 		// Create shader instances
 		Shader* shader = new Shader("vertex_fragment.shader");
 		Shader* axesShader = new Shader("axes.shader");
@@ -235,8 +241,6 @@ int main(int argc, char* argv[])
 		// Entering main loop
 		while (!glfwWindowShouldClose(window))
 		{
-			if (!paused) {
-				// Update last frame
 				float currentFrame = glfwGetTime();
 				deltaTime = currentFrame - lastFrame;
 				lastFrame = currentFrame;
@@ -256,7 +260,10 @@ int main(int argc, char* argv[])
 
 				rotMat.updateRotation(currentFrame);
 
-				updateDisplacement(currentFrame);
+				if (!paused) {
+					updateDisplacement(currentFrame);
+				}
+				
 				renderer.updateCenterOfMass();
 
 				// Clear color and depth buffers
@@ -325,8 +332,15 @@ int main(int argc, char* argv[])
 				// Render light source
 				renderer.drawLightingSource(vaLightingSource, *lightingSourceShader, view, projection, lightPos);
 
-				// Update timer
-				int totalSeconds = timeLeft - (int)((clock() - timer) / (double)CLOCKS_PER_SEC);
+				int totalSeconds;
+				if (!paused) {
+					// Update timer
+					totalSeconds = timeLeft - (int)((clock() - timer) / (double)CLOCKS_PER_SEC);
+				}
+				else {
+					totalSeconds = timeLeft;
+				}
+				
 
 				if (totalSeconds < 0)
 					resetScoreAndTimer();
@@ -346,20 +360,27 @@ int main(int argc, char* argv[])
 					textRendering.RenderText(*textShader, "Time: " + to_string(minutes) + ":" + to_string(seconds), 850.0f, 700.0f, 0.50f, modelColor.at(modelIndex));
 				textRendering.disable();
 
-			}
-			else {
-			renderer.clear();
-			
+				if (paused) {
 
-				vaMenu.bind();
-				menuShader->bind();
-				glDrawArrays(GL_TRIANGLES, 0, 6);
-				menuShader->unbind();
-				vaMenu.unbind();
-				textRendering.enable();
-				textRendering.RenderText(*textShader, "Hello", 300.0f, 450.0f, 0.5f, glm::vec3(1.0f, 1.0f, 1.0f));
-				textRendering.disable();
-			}
+					vaMenuBorder.bind();
+					menuShader->bind();
+					menuShader->setUniform3Vec("acolor", glm::vec3(1.0, 1.0, 1.0));
+					glLineWidth(5.0f); // make the borders thicker (default is 1)
+					glDrawArrays(GL_LINES, 0, 8);
+					menuShader->unbind();
+					vaMenuBorder.unbind();
+
+					vaMenu.bind();
+					menuShader->bind();
+					menuShader->setUniform3Vec("acolor", glm::vec3(0.55, 0.55, 0.55));
+					glDrawArrays(GL_TRIANGLES, 0, 6);
+					menuShader->unbind();
+					vaMenu.unbind();
+
+					textRendering.enable();
+					textRendering.RenderText(*textShader, "I don't know what to put here", 300.0f, 630.0f, 0.5f, glm::vec3(1.0f, 1.0f, 1.0f));
+					textRendering.disable();
+				}
 			
 
 			// End frame
