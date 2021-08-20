@@ -46,8 +46,7 @@ int incMultiplierThreshold = 2;
 // Possibly bound to a single model (modelIndex)
 // Models
 vector<glm::mat4> modelTransMat;
-RotationMat 
-(glm::vec3(0.0f));
+RotationMat rotMat(glm::vec3(0.0f));
 glm::vec3 displacement;
 float displacementSpeed = 2.0;
 float scaleFactor = 1.0f;
@@ -63,7 +62,6 @@ int score = 0;
 int wallsCleared = 0;
 int numCubes = 0;
 clock_t timer;
-bool instructions = false;
 
 // Renderer
 Renderer& renderer = Renderer::getInstance();
@@ -250,7 +248,7 @@ int main(int argc, char* argv[])
 				textRendering.RenderText(*textShader, "SuperHyperCube", 300.0f, 600.0f, 1.00f, glm::vec3(1.0f));
 				textRendering.RenderText(*textShader, "Press S to start game.", 300.0f, 450.0f, 0.50f, glm::vec3(1.0f));
 				textRendering.RenderText(*textShader, "Press ESC to exit.", 300.0f, 420.0f, 0.50f, glm::vec3(1.0f));
-				textRendering.RenderText(*textShader, "Press TAB to toggle key bindings (in-game).", 300.0f, 390.0f, 0.50f, glm::vec3(1.0f));
+				textRendering.RenderText(*textShader, "Press P to pause game (and see key-bindings).", 300.0f, 390.0f, 0.50f, glm::vec3(1.0f));
 				textRendering.disable();
 
 				// End frame
@@ -429,16 +427,6 @@ int main(int argc, char* argv[])
 				textRendering.RenderText(*textShader, "Time: " + to_string(minutes) + ":0" + to_string(seconds), 850.0f, 700.0f, 0.50f, modelColor.at(modelIndex));
 			else
 				textRendering.RenderText(*textShader, "Time: " + to_string(minutes) + ":" + to_string(seconds), 850.0f, 700.0f, 0.50f, modelColor.at(modelIndex));
-
-			if (instructions)
-			{
-				textRendering.RenderText(*textShader, "W/S: Rotate object (X-axis)", 50.0f, 200.0f, 0.50f, modelColor.at(modelIndex));
-				textRendering.RenderText(*textShader, "A/D: Rotate object (Y-axis)", 50.0f, 170.0f, 0.50f, modelColor.at(modelIndex));
-				textRendering.RenderText(*textShader, "Q/E: Rotate object (Z-axis)", 50.0f, 140.0f, 0.50f, modelColor.at(modelIndex));
-				textRendering.RenderText(*textShader, "SHIFT: Rush", 50.0f, 110.0f, 0.50f, modelColor.at(modelIndex));
-				textRendering.RenderText(*textShader, "UP/DOWN/LEFT/RIGHT: Rotate camera", 50.0f, 80.0f, 0.50f, modelColor.at(modelIndex));
-				textRendering.RenderText(*textShader, "HOME: Reset camera", 50.0f, 50.0f, 0.50f, modelColor.at(modelIndex));
-			}
 
 			textRendering.disable();
 
@@ -747,32 +735,26 @@ void processInput(GLFWwindow* window, int key, int scancode, int action, int mod
 			rotMat.setSoft(glm::vec3(0.0f, 0.0f, -90.0f));
 		}
 
-	// Pause menu
-	if (glfwGetKey(window, GLFW_KEY_P) == GLFW_PRESS) 
-  {
-		if (!paused) 
-    {
-			timeBeforePause = glfwGetTime();
-			timeLeft = timeLeft - (int)((clock() - timer) / (double)CLOCKS_PER_SEC);
+		// Pause menu
+		if (glfwGetKey(window, GLFW_KEY_P) == GLFW_PRESS) 
+		{
+			if (!paused) 
+		{
+				timeBeforePause = glfwGetTime();
+				timeLeft = timeLeft - (int)((clock() - timer) / (double)CLOCKS_PER_SEC);
+			}
+			else 
+		{
+				timer = clock();
+				glfwSetTime(timeBeforePause);
+			}
+			paused = !paused;
 		}
-		else 
-    {
-			timer = clock();
-			glfwSetTime(timeBeforePause);
-		}
-		paused = !paused;
-	}
 
 		// Toggle shadows
 		if (glfwGetKey(window, GLFW_KEY_B) == GLFW_PRESS)
 		{
 			shadows = !shadows;
-		}
-
-		// Toggle instructions
-		if (glfwGetKey(window, GLFW_KEY_TAB) == GLFW_PRESS)
-		{
-			instructions = !instructions;
 		}
 	}
 }
