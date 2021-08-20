@@ -100,6 +100,10 @@ float resetTime = 0.0f;
 glm::vec3 cameraInitialPos = glm::vec3(modelPosition.at(modelIndex).x, modelPosition.at(modelIndex).y + 40, 100.0f);
 glm::vec3 modelPos;
 
+bool paused = false;
+float timeBeforePause = 0.0f;
+int timeLeft = 120;
+
 // Window size
 int HEIGHT = 768;
 int WIDTH = 1024;
@@ -165,12 +169,26 @@ int main(int argc, char* argv[])
 		layoutFloor.push<float>(2);
 		vaFloor.addBuffer(vbFloor, layoutFloor);
 
+		// setup for menu
+		VertexArray vaMenu;
+		VertexBuffer vbMenu(flatSquare, sizeof(flatSquare));
+		VertexBufferLayout layoutMenu;
+		layoutMenu.push<float>(3);
+		vaMenu.addBuffer(vbMenu, layoutMenu);
+
+		VertexArray vaMenuBorder;
+		VertexBuffer vbMenuBorder(flatSquareBoarder, sizeof(flatSquareBoarder));
+		VertexBufferLayout layoutMenuBorder;
+		layoutMenuBorder.push<float>(3);
+		vaMenuBorder.addBuffer(vbMenuBorder, layoutMenuBorder);
+
 		// Create shader instances
 		Shader* shader = new Shader("vertex_fragment.shader");
 		Shader* axesShader = new Shader("axes.shader");
 		Shader* lightingSourceShader = new Shader("lightingSource.shader");
 		Shader* depthShader = new Shader("depthMap.shader");
 		Shader* textShader = new Shader("text.shader");
+		Shader* menuShader = new Shader("menu.shader");
 
 		// 3D Models
 		Model ivysaurmodel("3D_Model/pokemon.obj");   // ivysaur //right
@@ -221,7 +239,6 @@ int main(int argc, char* argv[])
 		// Entering main loop
 		while (!glfwWindowShouldClose(window))
 		{
-			// Update last frame
 			float currentFrame = glfwGetTime();
 			deltaTime = currentFrame - lastFrame;
 			lastFrame = currentFrame;
@@ -241,7 +258,10 @@ int main(int argc, char* argv[])
 
 			rotMat.updateRotation(currentFrame);
 
-			updateDisplacement(currentFrame);
+			if (!paused) {
+				updateDisplacement(currentFrame);
+			}
+				
 			renderer.updateCenterOfMass();
 
 			// Clear color and depth buffers
@@ -357,10 +377,16 @@ int main(int argc, char* argv[])
 
 			// Render light source
 			renderer.drawLightingSource(vaLightingSource, *lightingSourceShader, view, projection, lightPos);
-			
-			// Update timer
-			int totalSeconds = 120 - (int) ((clock() - timer) / (double) CLOCKS_PER_SEC);
-			
+
+			int totalSeconds;
+			if (!paused) {
+				// Update timer
+				totalSeconds = timeLeft - (int)((clock() - timer) / (double)CLOCKS_PER_SEC);
+			}
+			else {
+				totalSeconds = timeLeft;
+			}
+
 			if (totalSeconds < 0)
 				resetScoreAndTimer();
 
@@ -378,6 +404,40 @@ int main(int argc, char* argv[])
 			else
 				textRendering.RenderText(*textShader, "Time: " + to_string(minutes) + ":" + to_string(seconds), 850.0f, 700.0f, 0.50f, modelColor.at(modelIndex));
 			textRendering.disable();
+
+			if (paused) {
+				vaMenuBorder.bind();
+				menuShader->bind();
+				menuShader->setUniform3Vec("acolor", glm::vec3(1.0, 1.0, 1.0));
+				glLineWidth(5.0f); // make the borders thicker (default is 1)
+				glDrawArrays(GL_LINES, 0, 8);
+				menuShader->unbind();
+				vaMenuBorder.unbind();
+
+				vaMenu.bind();
+				menuShader->bind();
+				menuShader->setUniform3Vec("acolor", glm::vec3(0.55, 0.55, 0.55));
+				glDrawArrays(GL_TRIANGLES, 0, 6);
+				menuShader->unbind();
+				vaMenu.unbind();
+
+				textRendering.enable();
+				textRendering.RenderText(*textShader, "UP/DOWN: rotate camera along X-axis.", 300.0f, 630.0f, 0.5f, glm::vec3(1.0f, 1.0f, 1.0f));
+				textRendering.RenderText(*textShader, "LEFT/RIGHT: rotate camera along Y-axis.", 300.0f, 600.0f, 0.5f, glm::vec3(1.0f, 1.0f, 1.0f));
+				textRendering.RenderText(*textShader, "HOME: reset camera.", 300.0f, 570.0f, 0.5f, glm::vec3(1.0f, 1.0f, 1.0f));
+				textRendering.RenderText(*textShader, "LMB: zoom camera.", 300.0f, 540.0f, 0.5f, glm::vec3(1.0f, 1.0f, 1.0f));
+				textRendering.RenderText(*textShader, "RMB: pan camera.", 300.0f, 510.0f, 0.5f, glm::vec3(1.0f, 1.0f, 1.0f));
+				textRendering.RenderText(*textShader, "MMB: tilt camera.", 300.0f, 480.0f, 0.5f, glm::vec3(1.0f, 1.0f, 1.0f));
+				textRendering.RenderText(*textShader, "ESC: close window.", 300.0f, 450.0f, 0.5f, glm::vec3(1.0f, 1.0f, 1.0f));
+				textRendering.RenderText(*textShader, "SPACEBAR: reset model position.", 300.0f, 420.0f, 0.5f, glm::vec3(1.0f, 1.0f, 1.0f));
+				textRendering.RenderText(*textShader, "SHIFT: increase model speed.", 300.0f, 390.0f, 0.5f, glm::vec3(1.0f, 1.0f, 1.0f));
+				textRendering.RenderText(*textShader, "W/S: rotate model along X-axis.", 300.0f, 360.0f, 0.5f, glm::vec3(1.0f, 1.0f, 1.0f));
+				textRendering.RenderText(*textShader, "A/D: rotate model along Y-axis.", 300.0f, 330.0f, 0.5f, glm::vec3(1.0f, 1.0f, 1.0f));
+				textRendering.RenderText(*textShader, "Q/E: rotate model along X-axis.", 300.0f, 300.0f, 0.5f, glm::vec3(1.0f, 1.0f, 1.0f));
+				textRendering.RenderText(*textShader, "B: toggle shadows", 300.0f, 270.0f, 0.5f, glm::vec3(1.0f, 1.0f, 1.0f));
+				textRendering.RenderText(*textShader, "P: Pause/Unpause", 300.0f, 240.0f, 0.5f, glm::vec3(1.0f, 1.0f, 1.0f));
+				textRendering.disable();
+			}
 			// End frame
 			glfwSwapBuffers(window);
 
@@ -634,15 +694,18 @@ void processInput(GLFWwindow* window, int key, int scancode, int action, int mod
 		SoundEngine2->play2D("audio/click.mp3", false);
 		rotMat.setSoft(glm::vec3(0.0f, 0.0f, -90.0f));
 	}
-	// Toggle rendering mode between point, line and fill mode (P/L/T)
-	if (glfwGetKey(window, GLFW_KEY_P) == GLFW_PRESS)
-		glPolygonMode(GL_FRONT_AND_BACK, GL_POINT);
-
-	if (glfwGetKey(window, GLFW_KEY_L) == GLFW_PRESS)
-		glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-
-	if (glfwGetKey(window, GLFW_KEY_T) == GLFW_PRESS)
-		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+	// Toggle rendering mode between line and fill mode (L/T)
+	if (glfwGetKey(window, GLFW_KEY_P) == GLFW_PRESS) {
+		if (!paused) {
+			timeBeforePause = glfwGetTime();
+			timeLeft = timeLeft - (int)((clock() - timer) / (double)CLOCKS_PER_SEC);
+		}
+		else {
+			timer = clock();
+			glfwSetTime(timeBeforePause);
+		}
+		paused = !paused;
+	}
 
 	if (glfwGetKey(window, GLFW_KEY_B) == GLFW_PRESS)
 	{
