@@ -233,7 +233,7 @@ void Renderer::draw3DModel(Shader& shader, glm::mat4 view, glm::mat4 projection,
 	modelObject.Draw(shader);
 }
 // Draw the wall that is currently in use
-void Renderer::drawWall(VertexArray& va, Shader& shader, glm::mat4 view, glm::mat4 projection, glm::vec3 lightPos, glm::vec3 cameraPos, Texture& texture, glm::mat4 modelRotMat, float scaleFactor, glm::vec3 displacement)
+void Renderer::drawWall(VertexArray& va, Shader& shader, glm::mat4 view, glm::mat4 projection, glm::vec3 lightPos, glm::vec3 cameraPos, Texture& texture, glm::mat4 modelRotMat, float scaleFactor, glm::vec3 displacement, bool dead, bool fittingThrough)
 {
 	// bind the vertex array and shader
 	va.bind();
@@ -255,7 +255,12 @@ void Renderer::drawWall(VertexArray& va, Shader& shader, glm::mat4 view, glm::ma
 		if (isTextureEnabled)
 		{
 			shader.setUniform1i("textureStatus", 1);
-			shader.setUniform3Vec("ourColor", glm::vec3(1.0f, 1.0f, 1.0f));
+			if (dead)
+				shader.setUniform3Vec("ourColor", glm::vec3(1.0f, 0.0f, 0.0f));
+			else if (fittingThrough)
+				shader.setUniform3Vec("ourColor", glm::vec3(0.0f, 1.0f, 0.0f));
+			else
+				shader.setUniform3Vec("ourColor", glm::vec3(1.0f, 1.0f, 1.0f));
 		}
 		else
 		{
@@ -344,9 +349,8 @@ float Renderer::calculateFurthestZ(glm::mat4 modelRotMat, vector<glm::mat4> mode
 	}
 
 	float smallestZ = 2 * modelPosition.at(renderIndex).z;
-	for (int i = 0; i < numCubePieces; i++)
+	for (int i = 0; i < numCubePieces; i++) 
 		smallestZ = smallestZ < currentModelCubes.at(i).z ? smallestZ : currentModelCubes.at(i).z;
-
+	
 	return smallestZ;
 }
-

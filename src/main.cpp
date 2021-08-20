@@ -42,6 +42,11 @@ using namespace std;
 int scoreMultiplier = 1;
 int multiplierCounter = 0;
 int incMultiplierThreshold = 2;
+// collision variables
+float prevDisplacementSpeed = 0.0f;
+bool displacementSpeedUpdate = true;
+float speedAfterPass = 6.6f;
+glm::vec3 lockedCameraLookAt = glm::vec3(1.0f);
 // Modified throughout run and to reset between runs.
 // Possibly bound to a single model (modelIndex)
 // Models
@@ -69,6 +74,13 @@ Renderer& renderer = Renderer::getInstance();
 // Sound
 ISoundEngine* SoundEngine = createIrrKlangDevice();
 ISoundEngine* SoundEngine2 = createIrrKlangDevice();
+
+float bgmVolume = 0.25f;
+float effectVolume = 0.50f;
+int lastMinusState = GLFW_RELEASE;
+int lastEqualState = GLFW_RELEASE;
+int lastBackSpaceState = GLFW_RELEASE;
+int soundSwitch = 1;
 
 // Cursor positions for mouse inputs
 float lastMouseX;
@@ -103,6 +115,7 @@ void resetScoreAndTimer();
 
 // animation
 bool resetAfterCollision = false;
+bool fittingThrough = false;
 float resetTime = 0.0f;
 glm::vec3 cameraInitialPos = glm::vec3(modelPosition.at(modelIndex).x, modelPosition.at(modelIndex).y + 40, 100.0f);
 glm::vec3 modelPos;
@@ -131,9 +144,10 @@ int main(int argc, char* argv[])
 		createModel(model);
 	}
 
-	SoundEngine->setSoundVolume(0.1f);
+	SoundEngine->setSoundVolume(bgmVolume);
 	SoundEngine->play2D("audio/Halo.mp3", true);
-	SoundEngine2->setSoundVolume(0.25f);
+
+	SoundEngine2->setSoundVolume(effectVolume);
 	SoundEngine2->addSoundSourceFromFile("audio/punch.mp3", ESM_AUTO_DETECT, true); // third parameter set to true == preload
 	SoundEngine2->addSoundSourceFromFile("audio/bow.mp3", ESM_AUTO_DETECT, true); // third parameter set to true == preload
 	SoundEngine2->addSoundSourceFromFile("audio/score.wav", ESM_AUTO_DETECT, true); // third parameter set to true == preload
@@ -246,8 +260,8 @@ int main(int argc, char* argv[])
 
 		// Entering main loop
 		while (!glfwWindowShouldClose(window))
-		{
-
+		{	
+			SoundEngine->setSoundVolume(bgmVolume);
 			if (mainMenu)
 			{
 				textRendering.enable();
@@ -322,7 +336,7 @@ int main(int argc, char* argv[])
 			depthMapper.Draw(depthShader, lightPos, [&]() {
 				// Render objects to be drawn by the depth mapper object
 				renderer.drawObject(vA, *depthShader, view, projection, lightPos, camera->position, tetrisTexture, rotMat.getMatrix(), modelTransMat, scaleFactor, displacement);
-				renderer.drawWall(vA, *depthShader, view, projection, lightPos, camera->position, brickTexture, rotMat.getMatrix(), scaleFactor, displacement);
+				renderer.drawWall(vA, *depthShader, view, projection, lightPos, camera->position, brickTexture, rotMat.getMatrix(), scaleFactor, displacement, resetAfterCollision, fittingThrough);
 
 				// Draw Squirtle
 				renderer.draw3DModel(
@@ -362,7 +376,6 @@ int main(int argc, char* argv[])
 					glm::vec3(0.0f, 135.0f, 0.0f),
 					ivysaurmodel
 				);
-
 				});
 
 			// Bind universal attributes necessary for drawing all the objects on the map
@@ -376,7 +389,8 @@ int main(int argc, char* argv[])
 
 			// Render each object (wall, model, static models, axes, and mesh floor)
 			renderer.drawObject(vA, *shader, view, projection, lightPos, camera->position, tetrisTexture, rotMat.getMatrix(), modelTransMat, scaleFactor, displacement);
-			renderer.drawWall(vA, *shader, view, projection, lightPos, camera->position, brickTexture, rotMat.getMatrix(), scaleFactor, displacement);
+			
+			renderer.drawWall(vA, *shader, view, projection, lightPos, camera->position, brickTexture, rotMat.getMatrix(), scaleFactor, displacement, resetAfterCollision, fittingThrough);
 			renderer.drawLightingSource(vaLightingSource, *lightingSourceShader, view, projection, lightPos);
 			renderer.drawFloor(vaFloor, *shader, view, projection, lightPos, camera->position, galaxyTexture);
 
@@ -491,9 +505,9 @@ int main(int argc, char* argv[])
 				textRendering.RenderText(*textShader, "Q/E: rotate model along X-axis.", 300.0f, 300.0f, 0.5f, glm::vec3(1.0f, 1.0f, 1.0f));
 				textRendering.RenderText(*textShader, "B: toggle shadows", 300.0f, 270.0f, 0.5f, glm::vec3(1.0f, 1.0f, 1.0f));
 				textRendering.RenderText(*textShader, "P: Pause/Unpause", 300.0f, 240.0f, 0.5f, glm::vec3(1.0f, 1.0f, 1.0f));
-				textRendering.RenderText(*textShader, "-: decrease volume", 300.0f, 210.0f, 0.5f, glm::vec3(1.0f, 1.0f, 1.0f));
+				textRendering.RenderText(*textShader, "BACKSPACE: change music", 300.0f, 210.0f, 0.5f, glm::vec3(1.0f, 1.0f, 1.0f));
 				textRendering.RenderText(*textShader, "=: increase volume", 300.0f, 180.0f, 0.5f, glm::vec3(1.0f, 1.0f, 1.0f));
-				textRendering.RenderText(*textShader, "BACKSPACE: change bgm", 300.0f, 150.0f, 0.5f, glm::vec3(1.0f, 1.0f, 1.0f));
+				textRendering.RenderText(*textShader, "-: decrease volume", 300.0f, 150.0f, 0.5f, glm::vec3(1.0f, 1.0f, 1.0f));
 				textRendering.disable();
 			}
 			// End frame
@@ -606,18 +620,38 @@ void updateDisplacement(float currentFrame)
 	}
 
 	prevFrame = currentFrame;
-
+	
 	// Check for collision
 	if (renderer.calculateFurthestZ(rotMat.getMatrix(), modelTransMat, displacement) < wallZPos + 2)
 		if (!isFit() && !resetAfterCollision) {
 			SoundEngine2->play2D("audio/punch.mp3", false);
-			rotMat.setSoft(glm::vec3(0.0f, 0.0f, 20.0f));
+      
+			// random rotation and x movement
+			float LO = -1.0f;
+			float HI = 1.0f;
+			float r = LO + static_cast <float> (rand()) / (static_cast <float> (RAND_MAX / (HI - LO)));
+			rotMat.setSoft(glm::vec3(0.0f, 0.0f, r * 20.0f));
+			displacement.x += 1.3 * r;
 			resetTime = currentFrame + 0.5f;
 			resetAfterCollision = true;
+			fittingThrough = false;
+		}	
+		// camera lookAt does not move forward, slows down when passed
+		else if (displacement.z < -18 && displacement.z > -25){
+			if (displacementSpeedUpdate) {
+				if (displacementSpeed >= 10.0f) { prevDisplacementSpeed = speedAfterPass; }
+				else {
+					prevDisplacementSpeed = displacementSpeed;
+				}
+				displacementSpeedUpdate = false;
+				lockedCameraLookAt = (modelPos + displacement);
+			}
+			displacementSpeed = prevDisplacementSpeed;
+			camera->lookAt(lockedCameraLookAt);
+			if (isFit()) fittingThrough = true;
 		}
 	// Reset upon wall pass
-		else if (displacement.z < -27) {
-
+		else if (displacement.z < -25) {
 			// Increment if model fits through hole
 			if (isFit()) {
 				SoundEngine2->play2D("audio/score.wav", false);
@@ -637,6 +671,7 @@ void updateDisplacement(float currentFrame)
 			// Z displacement and speed
 			displacement.z = 0;
 
+			displacementSpeedUpdate = true;
 			resetModel();
 			randomRotation();
 			updateNumberOfCubes();
@@ -651,6 +686,7 @@ void updateDisplacement(float currentFrame)
 void updateNumberOfCubes()
 {
 	numCubes = getTotalCubes(models.at(modelIndex));
+	fittingThrough = false;
 }
 
 // Reset translation matrix for each model's cube.
@@ -704,6 +740,7 @@ void processInput(GLFWwindow* window, int key, int scancode, int action, int mod
 			SoundEngine->stopAllSounds();
 			SoundEngine2->play2D("audio/Kirby.mp3", true);
 			glfwSetTime(timeBeforeStart);
+			SoundEngine->play2D("audio/Kirby.mp3", true, false, true);
 			resetModel();
 			randomRotation();
 			updateNumberOfCubes();
@@ -798,7 +835,41 @@ void processInput(GLFWwindow* window, int key, int scancode, int action, int mod
 		{
 			shadows = !shadows;
 		}
+
+		// Change BGM
+		if (lastBackSpaceState == GLFW_RELEASE && glfwGetKey(window, GLFW_KEY_BACKSPACE) == GLFW_PRESS) {
+			SoundEngine->stopAllSounds();
+			switch (soundSwitch) {
+			case 0:
+				SoundEngine->play2D("audio/Kirby.mp3", true, false, true);
+				break;
+			case 1:
+				SoundEngine->play2D("audio/breakout.mp3", true, false, true);
+				break;
+			case 2:
+				SoundEngine->play2D("audio/salt.mp3", true, false, true);
+				break;
+			}
+			soundSwitch++;
+			if (soundSwitch >= 3) soundSwitch = 0;
+		}
+		lastBackSpaceState = glfwGetKey(window, GLFW_KEY_BACKSPACE);
 	}
+	
+	// Sound adjust
+	if (lastMinusState == GLFW_RELEASE && glfwGetKey(window, GLFW_KEY_MINUS) == GLFW_PRESS) {
+		bgmVolume -= 0.05;
+		if (bgmVolume < 0)
+			bgmVolume = 0;
+	}
+	lastMinusState = glfwGetKey(window, GLFW_KEY_MINUS);
+
+	if (lastEqualState == GLFW_RELEASE && glfwGetKey(window, GLFW_KEY_EQUAL) == GLFW_PRESS) {
+		bgmVolume += 0.05;
+		if (bgmVolume > 1.0)
+			bgmVolume = 1;
+	}
+	lastEqualState = glfwGetKey(window, GLFW_KEY_EQUAL);
 }
 
 // Function for processing mouse input
