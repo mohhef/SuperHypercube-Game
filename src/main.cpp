@@ -241,163 +241,158 @@ int main(int argc, char* argv[])
 		// Entering main loop
 		while (!glfwWindowShouldClose(window))
 		{
-				float currentFrame = glfwGetTime();
-				deltaTime = currentFrame - lastFrame;
-				lastFrame = currentFrame;
-				if (resetAfterCollision && currentFrame > resetTime) {
-					resetAfterCollision = false;
-					resetTime = 0.0f;
-					resetModel(true);
-					// handle multiplier
-					multiplierCounter = 0;
-					// reduce multipler to half
-					if (scoreMultiplier > 1)scoreMultiplier = scoreMultiplier / 2;
-				}
+			float currentFrame = glfwGetTime();
+			deltaTime = currentFrame - lastFrame;
+			lastFrame = currentFrame;
+			if (resetAfterCollision && currentFrame > resetTime) {
+				resetAfterCollision = false;
+				resetTime = 0.0f;
+				resetModel(true);
+				// handle multiplier
+				multiplierCounter = 0;
+				// reduce multipler to half
+				if (scoreMultiplier > 1)scoreMultiplier = scoreMultiplier / 2;
+			}
 
-				if (resetAfterCollision) {
-					camera->lookAt(modelPos + displacement);
-				}
+			if (resetAfterCollision) {
+				camera->lookAt(modelPos + displacement);
+			}
 
-				rotMat.updateRotation(currentFrame);
+			rotMat.updateRotation(currentFrame);
 
-				if (!paused) {
-					updateDisplacement(currentFrame);
-				}
+			if (!paused) {
+				updateDisplacement(currentFrame);
+			}
 				
-				renderer.updateCenterOfMass();
+			renderer.updateCenterOfMass();
 
-				// Clear color and depth buffers
-				renderer.clear();
+			// Clear color and depth buffers
+			renderer.clear();
 
-				glm::mat4 projection = glm::perspective(glm::radians(camera->zoom), (float)WIDTH / (float)HEIGHT, 0.1f, 600.0f);
-				glm::mat4 view = camera->getViewMatrix();
+			glm::mat4 projection = glm::perspective(glm::radians(camera->zoom), (float)WIDTH / (float)HEIGHT, 0.1f, 600.0f);
+			glm::mat4 view = camera->getViewMatrix();
 
-				// Shadow mapping
-				depthMapper.Draw(depthShader, lightPos, [&]() {
-					// Render objects to be drawn by the depth mapper object
-					renderer.drawObject(vA, *depthShader, view, projection, lightPos, camera->position, tetrisTexture, rotMat.getMatrix(), modelTransMat, scaleFactor, displacement);
-					renderer.drawWall(vA, *depthShader, view, projection, lightPos, camera->position, brickTexture, rotMat.getMatrix(), scaleFactor, displacement);
-					});
+			// Shadow mapping
+			depthMapper.Draw(depthShader, lightPos, [&]() {
+				// Render objects to be drawn by the depth mapper object
+				renderer.drawObject(vA, *depthShader, view, projection, lightPos, camera->position, tetrisTexture, rotMat.getMatrix(), modelTransMat, scaleFactor, displacement);
+				renderer.drawWall(vA, *depthShader, view, projection, lightPos, camera->position, brickTexture, rotMat.getMatrix(), scaleFactor, displacement);
+				});
 
-				// Bind universal attributes necessary for drawing all the objects on the map
-				shader->bind();
-				shader->setUniform3Vec("lightPosition", lightPos);
-				shader->setUniform3Vec("viewPos", camera->position);
-				shader->setUniform1i("drawShadows", shadows);
-				shader->setUniform1f("map_range", far);
-				depthMapper.bind();
+			// Bind universal attributes necessary for drawing all the objects on the map
+			shader->bind();
+			shader->setUniform3Vec("lightPosition", lightPos);
+			shader->setUniform3Vec("viewPos", camera->position);
+			shader->setUniform1i("drawShadows", shadows);
+			shader->setUniform1f("map_range", far);
+			depthMapper.bind();
 
-				// Render each object (wall, model, static models, axes, and mesh floor)
-				renderer.drawObject(vA, *shader, view, projection, lightPos, camera->position, tetrisTexture, rotMat.getMatrix(), modelTransMat, scaleFactor, displacement);
-				renderer.drawWall(vA, *shader, view, projection, lightPos, camera->position, brickTexture, rotMat.getMatrix(), scaleFactor, displacement);
-				renderer.drawLightingSource(vaLightingSource, *lightingSourceShader, view, projection, lightPos);
-				renderer.drawFloor(vaFloor, *shader, view, projection, lightPos, camera->position, galaxyTexture);
+			// Render each object (wall, model, static models, axes, and mesh floor)
+			renderer.drawObject(vA, *shader, view, projection, lightPos, camera->position, tetrisTexture, rotMat.getMatrix(), modelTransMat, scaleFactor, displacement);
+			renderer.drawWall(vA, *shader, view, projection, lightPos, camera->position, brickTexture, rotMat.getMatrix(), scaleFactor, displacement);
+			renderer.drawLightingSource(vaLightingSource, *lightingSourceShader, view, projection, lightPos);
+			renderer.drawFloor(vaFloor, *shader, view, projection, lightPos, camera->position, galaxyTexture);
 
-				// Development purpose
-				// renderer.drawAxes(vaAxes, *axesShader, view, projection);	
+			// Development purpose
+			// renderer.drawAxes(vaAxes, *axesShader, view, projection);	
 
-				// Draw Ivysaur
-				renderer.draw3DModel(
-					*d3Shader,
-					view,
-					projection,
-					glm::vec3(2.0f, 2.0f, 2.0f),
-					glm::vec3(8.0f, 20.0f, -10.0f),
-					glm::vec3(0.0f, 135.0f, 0.0f),
-					ivysaurmodel
-				);
+			// Draw Ivysaur
+			renderer.draw3DModel(
+				*d3Shader,
+				view,
+				projection,
+				glm::vec3(2.0f, 2.0f, 2.0f),
+				glm::vec3(8.0f, 20.0f, -10.0f),
+				glm::vec3(0.0f, 135.0f, 0.0f),
+				ivysaurmodel
+			);
 
-				// Draw Charizard
-				renderer.draw3DModel(
-					*d3Shader,
-					view,
-					projection,
-					glm::vec3(0.2f, 0.2f, 0.2f),
-					glm::vec3(4.0f, 20.0f, -10.0f),
-					glm::vec3(10.0f, 0.0f, 10.0f),
-					charizardmodel
-				);
+			// Draw Charizard
+			renderer.draw3DModel(
+				*d3Shader,
+				view,
+				projection,
+				glm::vec3(0.2f, 0.2f, 0.2f),
+				glm::vec3(4.0f, 20.0f, -10.0f),
+				glm::vec3(10.0f, 0.0f, 10.0f),
+				charizardmodel
+			);
 
-				// Draw Squirtle
-				renderer.draw3DModel(
-					*d3Shader,
-					view,
-					projection,
-					glm::vec3(0.7f, 0.7f, 0.7f),
-					glm::vec3(-2.5f, 20.0f, -12.5f),
-					glm::vec3(0.0f, 70.0f, 0.0f),
-					squirtlemodel
-				);
+			// Draw Squirtle
+			renderer.draw3DModel(
+				*d3Shader,
+				view,
+				projection,
+				glm::vec3(0.7f, 0.7f, 0.7f),
+				glm::vec3(-2.5f, 20.0f, -12.5f),
+				glm::vec3(0.0f, 70.0f, 0.0f),
+				squirtlemodel
+			);
 
-				// Render light source
-				renderer.drawLightingSource(vaLightingSource, *lightingSourceShader, view, projection, lightPos);
+			// Render light source
+			renderer.drawLightingSource(vaLightingSource, *lightingSourceShader, view, projection, lightPos);
 
-				int totalSeconds;
-				if (!paused) {
-					// Update timer
-					totalSeconds = timeLeft - (int)((clock() - timer) / (double)CLOCKS_PER_SEC);
-				}
-				else {
-					totalSeconds = timeLeft;
-				}
-				
+			int totalSeconds;
+			if (!paused) {
+				// Update timer
+				totalSeconds = timeLeft - (int)((clock() - timer) / (double)CLOCKS_PER_SEC);
+			}
+			else {
+				totalSeconds = timeLeft;
+			}
 
-				if (totalSeconds < 0)
-					resetScoreAndTimer();
+			if (totalSeconds < 0)
+				resetScoreAndTimer();
 
-				int minutes = totalSeconds / 60;
-				int seconds = totalSeconds % 60;
+			int minutes = totalSeconds / 60;
+			int seconds = totalSeconds % 60;
 
-				// Render text
+			// Render text
+			textRendering.enable();
+			textRendering.RenderText(*textShader, "Score: " + to_string(score), 50.0f, 700.0f, 0.50f, modelColor.at(modelIndex));
+			textRendering.RenderText(*textShader, "Multiplier: " + to_string(scoreMultiplier), 50.0f, 670.0f, 0.50f, modelColor.at(modelIndex));
+			textRendering.RenderText(*textShader, "Walls cleared : " + to_string(wallsCleared), 50.0f, 640.0f, 0.50f, modelColor.at(modelIndex));
+			textRendering.RenderText(*textShader, "Number of cubes in cluster : " + to_string(numCubes), 50.0f, 610.0f, 0.50f, modelColor.at(modelIndex));
+			if (seconds < 10)
+				textRendering.RenderText(*textShader, "Time: " + to_string(minutes) + ":0" + to_string(seconds), 850.0f, 700.0f, 0.50f, modelColor.at(modelIndex));
+			else
+				textRendering.RenderText(*textShader, "Time: " + to_string(minutes) + ":" + to_string(seconds), 850.0f, 700.0f, 0.50f, modelColor.at(modelIndex));
+			textRendering.disable();
+
+			if (paused) {
+				vaMenuBorder.bind();
+				menuShader->bind();
+				menuShader->setUniform3Vec("acolor", glm::vec3(1.0, 1.0, 1.0));
+				glLineWidth(5.0f); // make the borders thicker (default is 1)
+				glDrawArrays(GL_LINES, 0, 8);
+				menuShader->unbind();
+				vaMenuBorder.unbind();
+
+				vaMenu.bind();
+				menuShader->bind();
+				menuShader->setUniform3Vec("acolor", glm::vec3(0.55, 0.55, 0.55));
+				glDrawArrays(GL_TRIANGLES, 0, 6);
+				menuShader->unbind();
+				vaMenu.unbind();
+
 				textRendering.enable();
-				textRendering.RenderText(*textShader, "Score: " + to_string(score), 50.0f, 700.0f, 0.50f, modelColor.at(modelIndex));
-				textRendering.RenderText(*textShader, "Multiplier: " + to_string(scoreMultiplier), 50.0f, 670.0f, 0.50f, modelColor.at(modelIndex));
-				textRendering.RenderText(*textShader, "Walls cleared : " + to_string(wallsCleared), 50.0f, 640.0f, 0.50f, modelColor.at(modelIndex));
-				textRendering.RenderText(*textShader, "Number of cubes in cluster : " + to_string(numCubes), 50.0f, 610.0f, 0.50f, modelColor.at(modelIndex));
-				if (seconds < 10)
-					textRendering.RenderText(*textShader, "Time: " + to_string(minutes) + ":0" + to_string(seconds), 850.0f, 700.0f, 0.50f, modelColor.at(modelIndex));
-				else
-					textRendering.RenderText(*textShader, "Time: " + to_string(minutes) + ":" + to_string(seconds), 850.0f, 700.0f, 0.50f, modelColor.at(modelIndex));
+				textRendering.RenderText(*textShader, "UP/DOWN: rotate camera along X-axis.", 300.0f, 630.0f, 0.5f, glm::vec3(1.0f, 1.0f, 1.0f));
+				textRendering.RenderText(*textShader, "LEFT/RIGHT: rotate camera along Y-axis.", 300.0f, 600.0f, 0.5f, glm::vec3(1.0f, 1.0f, 1.0f));
+				textRendering.RenderText(*textShader, "HOME: reset camera.", 300.0f, 570.0f, 0.5f, glm::vec3(1.0f, 1.0f, 1.0f));
+				textRendering.RenderText(*textShader, "LMB: zoom camera.", 300.0f, 540.0f, 0.5f, glm::vec3(1.0f, 1.0f, 1.0f));
+				textRendering.RenderText(*textShader, "RMB: pan camera.", 300.0f, 510.0f, 0.5f, glm::vec3(1.0f, 1.0f, 1.0f));
+				textRendering.RenderText(*textShader, "MMB: tilt camera.", 300.0f, 480.0f, 0.5f, glm::vec3(1.0f, 1.0f, 1.0f));
+				textRendering.RenderText(*textShader, "ESC: close window.", 300.0f, 450.0f, 0.5f, glm::vec3(1.0f, 1.0f, 1.0f));
+				textRendering.RenderText(*textShader, "SPACEBAR: reset model position.", 300.0f, 420.0f, 0.5f, glm::vec3(1.0f, 1.0f, 1.0f));
+				textRendering.RenderText(*textShader, "SHIFT: increase model speed.", 300.0f, 390.0f, 0.5f, glm::vec3(1.0f, 1.0f, 1.0f));
+				textRendering.RenderText(*textShader, "W/S: rotate model along X-axis.", 300.0f, 360.0f, 0.5f, glm::vec3(1.0f, 1.0f, 1.0f));
+				textRendering.RenderText(*textShader, "A/D: rotate model along Y-axis.", 300.0f, 330.0f, 0.5f, glm::vec3(1.0f, 1.0f, 1.0f));
+				textRendering.RenderText(*textShader, "Q/E: rotate model along X-axis.", 300.0f, 300.0f, 0.5f, glm::vec3(1.0f, 1.0f, 1.0f));
+				textRendering.RenderText(*textShader, "B: toggle shadows", 300.0f, 270.0f, 0.5f, glm::vec3(1.0f, 1.0f, 1.0f));
+				textRendering.RenderText(*textShader, "P: Pause/Unpause", 300.0f, 240.0f, 0.5f, glm::vec3(1.0f, 1.0f, 1.0f));
 				textRendering.disable();
-
-				if (paused) {
-
-					vaMenuBorder.bind();
-					menuShader->bind();
-					menuShader->setUniform3Vec("acolor", glm::vec3(1.0, 1.0, 1.0));
-					glLineWidth(5.0f); // make the borders thicker (default is 1)
-					glDrawArrays(GL_LINES, 0, 8);
-					menuShader->unbind();
-					vaMenuBorder.unbind();
-
-					vaMenu.bind();
-					menuShader->bind();
-					menuShader->setUniform3Vec("acolor", glm::vec3(0.55, 0.55, 0.55));
-					glDrawArrays(GL_TRIANGLES, 0, 6);
-					menuShader->unbind();
-					vaMenu.unbind();
-
-					textRendering.enable();
-					textRendering.RenderText(*textShader, "UP/DOWN: rotate camera along X-axis.", 300.0f, 630.0f, 0.5f, glm::vec3(1.0f, 1.0f, 1.0f));
-					textRendering.RenderText(*textShader, "LEFT/RIGHT: rotate camera along Y-axis.", 300.0f, 600.0f, 0.5f, glm::vec3(1.0f, 1.0f, 1.0f));
-					textRendering.RenderText(*textShader, "HOME: reset camera.", 300.0f, 570.0f, 0.5f, glm::vec3(1.0f, 1.0f, 1.0f));
-					textRendering.RenderText(*textShader, "LMB: zoom camera.", 300.0f, 540.0f, 0.5f, glm::vec3(1.0f, 1.0f, 1.0f));
-					textRendering.RenderText(*textShader, "RMB: pan camera.", 300.0f, 510.0f, 0.5f, glm::vec3(1.0f, 1.0f, 1.0f));
-					textRendering.RenderText(*textShader, "MMB: tilt camera.", 300.0f, 480.0f, 0.5f, glm::vec3(1.0f, 1.0f, 1.0f));
-					textRendering.RenderText(*textShader, "ESC: close window.", 300.0f, 450.0f, 0.5f, glm::vec3(1.0f, 1.0f, 1.0f));
-					textRendering.RenderText(*textShader, "SPACEBAR: reset model position.", 300.0f, 420.0f, 0.5f, glm::vec3(1.0f, 1.0f, 1.0f));
-					textRendering.RenderText(*textShader, "SHIFT: increase model speed.", 300.0f, 390.0f, 0.5f, glm::vec3(1.0f, 1.0f, 1.0f));
-					textRendering.RenderText(*textShader, "W/S: rotate model along X-axis.", 300.0f, 360.0f, 0.5f, glm::vec3(1.0f, 1.0f, 1.0f));
-					textRendering.RenderText(*textShader, "A/D: rotate model along Y-axis.", 300.0f, 330.0f, 0.5f, glm::vec3(1.0f, 1.0f, 1.0f));
-					textRendering.RenderText(*textShader, "Q/E: rotate model along X-axis.", 300.0f, 300.0f, 0.5f, glm::vec3(1.0f, 1.0f, 1.0f));
-					textRendering.RenderText(*textShader, "L/T: toggle object display between line,", 300.0f, 270.0f, 0.5f, glm::vec3(1.0f, 1.0f, 1.0f));
-					textRendering.RenderText(*textShader, "and fill, respectively.", 300.0f, 240.0f, 0.5f, glm::vec3(1.0f, 1.0f, 1.0f));
-					textRendering.RenderText(*textShader, "B: toggle shadows", 300.0f, 210.0f, 0.5f, glm::vec3(1.0f, 1.0f, 1.0f));
-					textRendering.RenderText(*textShader, "P: Pause/Unpause", 300.0f, 180.0f, 0.5f, glm::vec3(1.0f, 1.0f, 1.0f));
-					textRendering.disable();
-				}
+			}
 			
-
 			// End frame
 			glfwSwapBuffers(window);
 
@@ -666,12 +661,6 @@ void processInput(GLFWwindow* window, int key, int scancode, int action, int mod
 		}
 		paused = !paused;
 	}
-
-	if (glfwGetKey(window, GLFW_KEY_L) == GLFW_PRESS)
-		glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-
-	if (glfwGetKey(window, GLFW_KEY_T) == GLFW_PRESS)
-		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 
 	if (glfwGetKey(window, GLFW_KEY_B) == GLFW_PRESS)
 	{
