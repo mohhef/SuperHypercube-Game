@@ -9,7 +9,6 @@
 #include <assimp/postprocess.h>
 
 #include "Mesh.h"
-#include "ModelShader.h"
 
 using namespace std;
 

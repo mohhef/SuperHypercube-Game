@@ -215,7 +215,9 @@ void Renderer::draw3DModel(Shader& shader, glm::mat4 view, glm::mat4 projection,
 		shader.setUniform3Vec("lightColor", glm::vec3(1.0f, 1.0f, 1.0f));
 		shader.setUniform3Vec("lightPosition", lightPos);
 		shader.setUniform1i("shininess", 32);
-		shader.setUniform1i("textureStatus", 1);
+		shader.setUniform1i("textureStatus", 0);
+		shader.setUniform1i("invertStatus", invertStatus);
+		shader.setUniform1i("textureDiffStatus", 1);
 		shader.setUniform3Vec("ourColor", glm::vec3(1.0f, 1.0f, 1.0f));
 
 	}

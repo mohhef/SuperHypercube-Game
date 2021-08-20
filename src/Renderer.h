@@ -3,7 +3,6 @@
 #include "VertexArray.h"
 #include "Texture.h"
 #include "Shader.h"
-#include "ModelShader.h"
 #include "Model.h"
 #include <map>
 
@@ -33,6 +32,7 @@ private:
 	Renderer();
 
 public:
+	int invertStatus = 0;
 	glm::vec3 centerOfMass;
 	static Renderer& getInstance();
 	Renderer(const Renderer&) = delete;

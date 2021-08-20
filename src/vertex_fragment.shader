@@ -8,6 +8,7 @@ layout(location = 2) in vec2 aTexture;
 uniform mat4 model;
 uniform mat4 view;
 uniform mat4 projection;
+uniform int invertStatus;
 
 out vec3 FragPos;
 out vec3 Normal;
@@ -18,7 +19,17 @@ void main()
     gl_Position = projection * view * model * vec4(aPos, 1.0); // model's position with respect to perspective and view
 
     FragPos = vec3(model * vec4(aPos, 1.0)); // model's position with respect to global axis
-    Normal = mat3(transpose(inverse(model))) * aNormal; // model's normal vector
+    
+    vec3 nor;
+
+    if (invertStatus == 1) {
+        nor = aNormal * vec3(-1.0f, -1.0f, -1.0f);
+    }
+    else {
+        nor = aNormal;
+    }
+
+    Normal = mat3(transpose(inverse(model))) * nor; // model's normal vector
     Texture = aTexture;
 }
 
@@ -36,12 +47,14 @@ uniform vec3 lightPosition;
 uniform vec3 viewPos;
 
 uniform sampler2D textureObject;
+uniform sampler2D texture_diffuse1;
 uniform samplerCube depthMap;
 
 uniform float map_range;
 uniform bool drawShadows;
 
 uniform int textureStatus; // 1 indicates texture is being applied
+uniform int textureDiffStatus; // 1 indicates 3D model texture is being applied
 uniform int shininess;
 
 
@@ -92,10 +105,15 @@ void main()
 {
     vec3 color;
 
+
+
     if (textureStatus == 1)
     {
         // determine result with texture applied
         color = ourColor * texture(textureObject, Texture).rgb;
+    }
+    else if (textureDiffStatus == 1) {
+        color = ourColor * texture(texture_diffuse1, Texture).rgb;
     }
     else
     {
