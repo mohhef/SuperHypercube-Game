@@ -33,13 +33,7 @@
     <None Include="text.shader">
       <Filter>Resource Files</Filter>
     </None>
-    <None Include="3Dmodel.shader">
-      <Filter>Resource Files</Filter>
-    </None>
-    <None Include="3DmodelVertex.shader">
-      <Filter>Resource Files</Filter>
-    </None>
-    <None Include="3DmodelFragment.shader">
+    <None Include="menu.shader">
       <Filter>Resource Files</Filter>
     </None>
     <None Include="..\README.md" />
@@ -82,9 +76,6 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Mesh.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="ModelShader.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Model.cpp">
@@ -132,9 +123,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Mesh.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="ModelShader.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
