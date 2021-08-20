@@ -475,6 +475,9 @@ int main(int argc, char* argv[])
 				textRendering.RenderText(*textShader, "Q/E: rotate model along X-axis.", 300.0f, 300.0f, 0.5f, glm::vec3(1.0f, 1.0f, 1.0f));
 				textRendering.RenderText(*textShader, "B: toggle shadows", 300.0f, 270.0f, 0.5f, glm::vec3(1.0f, 1.0f, 1.0f));
 				textRendering.RenderText(*textShader, "P: Pause/Unpause", 300.0f, 240.0f, 0.5f, glm::vec3(1.0f, 1.0f, 1.0f));
+				textRendering.RenderText(*textShader, "BACKSPACE: change music", 300.0f, 210.0f, 0.5f, glm::vec3(1.0f, 1.0f, 1.0f));
+				textRendering.RenderText(*textShader, "=: increase volume", 300.0f, 180.0f, 0.5f, glm::vec3(1.0f, 1.0f, 1.0f));
+				textRendering.RenderText(*textShader, "-: decrease volume", 300.0f, 150.0f, 0.5f, glm::vec3(1.0f, 1.0f, 1.0f));
 				textRendering.disable();
 			}
 			// End frame
