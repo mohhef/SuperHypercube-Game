@@ -713,7 +713,7 @@ void processInput(GLFWwindow* window, int key, int scancode, int action, int mod
 			updateNumberOfCubes();
 		}
 	}
-	else //if(!mainMenu && !endMenu)
+	else
 	{
 		// Camera rotation around world axis (UP/DOWN/LEFT/RIGHT)
 		if (glfwGetKey(window, GLFW_KEY_UP) == GLFW_PRESS)
