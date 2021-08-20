@@ -36,6 +36,7 @@
     <None Include="menu.shader">
       <Filter>Resource Files</Filter>
     </None>
+    <None Include="..\README.md" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Camera.cpp">

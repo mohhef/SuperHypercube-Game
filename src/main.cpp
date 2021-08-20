@@ -6,7 +6,6 @@
 // - https://learnopengl.com/Getting-started/Hello-Window
 // - https://learnopengl.com/Getting-started/Hello-Triangle
 
-
 #define GLEW_STATIC 1
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
@@ -78,6 +77,9 @@ float lastMouseY;
 // Camera
 Camera* camera = NULL;
 
+// Menu
+bool mainMenu = true;
+
 // Function calls
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
 GLFWwindow* initializeWindow();
@@ -124,8 +126,8 @@ int main(int argc, char* argv[])
 	}
 
 	SoundEngine->setSoundVolume(0.1f);
-	SoundEngine2->setSoundVolume(0.5f);
-	SoundEngine->play2D("audio/Kirby.mp3", true);
+	SoundEngine->play2D("audio/Halo.mp3", true);
+	SoundEngine2->setSoundVolume(0.25f);
 	SoundEngine2->addSoundSourceFromFile("audio/punch.mp3", ESM_AUTO_DETECT, true); // third parameter set to true == preload
 	SoundEngine2->addSoundSourceFromFile("audio/bow.mp3", ESM_AUTO_DETECT, true); // third parameter set to true == preload
 	SoundEngine2->addSoundSourceFromFile("audio/score.wav", ESM_AUTO_DETECT, true); // third parameter set to true == preload
@@ -239,9 +241,31 @@ int main(int argc, char* argv[])
 		// Entering main loop
 		while (!glfwWindowShouldClose(window))
 		{
+			
+			if (mainMenu)
+			{
+				textRendering.enable();
+				textRendering.RenderText(*textShader, "SuperHyperCube", 300.0f, 600.0f, 1.00f, glm::vec3(1.0f));
+				textRendering.RenderText(*textShader, "Press Enter to start game.", 300.0f, 450.0f, 0.50f, glm::vec3(1.0f));
+				textRendering.RenderText(*textShader, "Press ESC to exit.", 300.0f, 420.0f, 0.50f, glm::vec3(1.0f));
+				textRendering.RenderText(*textShader, "Press P to pause game (and see key-bindings).", 300.0f, 390.0f, 0.50f, glm::vec3(1.0f));
+				textRendering.disable();
+
+				// End frame
+				glfwSwapBuffers(window);
+
+				// Detect inputs
+				glfwPollEvents();
+
+				continue;
+			}
+	
+
+			// Update last frame
 			float currentFrame = glfwGetTime();
 			deltaTime = currentFrame - lastFrame;
 			lastFrame = currentFrame;
+
 			if (resetAfterCollision && currentFrame > resetTime) {
 				resetAfterCollision = false;
 				resetTime = 0.0f;
@@ -403,6 +427,7 @@ int main(int argc, char* argv[])
 				textRendering.RenderText(*textShader, "Time: " + to_string(minutes) + ":0" + to_string(seconds), 850.0f, 700.0f, 0.50f, modelColor.at(modelIndex));
 			else
 				textRendering.RenderText(*textShader, "Time: " + to_string(minutes) + ":" + to_string(seconds), 850.0f, 700.0f, 0.50f, modelColor.at(modelIndex));
+
 			textRendering.disable();
 
 			if (paused) {
@@ -637,79 +662,100 @@ void processInput(GLFWwindow* window, int key, int scancode, int action, int mod
 	// Closes window
 	if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
 		glfwSetWindowShouldClose(window, true);
-
-	// Camera rotation around world axis (UP/DOWN/LEFT/RIGHT)
-	if (glfwGetKey(window, GLFW_KEY_UP) == GLFW_PRESS)
-		camera->processMovement(KEY::UP, deltaTime);
-	if (glfwGetKey(window, GLFW_KEY_DOWN) == GLFW_PRESS)
-		camera->processMovement(KEY::DOWN, deltaTime);
-	if (glfwGetKey(window, GLFW_KEY_LEFT) == GLFW_PRESS)
-		camera->processMovement(KEY::LEFT, deltaTime);
-	if (glfwGetKey(window, GLFW_KEY_RIGHT) == GLFW_PRESS)
-		camera->processMovement(KEY::RIGHT, deltaTime);
-
-	// Camera reset (HOME)
-	if (glfwGetKey(window, GLFW_KEY_HOME) == GLFW_PRESS) {
-		glm::vec3 cameraPos = modelPos + glm::vec3(0.0f, 0.0f, 40.0f);
-		camera->resetPos(cameraPos + displacement);
-		camera->lookAt(cameraPos + glm::vec3(0.0f, 0.0f, -50.0f));
-	}
-
-	// Reset model (SPACEBAR)
-	if (glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS)
-		resetModel();
-
-	// Model displacement (W/S/A/D) and rotation (w/s/a/d), the latter of which around it's own axis.
-	if (glfwGetKey(window, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS){
-		displacementSpeed = 60.0f;
-	}
-	// rotation movemement
-	if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
+	
+	if (mainMenu)
 	{
-		SoundEngine2->play2D("audio/click.mp3", false);
-		rotMat.setSoft(glm::vec3(-90.0f, 0.0f, 0.0f));
-	}
-	if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
-	{
-		SoundEngine2->play2D("audio/click.mp3", false);
-		rotMat.setSoft(glm::vec3(90.0f, 0.0f, 0.0f));
-	}
-	if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
-	{
-		SoundEngine2->play2D("audio/click.mp3", false);
-		rotMat.setSoft(glm::vec3(0.0f, 90.0f, 0.0f));
-	}
-	if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
-	{
-		SoundEngine2->play2D("audio/click.mp3", false);
-		rotMat.setSoft(glm::vec3(0.0f, -90.0f, 0.0f));
-	}
-	if (glfwGetKey(window, GLFW_KEY_Q) == GLFW_PRESS)
-	{
-		SoundEngine2->play2D("audio/click.mp3", false);
-		rotMat.setSoft(glm::vec3(0.0f, 0.0f, 90.0f));
-	}
-	if (glfwGetKey(window, GLFW_KEY_E) == GLFW_PRESS)
-	{
-		SoundEngine2->play2D("audio/click.mp3", false);
-		rotMat.setSoft(glm::vec3(0.0f, 0.0f, -90.0f));
-	}
-	// Toggle rendering mode between line and fill mode (L/T)
-	if (glfwGetKey(window, GLFW_KEY_P) == GLFW_PRESS) {
-		if (!paused) {
-			timeBeforePause = glfwGetTime();
-			timeLeft = timeLeft - (int)((clock() - timer) / (double)CLOCKS_PER_SEC);
+		if (glfwGetKey(window, GLFW_KEY_ENTER) == GLFW_PRESS)
+		{
+			mainMenu = false;
+			SoundEngine->stopAllSounds();
+			SoundEngine2->play2D("audio/Kirby.mp3", true);
+			resetModel();
+			randomRotation();
+			updateNumberOfCubes();
 		}
-		else {
-			timer = clock();
-			glfwSetTime(timeBeforePause);
-		}
-		paused = !paused;
 	}
 
-	if (glfwGetKey(window, GLFW_KEY_B) == GLFW_PRESS)
+	if (!mainMenu)
 	{
-		shadows = !shadows;
+		// Camera rotation around world axis (UP/DOWN/LEFT/RIGHT)
+		if (glfwGetKey(window, GLFW_KEY_UP) == GLFW_PRESS)
+			camera->processMovement(KEY::UP, deltaTime);
+		if (glfwGetKey(window, GLFW_KEY_DOWN) == GLFW_PRESS)
+			camera->processMovement(KEY::DOWN, deltaTime);
+		if (glfwGetKey(window, GLFW_KEY_LEFT) == GLFW_PRESS)
+			camera->processMovement(KEY::LEFT, deltaTime);
+		if (glfwGetKey(window, GLFW_KEY_RIGHT) == GLFW_PRESS)
+			camera->processMovement(KEY::RIGHT, deltaTime);
+
+		// Camera reset (HOME)
+		if (glfwGetKey(window, GLFW_KEY_HOME) == GLFW_PRESS) {
+			glm::vec3 cameraPos = modelPos + glm::vec3(0.0f, 0.0f, 40.0f);
+			camera->resetPos(cameraPos + displacement);
+			camera->lookAt(cameraPos + glm::vec3(0.0f, 0.0f, -50.0f));
+		}
+
+		// Reset model (SPACEBAR)
+		if (glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS)
+			resetModel();
+
+		// Model displacement (W/S/A/D) and rotation (w/s/a/d), the latter of which around it's own axis.
+		if (glfwGetKey(window, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS) {
+			displacementSpeed = 60.0f;
+		}
+		// rotation movemement
+		if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
+		{
+			SoundEngine2->play2D("audio/click.mp3", false);
+			rotMat.setSoft(glm::vec3(-90.0f, 0.0f, 0.0f));
+		}
+		if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
+		{
+			SoundEngine2->play2D("audio/click.mp3", false);
+			rotMat.setSoft(glm::vec3(90.0f, 0.0f, 0.0f));
+		}
+		if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
+		{
+			SoundEngine2->play2D("audio/click.mp3", false);
+			rotMat.setSoft(glm::vec3(0.0f, 90.0f, 0.0f));
+		}
+		if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
+		{
+			SoundEngine2->play2D("audio/click.mp3", false);
+			rotMat.setSoft(glm::vec3(0.0f, -90.0f, 0.0f));
+		}
+		if (glfwGetKey(window, GLFW_KEY_Q) == GLFW_PRESS)
+		{
+			SoundEngine2->play2D("audio/click.mp3", false);
+			rotMat.setSoft(glm::vec3(0.0f, 0.0f, 90.0f));
+		}
+		if (glfwGetKey(window, GLFW_KEY_E) == GLFW_PRESS)
+		{
+			SoundEngine2->play2D("audio/click.mp3", false);
+			rotMat.setSoft(glm::vec3(0.0f, 0.0f, -90.0f));
+		}
+
+		// Pause menu
+		if (glfwGetKey(window, GLFW_KEY_P) == GLFW_PRESS) 
+		{
+			if (!paused) 
+		{
+				timeBeforePause = glfwGetTime();
+				timeLeft = timeLeft - (int)((clock() - timer) / (double)CLOCKS_PER_SEC);
+			}
+			else 
+		{
+				timer = clock();
+				glfwSetTime(timeBeforePause);
+			}
+			paused = !paused;
+		}
+
+		// Toggle shadows
+		if (glfwGetKey(window, GLFW_KEY_B) == GLFW_PRESS)
+		{
+			shadows = !shadows;
+		}
 	}
 }
 
