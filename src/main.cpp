@@ -122,7 +122,7 @@ glm::vec3 modelPos;
 
 bool paused = false;
 float timeBeforePause = 0.0f;
-int timeLeft = 10;	// 10 for test
+int timeLeft = 25;	// 10 for test
 
 // Window size
 int HEIGHT = 768;
@@ -465,8 +465,6 @@ int main(int argc, char* argv[])
 			textRendering.enable();
 			textRendering.RenderText(*textShader, "Score: " + to_string(score), 50.0f, 700.0f, 0.50f, modelColor.at(modelIndex));
 			textRendering.RenderText(*textShader, "Multiplier: " + to_string(scoreMultiplier), 50.0f, 670.0f, 0.50f, modelColor.at(modelIndex));
-			textRendering.RenderText(*textShader, "Walls cleared : " + to_string(wallsCleared), 50.0f, 640.0f, 0.50f, modelColor.at(modelIndex));
-			textRendering.RenderText(*textShader, "Number of cubes in cluster : " + to_string(numCubes), 50.0f, 610.0f, 0.50f, modelColor.at(modelIndex));
 			if (seconds < 10)
 				textRendering.RenderText(*textShader, "Time: " + to_string(minutes) + ":0" + to_string(seconds), 850.0f, 700.0f, 0.50f, modelColor.at(modelIndex));
 			else
