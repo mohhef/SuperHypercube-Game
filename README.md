@@ -11,6 +11,10 @@ Simply load the solution (ideally in `VS2019`) and run `main.cpp`.
 
 ## Inputs  
 
+P: pause menu  
+ENTER: start game  
+=/-: increase/decrease volume
+BACKSPACE: change sound track
 UP/DOWN: rotate camera along X-axis.  
 LEFT/RIGHT: rotate camera along Y-axis.  
 HOME: reset camera.  
@@ -23,8 +27,8 @@ SHIFT: increase model speed.
 W/S: rotate model along X-axis.  
 A/D: rotate model along Y-axis.  
 Q/E: rotate model along X-axis. 
-P/L/T: toggle object display between point, line, and fill, respectively.  
 B: toggle shadows  
+
 
 ## Contributors
 
