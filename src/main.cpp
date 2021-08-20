@@ -145,7 +145,7 @@ int main(int argc, char* argv[])
 	}
 
 	SoundEngine->setSoundVolume(bgmVolume);
-	SoundEngine->play2D("audio/Halo.mp3", true);
+	SoundEngine->play2D("audio/Kingstux.mp3", true);
 
 	SoundEngine2->setSoundVolume(effectVolume);
 	SoundEngine2->addSoundSourceFromFile("audio/punch.mp3", ESM_AUTO_DETECT, true); // third parameter set to true == preload
