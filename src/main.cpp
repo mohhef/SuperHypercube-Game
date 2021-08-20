@@ -90,14 +90,19 @@ float lastMouseY;
 Camera* camera = NULL;
 
 // Menu
+float startTime = glfwGetTime();
 bool mainMenu = true;
+bool endMenu = false;
+int highestScore;
+float timeBeforeStart = 0.0f;
+float timeBeforeRestart = 0.0f;
 
 // Function calls
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
 GLFWwindow* initializeWindow();
 void resetTransMat();
-void resetRotMat(bool randomRot= false);
-void resetModel(bool randomRot=false);
+void resetRotMat(bool randomRot = false);
+void resetModel(bool randomRot = false);
 void processInput(GLFWwindow* window, int key, int scancode, int action, int mode);
 void processMouse(GLFWwindow* window, double xpos, double  ypos);
 void createModel(vector<vector<int>> model);
@@ -117,7 +122,7 @@ glm::vec3 modelPos;
 
 bool paused = false;
 float timeBeforePause = 0.0f;
-int timeLeft = 120;
+int timeLeft = 25;	// 10 for test
 
 // Window size
 int HEIGHT = 768;
@@ -135,7 +140,7 @@ int main(int argc, char* argv[])
 	srand(time(NULL));
 
 	// Create models
-	for (auto &model : models) {
+	for (auto& model : models) {
 		createModel(model);
 	}
 
@@ -160,7 +165,7 @@ int main(int argc, char* argv[])
 		layout.push<float>(3);
 		layout.push<float>(2);
 		vA.addBuffer(vB, layout);
-		
+
 		// Setup for lighting
 		VertexArray vaLightingSource;
 		VertexBuffer vblightingSource(vertices, sizeof(vertices));
@@ -265,7 +270,8 @@ int main(int argc, char* argv[])
 				textRendering.RenderText(*textShader, "Press ESC to exit.", 300.0f, 420.0f, 0.50f, glm::vec3(1.0f));
 				textRendering.RenderText(*textShader, "Press P to pause game (and see key-bindings).", 300.0f, 390.0f, 0.50f, glm::vec3(1.0f));
 				textRendering.disable();
-
+				timeBeforeStart = clock();
+				timer = clock();
 				// End frame
 				glfwSwapBuffers(window);
 
@@ -275,6 +281,24 @@ int main(int argc, char* argv[])
 				continue;
 			}
 
+			if (endMenu) {
+				renderer.clear();
+
+				textRendering.enable();
+				textRendering.RenderText(*textShader, "SuperHyperCube", 300.0f, 600.0f, 1.00f, glm::vec3(1.0f));
+				textRendering.RenderText(*textShader, "Highest score: " + std::to_string(highestScore), 300.0f, 450.0f, 0.7f, glm::vec3(1.0f, 0.0f, 0.0f));
+				textRendering.RenderText(*textShader, "Press Enter to restart game.", 300.0f, 390.0f, 0.50f, glm::vec3(1.0f));
+				textRendering.RenderText(*textShader, "Press ESC to exit.", 300.0f, 360.0f, 0.50f, glm::vec3(1.0f));
+				textRendering.disable();
+				timeBeforeRestart = clock();
+				timer = clock();
+				// End frame
+				glfwSwapBuffers(window);
+				// Detect inputs
+				glfwPollEvents();
+
+				continue;
+			}
 			// Update last frame
 			float currentFrame = glfwGetTime();
 			deltaTime = currentFrame - lastFrame;
@@ -299,7 +323,7 @@ int main(int argc, char* argv[])
 			if (!paused) {
 				updateDisplacement(currentFrame);
 			}
-				
+
 			renderer.updateCenterOfMass();
 
 			// Clear color and depth buffers
@@ -313,7 +337,7 @@ int main(int argc, char* argv[])
 				// Render objects to be drawn by the depth mapper object
 				renderer.drawObject(vA, *depthShader, view, projection, lightPos, camera->position, tetrisTexture, rotMat.getMatrix(), modelTransMat, scaleFactor, displacement);
 				renderer.drawWall(vA, *depthShader, view, projection, lightPos, camera->position, brickTexture, rotMat.getMatrix(), scaleFactor, displacement, resetAfterCollision, fittingThrough);
-				
+
 				// Draw Squirtle
 				renderer.draw3DModel(
 					*depthShader,
@@ -425,8 +449,14 @@ int main(int argc, char* argv[])
 				totalSeconds = timeLeft;
 			}
 
-			if (totalSeconds < 0)
+			if (totalSeconds <= 0) {
+				endMenu = true;
+				if (score > highestScore) highestScore = score;
+				score = 0;
+				scoreMultiplier = 1;
+				multiplierCounter = 0;
 				resetScoreAndTimer();
+			}
 
 			int minutes = totalSeconds / 60;
 			int seconds = totalSeconds % 60;
@@ -435,8 +465,6 @@ int main(int argc, char* argv[])
 			textRendering.enable();
 			textRendering.RenderText(*textShader, "Score: " + to_string(score), 50.0f, 700.0f, 0.50f, modelColor.at(modelIndex));
 			textRendering.RenderText(*textShader, "Multiplier: " + to_string(scoreMultiplier), 50.0f, 670.0f, 0.50f, modelColor.at(modelIndex));
-			textRendering.RenderText(*textShader, "Walls cleared : " + to_string(wallsCleared), 50.0f, 640.0f, 0.50f, modelColor.at(modelIndex));
-			textRendering.RenderText(*textShader, "Number of cubes in cluster : " + to_string(numCubes), 50.0f, 610.0f, 0.50f, modelColor.at(modelIndex));
 			if (seconds < 10)
 				textRendering.RenderText(*textShader, "Time: " + to_string(minutes) + ":0" + to_string(seconds), 850.0f, 700.0f, 0.50f, modelColor.at(modelIndex));
 			else
@@ -541,7 +569,7 @@ GLFWwindow* initializeWindow()
 }
 
 // Wall check for score
-bool isFit() 
+bool isFit()
 {
 	int numCubePieces = modelCubePositions.at(modelIndex).size();
 	for (int i = 0; i < numCubePieces; i++)
@@ -557,7 +585,7 @@ bool isFit()
 			* glm::translate(glm::mat4(1.0f), -renderer.centerOfMass)
 			* glm::vec4(modelCubePositions.at(modelIndex).at(i), 1.0f);
 
-		cubePos.x = round(abs( cubePos.x));
+		cubePos.x = round(abs(cubePos.x));
 		cubePos.y = round(abs(cubePos.y));
 
 		bool foundPlace = false;
@@ -572,12 +600,12 @@ bool isFit()
 			return false;
 		}
 	}
-	
+
 	return true;
 }
 
 //update the displacement of the object
-void updateDisplacement(float currentFrame) 
+void updateDisplacement(float currentFrame)
 {
 	static float prevFrame = currentFrame;
 	// Update z displacement
@@ -588,7 +616,7 @@ void updateDisplacement(float currentFrame)
 	else {
 		displacement.y += (prevFrame - currentFrame) * 20.0f;
 	}
-	
+
 	prevFrame = currentFrame;
 	
 	// Check for collision
@@ -708,14 +736,24 @@ void processInput(GLFWwindow* window, int key, int scancode, int action, int mod
 		{
 			mainMenu = false;
 			SoundEngine->stopAllSounds();
+			SoundEngine2->play2D("audio/Kirby.mp3", true);
+			glfwSetTime(timeBeforeStart);
 			SoundEngine->play2D("audio/Kirby.mp3", true, false, true);
 			resetModel();
 			randomRotation();
 			updateNumberOfCubes();
 		}
 	}
-
-	if (!mainMenu)
+	else if (endMenu) {
+		if (glfwGetKey(window, GLFW_KEY_ENTER) == GLFW_PRESS) {
+			endMenu = false;
+			glfwSetTime(timeBeforeRestart);
+			resetModel();
+			randomRotation();
+			updateNumberOfCubes();
+		}
+	}
+	else
 	{
 		// Camera rotation around world axis (UP/DOWN/LEFT/RIGHT)
 		if (glfwGetKey(window, GLFW_KEY_UP) == GLFW_PRESS)
@@ -775,15 +813,15 @@ void processInput(GLFWwindow* window, int key, int scancode, int action, int mod
 		}
 
 		// Pause menu
-		if (glfwGetKey(window, GLFW_KEY_P) == GLFW_PRESS) 
+		if (glfwGetKey(window, GLFW_KEY_P) == GLFW_PRESS)
 		{
-			if (!paused) 
-		{
+			if (!paused)
+			{
 				timeBeforePause = glfwGetTime();
 				timeLeft = timeLeft - (int)((clock() - timer) / (double)CLOCKS_PER_SEC);
 			}
-			else 
-		{
+			else
+			{
 				timer = clock();
 				glfwSetTime(timeBeforePause);
 			}
@@ -895,7 +933,7 @@ void createModel(vector<vector<int>> model) {
 	float z = -10.0f;
 
 	//start from bottom left
-	for (int i = rows-1; i > -1; i--) {
+	for (int i = rows - 1; i > -1; i--) {
 		int cols = model.at(i).size();
 		for (int j = 0; j < cols; j++) {
 			if (model.at(i).at(j) == 0) {
@@ -920,7 +958,7 @@ void createModel(vector<vector<int>> model) {
 };
 
 // Rotate a model randomly when shuffling
-void randomRotation() 
+void randomRotation()
 {
 	float xRot = rand() % 3;
 	float yRot = rand() % 3;
