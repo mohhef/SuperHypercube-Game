@@ -89,8 +89,8 @@ float timeBeforeRestart = 0.0f;
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
 GLFWwindow* initializeWindow();
 void resetTransMat();
-void resetRotMat(bool randomRot= false);
-void resetModel(bool randomRot=false);
+void resetRotMat(bool randomRot = false);
+void resetModel(bool randomRot = false);
 void processInput(GLFWwindow* window, int key, int scancode, int action, int mode);
 void processMouse(GLFWwindow* window, double xpos, double  ypos);
 void createModel(vector<vector<int>> model);
@@ -127,7 +127,7 @@ int main(int argc, char* argv[])
 	srand(time(NULL));
 
 	// Create models
-	for (auto &model : models) {
+	for (auto& model : models) {
 		createModel(model);
 	}
 
@@ -151,7 +151,7 @@ int main(int argc, char* argv[])
 		layout.push<float>(3);
 		layout.push<float>(2);
 		vA.addBuffer(vB, layout);
-		
+
 		// Setup for lighting
 		VertexArray vaLightingSource;
 		VertexBuffer vblightingSource(vertices, sizeof(vertices));
@@ -247,7 +247,7 @@ int main(int argc, char* argv[])
 		// Entering main loop
 		while (!glfwWindowShouldClose(window))
 		{
-			
+
 			if (mainMenu)
 			{
 				textRendering.enable();
@@ -266,7 +266,7 @@ int main(int argc, char* argv[])
 
 				continue;
 			}
-			
+
 			if (endMenu) {
 				renderer.clear();
 
@@ -282,7 +282,7 @@ int main(int argc, char* argv[])
 				glfwSwapBuffers(window);
 				// Detect inputs
 				glfwPollEvents();
-				
+
 				continue;
 			}
 			// Update last frame
@@ -309,7 +309,7 @@ int main(int argc, char* argv[])
 			if (!paused) {
 				updateDisplacement(currentFrame);
 			}
-				
+
 			renderer.updateCenterOfMass();
 
 			// Clear color and depth buffers
@@ -323,7 +323,7 @@ int main(int argc, char* argv[])
 				// Render objects to be drawn by the depth mapper object
 				renderer.drawObject(vA, *depthShader, view, projection, lightPos, camera->position, tetrisTexture, rotMat.getMatrix(), modelTransMat, scaleFactor, displacement);
 				renderer.drawWall(vA, *depthShader, view, projection, lightPos, camera->position, brickTexture, rotMat.getMatrix(), scaleFactor, displacement);
-				
+
 				// Draw Squirtle
 				renderer.draw3DModel(
 					*depthShader,
@@ -439,6 +439,8 @@ int main(int argc, char* argv[])
 				endMenu = true;
 				if (score > highestScore) highestScore = score;
 				score = 0;
+				scoreMultiplier = 1;
+				multiplierCounter = 0;
 				resetScoreAndTimer();
 			}
 
@@ -489,6 +491,9 @@ int main(int argc, char* argv[])
 				textRendering.RenderText(*textShader, "Q/E: rotate model along X-axis.", 300.0f, 300.0f, 0.5f, glm::vec3(1.0f, 1.0f, 1.0f));
 				textRendering.RenderText(*textShader, "B: toggle shadows", 300.0f, 270.0f, 0.5f, glm::vec3(1.0f, 1.0f, 1.0f));
 				textRendering.RenderText(*textShader, "P: Pause/Unpause", 300.0f, 240.0f, 0.5f, glm::vec3(1.0f, 1.0f, 1.0f));
+				textRendering.RenderText(*textShader, "-: decrease volume", 300.0f, 210.0f, 0.5f, glm::vec3(1.0f, 1.0f, 1.0f));
+				textRendering.RenderText(*textShader, "=: increase volume", 300.0f, 180.0f, 0.5f, glm::vec3(1.0f, 1.0f, 1.0f));
+				textRendering.RenderText(*textShader, "BACKSPACE: change bgm", 300.0f, 150.0f, 0.5f, glm::vec3(1.0f, 1.0f, 1.0f));
 				textRendering.disable();
 			}
 			// End frame
@@ -552,7 +557,7 @@ GLFWwindow* initializeWindow()
 }
 
 // Wall check for score
-bool isFit() 
+bool isFit()
 {
 	int numCubePieces = modelCubePositions.at(modelIndex).size();
 	for (int i = 0; i < numCubePieces; i++)
@@ -568,7 +573,7 @@ bool isFit()
 			* glm::translate(glm::mat4(1.0f), -renderer.centerOfMass)
 			* glm::vec4(modelCubePositions.at(modelIndex).at(i), 1.0f);
 
-		cubePos.x = round(abs( cubePos.x));
+		cubePos.x = round(abs(cubePos.x));
 		cubePos.y = round(abs(cubePos.y));
 
 		bool foundPlace = false;
@@ -583,12 +588,12 @@ bool isFit()
 			return false;
 		}
 	}
-	
+
 	return true;
 }
 
 //update the displacement of the object
-void updateDisplacement(float currentFrame) 
+void updateDisplacement(float currentFrame)
 {
 	static float prevFrame = currentFrame;
 	// Update z displacement
@@ -599,7 +604,7 @@ void updateDisplacement(float currentFrame)
 	else {
 		displacement.y += (prevFrame - currentFrame) * 20.0f;
 	}
-	
+
 	prevFrame = currentFrame;
 
 	// Check for collision
@@ -609,7 +614,7 @@ void updateDisplacement(float currentFrame)
 			rotMat.setSoft(glm::vec3(0.0f, 0.0f, 20.0f));
 			resetTime = currentFrame + 0.5f;
 			resetAfterCollision = true;
-		}	
+		}
 	// Reset upon wall pass
 		else if (displacement.z < -27) {
 
@@ -690,7 +695,7 @@ void processInput(GLFWwindow* window, int key, int scancode, int action, int mod
 	// Closes window
 	if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
 		glfwSetWindowShouldClose(window, true);
-	
+
 	if (mainMenu)
 	{
 		if (glfwGetKey(window, GLFW_KEY_ENTER) == GLFW_PRESS)
@@ -773,15 +778,15 @@ void processInput(GLFWwindow* window, int key, int scancode, int action, int mod
 		}
 
 		// Pause menu
-		if (glfwGetKey(window, GLFW_KEY_P) == GLFW_PRESS) 
+		if (glfwGetKey(window, GLFW_KEY_P) == GLFW_PRESS)
 		{
-			if (!paused) 
-		{
+			if (!paused)
+			{
 				timeBeforePause = glfwGetTime();
 				timeLeft = timeLeft - (int)((clock() - timer) / (double)CLOCKS_PER_SEC);
 			}
-			else 
-		{
+			else
+			{
 				timer = clock();
 				glfwSetTime(timeBeforePause);
 			}
@@ -859,7 +864,7 @@ void createModel(vector<vector<int>> model) {
 	float z = -10.0f;
 
 	//start from bottom left
-	for (int i = rows-1; i > -1; i--) {
+	for (int i = rows - 1; i > -1; i--) {
 		int cols = model.at(i).size();
 		for (int j = 0; j < cols; j++) {
 			if (model.at(i).at(j) == 0) {
@@ -884,7 +889,7 @@ void createModel(vector<vector<int>> model) {
 };
 
 // Rotate a model randomly when shuffling
-void randomRotation() 
+void randomRotation()
 {
 	float xRot = rand() % 3;
 	float yRot = rand() % 3;
