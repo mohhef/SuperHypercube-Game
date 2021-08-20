@@ -246,7 +246,7 @@ int main(int argc, char* argv[])
 			{
 				textRendering.enable();
 				textRendering.RenderText(*textShader, "SuperHyperCube", 300.0f, 600.0f, 1.00f, glm::vec3(1.0f));
-				textRendering.RenderText(*textShader, "Press S to start game.", 300.0f, 450.0f, 0.50f, glm::vec3(1.0f));
+				textRendering.RenderText(*textShader, "Press Enter to start game.", 300.0f, 450.0f, 0.50f, glm::vec3(1.0f));
 				textRendering.RenderText(*textShader, "Press ESC to exit.", 300.0f, 420.0f, 0.50f, glm::vec3(1.0f));
 				textRendering.RenderText(*textShader, "Press P to pause game (and see key-bindings).", 300.0f, 390.0f, 0.50f, glm::vec3(1.0f));
 				textRendering.disable();
@@ -665,7 +665,7 @@ void processInput(GLFWwindow* window, int key, int scancode, int action, int mod
 	
 	if (mainMenu)
 	{
-		if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
+		if (glfwGetKey(window, GLFW_KEY_ENTER) == GLFW_PRESS)
 		{
 			mainMenu = false;
 			SoundEngine->stopAllSounds();
