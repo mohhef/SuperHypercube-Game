@@ -126,7 +126,7 @@ int main(int argc, char* argv[])
 	SoundEngine2->addSoundSourceFromFile("audio/punch.mp3", ESM_AUTO_DETECT, true); // third parameter set to true == preload
 	SoundEngine2->addSoundSourceFromFile("audio/bow.mp3", ESM_AUTO_DETECT, true); // third parameter set to true == preload
 	SoundEngine2->addSoundSourceFromFile("audio/score.wav", ESM_AUTO_DETECT, true); // third parameter set to true == preload
-	SoundEngine2->addSoundSourceFromFile("audio/click.wav", ESM_AUTO_DETECT, true); // third parameter set to true == preload
+	SoundEngine2->addSoundSourceFromFile("audio/click.mp3", ESM_AUTO_DETECT, true); // third parameter set to true == preload
 
 	GLFWwindow* window = initializeWindow();
 	{
@@ -257,6 +257,44 @@ int main(int argc, char* argv[])
 				// Render objects to be drawn by the depth mapper object
 				renderer.drawObject(vA, *depthShader, view, projection, lightPos, camera->position, tetrisTexture, rotMat.getMatrix(), modelTransMat, scaleFactor, displacement);
 				renderer.drawWall(vA, *depthShader, view, projection, lightPos, camera->position, brickTexture, rotMat.getMatrix(), scaleFactor, displacement);
+				// Draw Ivysaur
+				renderer.draw3DModel(
+					*depthShader,
+					view,
+					projection,
+					lightPos,
+					camera->position,
+					glm::vec3(2.0f, 2.0f, 2.0f),
+					glm::vec3(8.0f, 20.0f, -10.0f),
+					glm::vec3(0.0f, 135.0f, 0.0f),
+					ivysaurmodel
+				);
+
+				// Draw Charizard
+				renderer.draw3DModel(
+					*depthShader,
+					view,
+					projection,
+					lightPos,
+					camera->position,
+					glm::vec3(0.2f, 0.2f, 0.2f),
+					glm::vec3(4.0f, 20.0f, -10.0f),
+					glm::vec3(10.0f, 0.0f, 10.0f),
+					charizardmodel
+				);
+
+				// Draw Squirtle
+				renderer.draw3DModel(
+					*depthShader,
+					view,
+					projection,
+					lightPos,
+					camera->position,
+					glm::vec3(0.7f, 0.7f, 0.7f),
+					glm::vec3(-2.5f, 20.0f, -12.5f),
+					glm::vec3(0.0f, 70.0f, 0.0f),
+					squirtlemodel
+				);
 				});
 
 			// Bind universal attributes necessary for drawing all the objects on the map
@@ -278,9 +316,11 @@ int main(int argc, char* argv[])
 
 			// Draw Ivysaur
 			renderer.draw3DModel(
-				*d3Shader,
+				*shader,
 				view,
 				projection,
+				lightPos,
+				camera->position,
 				glm::vec3(2.0f, 2.0f, 2.0f),
 				glm::vec3(8.0f, 20.0f, -10.0f),
 				glm::vec3(0.0f, 135.0f, 0.0f),
@@ -289,9 +329,11 @@ int main(int argc, char* argv[])
 
 			// Draw Charizard
 			renderer.draw3DModel(
-				*d3Shader,
+				*shader,
 				view,
 				projection,
+				lightPos,
+				camera->position,
 				glm::vec3(0.2f, 0.2f, 0.2f),
 				glm::vec3(4.0f, 20.0f, -10.0f),
 				glm::vec3(10.0f, 0.0f, 10.0f),
@@ -300,9 +342,11 @@ int main(int argc, char* argv[])
 
 			// Draw Squirtle
 			renderer.draw3DModel(
-				*d3Shader,
+				*shader,
 				view,
 				projection,
+				lightPos,
+				camera->position,
 				glm::vec3(0.7f, 0.7f, 0.7f),
 				glm::vec3(-2.5f, 20.0f, -12.5f),
 				glm::vec3(0.0f, 70.0f, 0.0f),

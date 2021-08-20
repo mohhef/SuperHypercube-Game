@@ -3,7 +3,7 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 
-#include "ModelShader.h"
+#include "Shader.h"
 
 #include <string>
 #include <vector>
@@ -40,7 +40,7 @@ public:
     Mesh(vector<Vertex> vertices, vector<unsigned int> indices, vector<ModelTexture> textures);
 
     // render the mesh
-    void Draw(ModelShader& shader);
+    void Draw(Shader& shader);
 
 private:
     // render data 
