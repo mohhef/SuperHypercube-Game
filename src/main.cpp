@@ -123,6 +123,7 @@ glm::vec3 modelPos;
 bool paused = false;
 float timeBeforePause = 0.0f;
 int timeLeft = 25;	// 10 for test
+int const gameTime = 25;
 
 // Window size
 int HEIGHT = 768;
@@ -260,7 +261,7 @@ int main(int argc, char* argv[])
 
 		// Entering main loop
 		while (!glfwWindowShouldClose(window))
-		{	
+		{
 			SoundEngine->setSoundVolume(bgmVolume);
 			if (mainMenu)
 			{
@@ -389,7 +390,7 @@ int main(int argc, char* argv[])
 
 			// Render each object (wall, model, static models, axes, and mesh floor)
 			renderer.drawObject(vA, *shader, view, projection, lightPos, camera->position, tetrisTexture, rotMat.getMatrix(), modelTransMat, scaleFactor, displacement);
-			
+
 			renderer.drawWall(vA, *shader, view, projection, lightPos, camera->position, brickTexture, rotMat.getMatrix(), scaleFactor, displacement, resetAfterCollision, fittingThrough);
 			renderer.drawLightingSource(vaLightingSource, *lightingSourceShader, view, projection, lightPos);
 			renderer.drawFloor(vaFloor, *shader, view, projection, lightPos, camera->position, galaxyTexture);
@@ -618,12 +619,12 @@ void updateDisplacement(float currentFrame)
 	}
 
 	prevFrame = currentFrame;
-	
+
 	// Check for collision
 	if (renderer.calculateFurthestZ(rotMat.getMatrix(), modelTransMat, displacement) < wallZPos + 2)
 		if (!isFit() && !resetAfterCollision) {
 			SoundEngine2->play2D("audio/punch.mp3", false);
-      
+
 			// random rotation and x movement
 			float LO = -1.0f;
 			float HI = 1.0f;
@@ -633,9 +634,9 @@ void updateDisplacement(float currentFrame)
 			resetTime = currentFrame + 0.5f;
 			resetAfterCollision = true;
 			fittingThrough = false;
-		}	
-		// camera lookAt does not move forward, slows down when passed
-		else if (displacement.z < -18 && displacement.z > -25){
+		}
+	// camera lookAt does not move forward, slows down when passed
+		else if (displacement.z < -18 && displacement.z > -25) {
 			if (displacementSpeedUpdate) {
 				if (displacementSpeed >= 10.0f) { prevDisplacementSpeed = speedAfterPass; }
 				else {
@@ -648,7 +649,7 @@ void updateDisplacement(float currentFrame)
 			camera->lookAt(lockedCameraLookAt);
 			if (isFit()) fittingThrough = true;
 		}
-		// Reset upon wall pass
+	// Reset upon wall pass
 		else if (displacement.z < -25) {
 			// Increment if model fits through hole
 			if (isFit()) {
@@ -774,11 +775,12 @@ void processInput(GLFWwindow* window, int key, int scancode, int action, int mod
 			if (soundSwitch >= 3) soundSwitch = 0;
 		}
 		lastBackSpaceState = glfwGetKey(window, GLFW_KEY_BACKSPACE);
-		
+
 		if (endMenu) {
 			if (glfwGetKey(window, GLFW_KEY_ENTER) == GLFW_PRESS) {
 				endMenu = false;
 				glfwSetTime(timeBeforeRestart);
+				timeLeft = gameTime;
 				resetModel();
 				randomRotation();
 				updateNumberOfCubes();
