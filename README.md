@@ -1,6 +1,5 @@
 # SuperHypercube-Game
-https://drive.google.com/file/d/1Jy8uMDfmTmhH6fOlQn1FwvgYYWdpQny9/view?usp=sharing
-
+<iframe src="https://drive.google.com/file/d/1Jy8uMDfmTmhH6fOlQn1FwvgYYWdpQny9/preview" width="640" height="480" allow="autoplay"></iframe>
 
 ## Description  
 Introductionary OpengL programming Game. This projects aims to imitate the game shown in this video:  
